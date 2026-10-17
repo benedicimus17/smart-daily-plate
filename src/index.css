@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    background-color: #F8F9FA;
+    color: #1E293B;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    touch-action: manipulation;
+  }
+}
+
+@layer utilities {
+  /* Безпечні відступи для iOS Notch/Dynamic Island та Android Gesture Bar */
+  .pt-safe {
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+  }
+  
+  .pb-safe {
+    padding-bottom: max(5.5rem, calc(4.5rem + env(safe-area-inset-bottom)));
+  }
+
+  .bottom-safe {
+    bottom: max(1rem, calc(0.5rem + env(safe-area-inset-bottom)));
+  }
+
+  /* Frosted Glassmorphism */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  }
+
+  .glass-card-interactive {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-card-interactive:active {
+    transform: scale(0.98);
+  }
+
+  /* Неоморфне світіння кілець калорій */
+  .glow-ring-emerald {
+    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
+  }
+
+  .glow-ring-amber {
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5));
+  }
+
+  .glow-ring-indigo {
+    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
+  }
+
+  /* Приховування скролбарів при збереженні прокрутки */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
