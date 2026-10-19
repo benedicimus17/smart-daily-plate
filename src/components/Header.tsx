@@ -4,6 +4,7 @@ import { useNutritionStore } from '../store/nutritionStore';
 
 interface HeaderProps {
   date: string;
+  onOpenSplash?: () => void;
 }
 
 const formatLocalDate = (d: Date): string => {
@@ -13,7 +14,7 @@ const formatLocalDate = (d: Date): string => {
   return `${y}-${m}-${day}`;
 };
 
-export const Header: React.FC<HeaderProps> = () => {
+export const Header: React.FC<HeaderProps> = ({ onOpenSplash }) => {
   const { selectedDate, setSelectedDate } = useNutritionStore();
   // weekOffset: 0 - поточний тиждень, -1 - попередній тиждень, -2 - два тижні тому, etc.
   const [weekOffset, setWeekOffset] = useState<number>(0);
@@ -73,7 +74,11 @@ export const Header: React.FC<HeaderProps> = () => {
           </div>
 
           {/* Фірмовий логотип NUTRIQ із золотою Q */}
-          <div className="flex items-baseline gap-1 mt-0.5">
+          <div
+            onClick={onOpenSplash}
+            className={`flex items-baseline gap-1 mt-0.5 ${onOpenSplash ? 'cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all' : ''}`}
+            title="Переглянути завантажувальний екран NUTRIQ"
+          >
             <span className="text-2xl font-black tracking-wider text-zinc-100 font-sans">
               NUTRI<span className="text-amber-400 text-3xl font-black drop-shadow-[0_0_12px_rgba(245,158,11,0.6)]">Q</span>
             </span>

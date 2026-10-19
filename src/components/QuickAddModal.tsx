@@ -51,18 +51,19 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm animate-fadeIn">
-      <div className="glass-card rounded-4xl w-full max-w-sm p-6 relative border border-white shadow-2xl">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
+      <div className="bg-[#101612]/95 border border-[#233226] rounded-3xl w-full max-w-sm p-6 relative shadow-[0_20px_50px_rgba(0,0,0,0.85)]">
+        <div className="flex items-center justify-between pb-3 border-b border-[#233226]">
           <div>
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
               {mealTitles[mealType]}
             </span>
-            <h3 className="text-lg font-bold text-slate-800">Додати страву</h3>
+            <h3 className="text-lg font-bold text-zinc-100">Додати страву</h3>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500"
+            className="w-8 h-8 rounded-full bg-[#18221B] hover:bg-[#223026] text-zinc-400 hover:text-zinc-200 border border-[#2A3B2E] flex items-center justify-center transition-all"
           >
             <X className="w-4 h-4" />
           </button>
@@ -70,45 +71,45 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Назва страви / продукту</label>
+            <label className="block text-xs font-medium text-zinc-300 mb-1">Назва страви / продукту</label>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Наприклад: Куряче філе гриль"
-              className="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-emerald/30 focus:border-brand-emerald"
+              className="w-full px-3.5 py-2.5 rounded-2xl bg-[#162019] border border-[#27392C] text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-amber-400/60 focus:ring-1 focus:ring-amber-400/40"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Вага порції (г)</label>
+              <label className="block text-xs font-medium text-zinc-300 mb-1">Вага порції (г)</label>
               <input
                 type="number"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder="150"
-                className="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-emerald/30 focus:border-brand-emerald"
+                className="w-full px-3.5 py-2.5 rounded-2xl bg-[#162019] border border-[#27392C] text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-amber-400/60 focus:ring-1 focus:ring-amber-400/40"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Калорії (ккал)</label>
+              <label className="block text-xs font-medium text-zinc-300 mb-1">Калорії (ккал)</label>
               <input
                 type="number"
                 required
                 value={calories}
                 onChange={(e) => setCalories(e.target.value)}
                 placeholder="250"
-                className="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-slate-200 text-sm font-bold text-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/30 focus:border-brand-emerald"
+                className="w-full px-3.5 py-2.5 rounded-2xl bg-[#162019] border border-[#27392C] text-sm font-bold text-amber-300 placeholder:text-zinc-500 focus:outline-none focus:border-amber-400/60 focus:ring-1 focus:ring-amber-400/40"
               />
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-slate-600">БЖВ (необов'язково)</label>
-              <span className="text-[10px] text-slate-400">Авторозрахунок за ккал</span>
+              <label className="text-xs font-medium text-zinc-300">БЖВ (необов'язково)</label>
+              <span className="text-[10px] text-zinc-400">Авторозрахунок за ккал</span>
             </div>
             <div className="grid grid-cols-3 gap-2">
               <input
@@ -116,30 +117,30 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
                 value={protein}
                 onChange={(e) => setProtein(e.target.value)}
                 placeholder="Б (г)"
-                className="w-full px-2.5 py-2 rounded-xl bg-white border border-slate-200 text-xs text-center focus:border-brand-emerald focus:outline-none"
+                className="w-full px-2.5 py-2 rounded-xl bg-[#162019] border border-emerald-500/30 text-xs text-center text-emerald-300 placeholder:text-zinc-500 focus:border-emerald-400 focus:outline-none"
               />
               <input
                 type="number"
                 value={fat}
                 onChange={(e) => setFat(e.target.value)}
                 placeholder="Ж (г)"
-                className="w-full px-2.5 py-2 rounded-xl bg-white border border-slate-200 text-xs text-center focus:border-brand-amber focus:outline-none"
+                className="w-full px-2.5 py-2 rounded-xl bg-[#162019] border border-amber-500/30 text-xs text-center text-amber-300 placeholder:text-zinc-500 focus:border-amber-400 focus:outline-none"
               />
               <input
                 type="number"
                 value={carbs}
                 onChange={(e) => setCarbs(e.target.value)}
                 placeholder="В (г)"
-                className="w-full px-2.5 py-2 rounded-xl bg-white border border-slate-200 text-xs text-center focus:border-brand-indigo focus:outline-none"
+                className="w-full px-2.5 py-2 rounded-xl bg-[#162019] border border-indigo-500/30 text-xs text-center text-indigo-300 placeholder:text-zinc-500 focus:border-indigo-400 focus:outline-none"
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full mt-4 py-3 rounded-2xl bg-brand-emerald hover:bg-emerald-600 active:scale-[0.98] text-white font-bold text-sm shadow-glow-emerald flex items-center justify-center gap-2 transition-all"
+            className="w-full mt-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-zinc-950 font-bold text-sm shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
-            <Sparkles className="w-4 h-4" /> Додати в щоденник
+            <Sparkles className="w-4 h-4 text-zinc-950" /> Додати в щоденник
           </button>
         </form>
       </div>

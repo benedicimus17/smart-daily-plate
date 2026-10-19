@@ -48,7 +48,7 @@ export const App: React.FC = () => {
 
         <div className="w-full max-w-md sm:max-w-lg md:max-w-xl px-4 pt-safe pb-safe flex flex-col relative min-h-screen z-10">
           {/* Верхня панель зі стрічкою тижня */}
-          <Header date={dailyLog.date} />
+          <Header date={dailyLog.date} onOpenSplash={() => setShowSplash(true)} />
 
           {/* 1. Вкладка "Сьогодні" (Головний дашборд) */}
           {activeTab === 'today' && (
