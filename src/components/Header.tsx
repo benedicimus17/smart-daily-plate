@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNutritionStore } from '../store/nutritionStore';
 
 interface HeaderProps {
@@ -62,112 +62,104 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSplash }) => {
   });
   const capitalizedSelected = selectedFormatted.charAt(0).toUpperCase() + selectedFormatted.slice(1);
 
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
   return (
-    <header className="pt-2 pb-3 mb-2 space-y-3 select-none">
-      {/* Верхній рядок: Бренд NUTRIQ + Дзен Статус */}
-      <div className="flex items-center justify-between">
+    <header className="pt-2 pb-1 select-none relative">
+      {/* Верхній рядок: Чистий мінімалістичний дзен Layout 2 */}
+      <div className="flex items-start justify-between">
         <div>
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-amber-400/90 uppercase">
-            <span>NUTRIQ FIT</span>
-            <span className="text-zinc-600">•</span>
-            <span className="text-zinc-300 font-normal">{capitalizedSelected}</span>
-          </div>
-
-          {/* Фірмовий логотип NUTRIQ із золотою Q */}
-          <div
-            onClick={onOpenSplash}
-            className={`flex items-baseline gap-1 mt-0.5 ${onOpenSplash ? 'cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all' : ''}`}
-            title="Переглянути завантажувальний екран NUTRIQ"
-          >
-            <span className="text-2xl font-black tracking-wider text-zinc-100 font-sans">
-              NUTRI<span className="text-amber-400 text-3xl font-black drop-shadow-[0_0_12px_rgba(245,158,11,0.6)]">Q</span>
-            </span>
-            <span className="text-[10px] tracking-widest text-zinc-400 font-medium uppercase ml-2 hidden sm:inline">
-              Intelligent Nutrition
-            </span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-100 font-sans">
+            Today's Balance
+          </h1>
+          <div className="flex items-center gap-2 mt-1 text-xs text-zinc-400 font-medium">
+            <span>{capitalizedSelected}</span>
+            <span>•</span>
+            <span className="text-zinc-300">Привіт!</span>
           </div>
         </div>
 
-        {/* Дзен-бейдж статусу Cook-Loss */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#121814]/90 border border-[#233226]/80 shadow-lg text-xs font-semibold text-zinc-300 backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-            <span className="text-[11px] font-bold text-amber-300">Cook-Loss</span>
-            <Sparkles className="w-3 h-3 text-amber-400" />
-          </div>
-        </div>
-      </div>
-
-      {/* Рядок тижня та навігація (гортання без обмежень назад і вперед) */}
-      <div className="flex items-center justify-between px-0.5">
+        {/* Дії: календар та логотип */}
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setWeekOffset(prev => prev - 1)}
-            className="w-7 h-7 rounded-full bg-[#121814]/90 border border-[#233226]/80 hover:border-amber-500/40 text-zinc-400 hover:text-zinc-200 flex items-center justify-center transition-all active:scale-95"
-            title="Попередній тиждень"
+            onClick={() => setShowDatePicker(!showDatePicker)}
+            className="w-9 h-9 rounded-full bg-[#141C16] border border-[#233326] flex items-center justify-center text-zinc-300 hover:text-amber-400 hover:border-amber-500/40 transition-all active:scale-95 shadow-sm"
+            title="Календар днів"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <Calendar className="w-4 h-4" />
           </button>
-          
-          <div className="text-xs font-medium text-zinc-300 flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5 text-amber-400/80" />
-            <span>Тиждень: <strong className="text-zinc-100 font-semibold">{weekStartStr} – {weekEndStr}</strong></span>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setWeekOffset(prev => prev + 1)}
-            className="w-7 h-7 rounded-full bg-[#121814]/90 border border-[#233226]/80 hover:border-amber-500/40 text-zinc-400 hover:text-zinc-200 flex items-center justify-center transition-all active:scale-95"
-            title="Наступний тиждень"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleGoToday}
-          className={`text-[11px] font-semibold px-2.5 py-1 rounded-full transition-all active:scale-95 ${
-            selectedDate === todayDateStr
-              ? 'text-amber-400 bg-amber-500/20 border border-amber-400/50 shadow-sm'
-              : 'text-zinc-400 bg-[#121814]/90 border border-[#233226]/80 hover:text-zinc-200'
-          }`}
-        >
-          Сьогодні
-        </button>
-      </div>
-
-      {/* Стрічка 7 днів тижня з можливістю вибору будь-якого дня */}
-      <div className="grid grid-cols-7 gap-1.5 p-1.5 rounded-2xl bg-[#0F1411]/90 border border-[#202C23]/80 backdrop-blur-xl">
-        {days.map((d) => {
-          const isSelected = selectedDate === d.date;
-
-          return (
+          {onOpenSplash && (
             <button
-              key={d.date}
               type="button"
-              onClick={() => setSelectedDate(d.date)}
-              className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 ${
-                isSelected
-                  ? 'bg-gradient-to-b from-amber-400/25 to-amber-500/10 border border-amber-400/70 text-amber-200 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
-                  : 'bg-[#141C16]/50 hover:bg-[#18221B] border border-transparent text-zinc-400 hover:text-zinc-200'
-              }`}
+              onClick={onOpenSplash}
+              className="px-2.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-xs font-bold text-amber-300 hover:bg-amber-500/20 transition-all"
+              title="Завантажувальний екран NUTRIQ"
             >
-              <span className={`text-[10px] font-bold tracking-wider ${isSelected ? 'text-amber-300' : 'text-zinc-400'}`}>
-                {d.shortName}
-              </span>
-              <span className={`text-sm font-extrabold mt-0.5 ${isSelected ? 'text-zinc-50' : 'text-zinc-300'}`}>
-                {d.dayNum}
-              </span>
-              {/* Крапка статусу дня */}
-              <span className={`w-1 h-1 rounded-full mt-1 ${
-                isSelected ? 'bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.8)]' : d.isToday ? 'bg-emerald-400' : 'bg-transparent'
-              }`} />
+              NUTRI<span className="text-amber-400">Q</span>
             </button>
-          );
-        })}
+          )}
+        </div>
       </div>
+
+      {/* Компактний випадаючий вибір днів тижня (з'являється лише при кліку на календар) */}
+      {showDatePicker && (
+        <div className="mt-3 p-3 rounded-2xl bg-[#111713]/98 border border-[#212E24] shadow-2xl animate-fadeIn">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+              {weekStartStr} – {weekEndStr}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setWeekOffset(prev => prev - 1)}
+                className="p-1 rounded-lg hover:bg-[#1A251D] text-zinc-400 hover:text-zinc-200"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleGoToday}
+                className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30"
+              >
+                Сьогодні
+              </button>
+              <button
+                type="button"
+                onClick={() => setWeekOffset(prev => prev + 1)}
+                className="p-1 rounded-lg hover:bg-[#1A251D] text-zinc-400 hover:text-zinc-200"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-7 gap-1.5">
+            {days.map((item) => {
+              const isSelected = item.date === selectedDate;
+              return (
+                <button
+                  key={item.date}
+                  type="button"
+                  onClick={() => {
+                    setSelectedDate(item.date);
+                    setShowDatePicker(false);
+                  }}
+                  className={`py-1.5 rounded-xl flex flex-col items-center justify-center text-xs transition-all ${
+                    isSelected
+                      ? 'bg-amber-400 text-zinc-950 font-black shadow-lg shadow-amber-500/30'
+                      : item.isToday
+                      ? 'bg-amber-500/15 border border-amber-500/40 text-amber-300 font-bold'
+                      : 'bg-[#151D18] text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  <span className="text-[9px] uppercase">{item.shortName}</span>
+                  <span className="text-xs font-bold">{item.dayNum}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </header>
   );
 };

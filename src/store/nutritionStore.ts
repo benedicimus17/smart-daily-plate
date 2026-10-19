@@ -80,7 +80,7 @@ function createEmptyMeals(): DailyLog['meals'] {
   };
 }
 
-// Початкові прийоми їжі для сьогодні (19.10.2026)
+// Початкові прийоми їжі (відповідають макету Layout 2: 700 ккал залишок, 140г білка, 65г жиру, 220г вуглеводів)
 const todayMeals: DailyLog['meals'] = {
   breakfast: {
     type: 'breakfast',
@@ -92,22 +92,22 @@ const todayMeals: DailyLog['meals'] = {
         foodId: 'oats',
         name: 'Вівсянка з ягодами та мигдалем',
         weightGrams: 280,
-        macros: { calories: 380, protein: 14, fat: 12, carbs: 54 },
+        macros: { calories: 520, protein: 42, fat: 22, carbs: 78 },
         timestamp: '08:30',
         eaten: true,
-        recipeDetails: 'Вівсяні пластівці 60г, лохина свіжа 80г, мигдаль 15г, протеїн 25г'
+        recipeDetails: 'Вівсяні пластівці 70г, протеїн ізолят 35г, лохина 80г, мигдаль 20г'
       },
       {
         id: 'b-2',
         foodId: 'coffee',
-        name: 'Флет-вайт на вівсяному',
+        name: 'Флет-вайт',
         weightGrams: 200,
-        macros: { calories: 95, protein: 3, fat: 3, carbs: 14 },
+        macros: { calories: 120, protein: 6, fat: 5, carbs: 14 },
         timestamp: '08:45',
         eaten: true
       }
     ],
-    totalMacros: { calories: 475, protein: 17, fat: 15, carbs: 68 }
+    totalMacros: { calories: 640, protein: 48, fat: 27, carbs: 92 }
   },
   lunch: {
     type: 'lunch',
@@ -117,18 +117,18 @@ const todayMeals: DailyLog['meals'] = {
       {
         id: 'l-1',
         foodId: 'salmon_bowl',
-        name: 'Боул з лососем, кіноа та авокадо',
-        weightGrams: 350,
-        macros: { calories: 620, protein: 38, fat: 26, carbs: 58 },
+        name: 'Боул з лососем та кіноа',
+        weightGrams: 420,
+        macros: { calories: 810, protein: 92, fat: 38, carbs: 128 },
         timestamp: '13:15',
         eaten: true,
         isCookLoss: true,
-        rawWeightGrams: 330,
-        cookedWeightGrams: 250,
-        recipeDetails: 'Лосось свіжий 330г ➔ 250г (-24%), варена кіноа 120г, авокадо 60г, огірок'
+        rawWeightGrams: 350,
+        cookedWeightGrams: 260,
+        recipeDetails: 'Філе лосося 350г ➔ 260г (-26%), кіноа 160г, авокадо 70г'
       }
     ],
-    totalMacros: { calories: 620, protein: 38, fat: 26, carbs: 58 }
+    totalMacros: { calories: 810, protein: 92, fat: 38, carbs: 128 }
   },
   dinner: {
     type: 'dinner',
@@ -137,16 +137,16 @@ const todayMeals: DailyLog['meals'] = {
     entries: [
       {
         id: 'd-1',
-        foodId: 'steak_asparagus',
-        name: 'Стейк рибай та запечена спаржа',
-        weightGrams: 300,
-        macros: { calories: 520, protein: 44, fat: 32, carbs: 10 },
+        foodId: 'steak_greens',
+        name: 'Gourmet Steak & Greens',
+        weightGrams: 320,
+        macros: { calories: 480, protein: 42, fat: 12, carbs: 20 },
         timestamp: '19:30',
-        eaten: false, // Заплановано на вечір
+        eaten: false, // Заплановано
         isCookLoss: true,
-        rawWeightGrams: 380,
-        cookedWeightGrams: 275,
-        recipeDetails: 'Яловичина 380г ➔ 275г (-28% уварка), спаржа 150г, оливкова олія, спеції'
+        rawWeightGrams: 350,
+        cookedWeightGrams: 260,
+        recipeDetails: 'Стейк яловичий 350г ➔ 260г (-26% Cook-Loss), спаржа свіжа 150г'
       }
     ],
     totalMacros: { calories: 0, protein: 0, fat: 0, carbs: 0 }
@@ -155,19 +155,8 @@ const todayMeals: DailyLog['meals'] = {
     type: 'snack',
     title: 'Перекус',
     icon: 'Apple',
-    entries: [
-      {
-        id: 's-1',
-        foodId: 'protein_yogurt',
-        name: 'Грецький йогурт 0% з лохиною',
-        weightGrams: 250,
-        macros: { calories: 160, protein: 22, fat: 2, carbs: 14 },
-        timestamp: '16:40',
-        eaten: true,
-        recipeDetails: 'Грецький йогурт 200г, свіжа лохина 50г'
-      }
-    ],
-    totalMacros: { calories: 160, protein: 22, fat: 2, carbs: 14 }
+    entries: [],
+    totalMacros: { calories: 0, protein: 0, fat: 0, carbs: 0 }
   }
 };
 
@@ -334,9 +323,9 @@ const initialWeeklyBank: WeeklyFlexBank = {
   weekStartDate: '2026-10-19',
   weekEndDate: '2026-10-25',
   weeklyTargetCalories: 15050,
-  weeklyConsumedCalories: 1255,
-  weeklyBalanceCalories: 13795,
-  adjustedDailyBudgetForRemainingDays: 2299,
+  weeklyConsumedCalories: 14700,
+  weeklyBalanceCalories: 350,
+  adjustedDailyBudgetForRemainingDays: 2200,
   bankHealthStatus: 'safe',
   days: [
     { date: '2026-10-19', dayName: 'Пн', targetCalories: 2150, consumedCalories: 1255, balanceCalories: 895, isCompleted: false, isToday: true },
@@ -350,23 +339,23 @@ const initialWeeklyBank: WeeklyFlexBank = {
 };
 
 const defaultHistory: Record<string, DailyLog> = {
-  '2026-10-18': {
-    date: '2026-10-18',
-    targets: DEFAULT_TARGETS,
+  '2026-10-19': {
+    date: '2026-10-19',
+    targets: { calories: 2150, protein: 180, fat: 80, carbs: 270 },
     meals: yesterdayMeals,
     totals: calculateTotals(yesterdayMeals),
     waterMl: 2100
   },
-  '2026-10-19': {
-    date: '2026-10-19',
-    targets: DEFAULT_TARGETS,
+  '2026-10-20': {
+    date: '2026-10-20',
+    targets: { calories: 2150, protein: 180, fat: 80, carbs: 270 },
     meals: todayMeals,
     totals: calculateTotals(todayMeals),
     waterMl: 1750
   },
-  '2026-10-20': {
-    date: '2026-10-20',
-    targets: DEFAULT_TARGETS,
+  '2026-10-21': {
+    date: '2026-10-21',
+    targets: { calories: 2150, protein: 180, fat: 80, carbs: 270 },
     meals: tomorrowMeals,
     totals: calculateTotals(tomorrowMeals),
     waterMl: 0
@@ -571,7 +560,7 @@ export const useNutritionStore = create<NutritionState>()(
       };
     },
     {
-      name: 'smart-daily-plate-storage-v2', // bump version to reset clean state with multi-day support
+      name: 'smart-daily-plate-storage-v5', // bump version for exact Layout 2 values
     }
   )
 );

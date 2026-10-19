@@ -6,140 +6,40 @@ interface CalorieRingsProps {
   targets: MacroTargets;
 }
 
-interface SemiCircleGaugeProps {
-  label: string;
-  current: number;
-  target: number;
-  unit?: string;
-  colorHex: string;
-  gradId: string;
-  glowDropShadow: string;
-  dotColorClass: string;
-  textColorClass: string;
-}
-
-const SemiCircleGauge: React.FC<SemiCircleGaugeProps> = ({
-  label,
-  current,
-  target,
-  unit = 'г',
-  colorHex,
-  gradId,
-  glowDropShadow,
-  dotColorClass,
-  textColorClass,
-}) => {
-  const percent = Math.min(100, Math.max(0, Math.round((current / (target || 1)) * 100)));
-  // Дуга півкола: центр (45, 42), радіус 32
-  // Від (13, 42) до (77, 42) -> M 13 42 A 32 32 0 0 1 77 42
-  // Довжина дуги: Math.PI * 32 = 100.53
-  const arcLength = 100.53;
-  const strokeDashoffset = arcLength - (percent / 100) * arcLength;
-
-  return (
-    <div className="flex flex-col items-center p-3 rounded-2xl bg-[#0F1511]/90 border border-[#212E24]/80 backdrop-blur-md shadow-inner transition-all hover:border-[#2C3D30]">
-      {/* Напівкруглий спідометр (Micro-gauge semi-arc) */}
-      <div className="relative w-24 h-14 flex items-center justify-center">
-        <svg viewBox="0 0 90 50" className="w-full h-full overflow-visible">
-          <defs>
-            <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={colorHex} stopOpacity="0.75" />
-              <stop offset="100%" stopColor={colorHex} stopOpacity="1" />
-            </linearGradient>
-          </defs>
-          {/* Флаг / трек напівкола */}
-          <path
-            d="M 13 42 A 32 32 0 0 1 77 42"
-            fill="none"
-            stroke="#19231B"
-            strokeWidth="7"
-            strokeLinecap="round"
-          />
-          {/* Активний півкруг із фірмовим світінням */}
-          <path
-            d="M 13 42 A 32 32 0 0 1 77 42"
-            fill="none"
-            stroke={`url(#${gradId})`}
-            strokeWidth="7"
-            strokeLinecap="round"
-            strokeDasharray={arcLength}
-            strokeDashoffset={strokeDashoffset}
-            style={{ filter: glowDropShadow }}
-            className="transition-all duration-700 ease-out"
-          />
-        </svg>
-
-        {/* Значення в центрі напівкола */}
-        <div className="absolute bottom-0 inset-x-0 flex flex-col items-center justify-center text-center">
-          <span className="text-sm font-black text-zinc-100 tracking-tight leading-none">
-            {current}<span className="text-[10px] text-zinc-400 font-normal">{unit}</span>
-          </span>
-          <span className="text-[9px] text-zinc-400 font-medium leading-tight mt-0.5">
-            з {target}{unit}
-          </span>
-        </div>
-      </div>
-
-      {/* Назва макросу та статусний індикатор */}
-      <div className="flex items-center gap-1.5 mt-2">
-        <div className={`w-2 h-2 rounded-full ${dotColorClass} shadow-sm`} />
-        <span className={`text-[11px] font-bold uppercase tracking-wider ${textColorClass}`}>
-          {label}
-        </span>
-      </div>
-      <span className="text-[10px] font-semibold text-zinc-400 mt-0.5">
-        {percent}%
-      </span>
-    </div>
-  );
-};
-
 export const CalorieRings: React.FC<CalorieRingsProps> = ({ totals, targets }) => {
   const remainingCalories = Math.max(0, targets.calories - totals.calories);
   const caloriePercent = Math.min(100, Math.round((totals.calories / targets.calories) * 100));
 
   // Розрахунок кола для калорій
-  const radius = 86;
-  const stroke = 11;
+  const radius = 95;
+  const stroke = 12;
   const normalizedRadius = radius - stroke * 0.5;
   const circumference = normalizedRadius * 2 * Math.PI;
   const strokeDashoffset = circumference - (caloriePercent / 100) * circumference;
 
   return (
-    <div className="rounded-4xl p-6 relative overflow-hidden flex flex-col items-center bg-[#111713]/90 border border-[#212E24]/80 backdrop-blur-2xl shadow-2xl shadow-black/80 select-none">
-      {/* Делікатне фонове органічне світіння (NUTRIQ Zen Glow: Бурштин та Мох) */}
-      <div className="absolute -top-16 -right-16 w-52 h-52 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-16 -left-16 w-52 h-52 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="relative flex flex-col items-center select-none py-2 animate-fadeIn">
+      {/* Делікатне фонове світіння NUTRIQ Zen Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-500/10 rounded-full blur-[80px] pointer-events-none" />
 
-      {/* Заголовок блоку у стилі Layout 2: Today's Balance */}
-      <div className="w-full flex items-center justify-between mb-2 px-1">
-        <span className="text-xs font-bold uppercase tracking-widest text-amber-400/90 flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-          Today's Balance
-        </span>
-        <span className="text-[11px] text-zinc-400 font-medium bg-[#162019] px-2.5 py-0.5 rounded-full border border-[#26372A]">
-          Баланс дня
-        </span>
-      </div>
-
-      {/* Головне золоте кільце калорій (Фірмовий дзен NUTRIQ) */}
-      <div className="relative flex items-center justify-center my-2">
+      {/* Головне золоте кільце калорій (Фірмовий дзен NUTRIQ 700 kcal Remaining) */}
+      <div className="relative flex items-center justify-center my-3">
         <svg
           height={radius * 2}
           width={radius * 2}
-          className="rotate-[-90deg] transition-all duration-700 ease-out"
+          className="rotate-[-90deg] transition-all duration-700 ease-out overflow-visible"
         >
           {/* Фонові треки */}
           <circle
-            stroke="#1B241D"
+            stroke="#1C261F"
             fill="transparent"
             strokeWidth={stroke}
             r={normalizedRadius}
             cx={radius}
             cy={radius}
-            className="opacity-80"
+            className="opacity-70"
           />
-          {/* Активний золотий прогрес із світінням */}
+          {/* Активний золотий прогрес із м'яким градієнтом та світінням */}
           <circle
             stroke="url(#nutriqCalorieGold)"
             fill="transparent"
@@ -150,7 +50,7 @@ export const CalorieRings: React.FC<CalorieRingsProps> = ({ totals, targets }) =
             r={normalizedRadius}
             cx={radius}
             cy={radius}
-            className="transition-all duration-1000 ease-out drop-shadow-[0_0_16px_rgba(245,158,11,0.65)]"
+            className="transition-all duration-1000 ease-out drop-shadow-[0_0_20px_rgba(245,158,11,0.7)]"
           />
           <defs>
             <linearGradient id="nutriqCalorieGold" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -161,57 +61,128 @@ export const CalorieRings: React.FC<CalorieRingsProps> = ({ totals, targets }) =
           </defs>
         </svg>
 
-        {/* Текст у центрі кільця */}
+        {/* Текст у центрі кільця точно за макетом */}
         <div className="absolute flex flex-col items-center justify-center text-center">
-          <span className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-100 drop-shadow-sm">
-            {remainingCalories}
-          </span>
-          <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 mt-0.5">
-            ккал залишок
-          </span>
-          <span className="text-[11px] font-semibold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 rounded-full mt-1.5 shadow-sm">
-            {totals.calories} / {targets.calories} ккал
+          <div className="flex items-baseline gap-1">
+            <span className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white drop-shadow-md">
+              {remainingCalories}
+            </span>
+            <span className="text-xs sm:text-sm font-semibold text-zinc-300">
+              kcal
+            </span>
+          </div>
+          <span className="text-xs font-medium text-zinc-400 mt-0.5 tracking-wide">
+            Remaining
           </span>
         </div>
       </div>
 
-      {/* 3 напівкруглі мікро-шкали БЖУ (Смарагд / Бурштин / Індиго) точно за Layout 2 */}
-      <div className="grid grid-cols-3 gap-2.5 w-full mt-4 pt-4 border-t border-[#212E24]/80">
-        {/* Білки (Смарагдовий напівкруг) */}
-        <SemiCircleGauge
-          label="Білки"
-          current={totals.protein}
-          target={targets.protein}
-          colorHex="#10B981"
-          gradId="gaugeProtein"
-          glowDropShadow="drop-shadow(0 0 6px rgba(16,185,129,0.85))"
-          dotColorClass="bg-emerald-400"
-          textColorClass="text-emerald-300"
-        />
+      {/* 3 напівкруглі мікро-шкали БЖУ (Смарагд / Бурштин / Індиго) без грубих рамок картки */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full mt-2 px-1">
+        {/* Білки (Смарагдовий спідометр - Protein 140g / 180g) */}
+        <div className="flex flex-col items-center">
+          <div className="relative w-24 h-14 flex items-center justify-center">
+            <svg viewBox="0 0 90 50" className="w-full h-full overflow-visible">
+              <defs>
+                <linearGradient id="gaugeProtein" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#10B981" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#34D399" stopOpacity="1" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 13 42 A 32 32 0 0 1 77 42"
+                fill="none"
+                stroke="#1A241D"
+                strokeWidth="7"
+                strokeLinecap="round"
+              />
+              <path
+                d="M 13 42 A 32 32 0 0 1 77 42"
+                fill="none"
+                stroke="url(#gaugeProtein)"
+                strokeWidth="7"
+                strokeLinecap="round"
+                strokeDasharray="100.53"
+                strokeDashoffset={100.53 - (Math.min(100, (totals.protein / (targets.protein || 1)) * 100) / 100) * 100.53}
+                style={{ filter: 'drop-shadow(0 0 8px rgba(16,185,129,0.8))' }}
+                className="transition-all duration-700 ease-out"
+              />
+            </svg>
+          </div>
+          <span className="text-xs font-bold text-emerald-400 mt-1">Protein</span>
+          <span className="text-[10px] text-emerald-400/70 font-medium">Emerald Green</span>
+          <span className="text-xs font-extrabold text-zinc-200 mt-0.5">{totals.protein}g / {targets.protein}g</span>
+        </div>
 
-        {/* Жири (Теплий бурштин напівкруг) */}
-        <SemiCircleGauge
-          label="Жири"
-          current={totals.fat}
-          target={targets.fat}
-          colorHex="#F59E0B"
-          gradId="gaugeFat"
-          glowDropShadow="drop-shadow(0 0 6px rgba(245,158,11,0.85))"
-          dotColorClass="bg-amber-400"
-          textColorClass="text-amber-300"
-        />
+        {/* Жири (Теплий бурштин спідометр - Fats 65g / 80g) */}
+        <div className="flex flex-col items-center">
+          <div className="relative w-24 h-14 flex items-center justify-center">
+            <svg viewBox="0 0 90 50" className="w-full h-full overflow-visible">
+              <defs>
+                <linearGradient id="gaugeFat" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#FBBF24" stopOpacity="1" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 13 42 A 32 32 0 0 1 77 42"
+                fill="none"
+                stroke="#1A241D"
+                strokeWidth="7"
+                strokeLinecap="round"
+              />
+              <path
+                d="M 13 42 A 32 32 0 0 1 77 42"
+                fill="none"
+                stroke="url(#gaugeFat)"
+                strokeWidth="7"
+                strokeLinecap="round"
+                strokeDasharray="100.53"
+                strokeDashoffset={100.53 - (Math.min(100, (totals.fat / (targets.fat || 1)) * 100) / 100) * 100.53}
+                style={{ filter: 'drop-shadow(0 0 8px rgba(245,158,11,0.8))' }}
+                className="transition-all duration-700 ease-out"
+              />
+            </svg>
+          </div>
+          <span className="text-xs font-bold text-amber-400 mt-1">Fats</span>
+          <span className="text-[10px] text-amber-400/70 font-medium">Warm Amber</span>
+          <span className="text-xs font-extrabold text-zinc-200 mt-0.5">{totals.fat}g / {targets.fat}g</span>
+        </div>
 
-        {/* Вуглеводи (Індиго напівкруг) */}
-        <SemiCircleGauge
-          label="Вуглеводи"
-          current={totals.carbs}
-          target={targets.carbs}
-          colorHex="#818CF8"
-          gradId="gaugeCarbs"
-          glowDropShadow="drop-shadow(0 0 6px rgba(129,140,248,0.85))"
-          dotColorClass="bg-indigo-400"
-          textColorClass="text-indigo-300"
-        />
+        {/* Вуглеводи (М'який індиго спідометр - Carbs 220g / 270g) */}
+        <div className="flex flex-col items-center">
+          <div className="relative w-24 h-14 flex items-center justify-center">
+            <svg viewBox="0 0 90 50" className="w-full h-full overflow-visible">
+              <defs>
+                <linearGradient id="gaugeCarbs" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#818CF8" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#A5B4FC" stopOpacity="1" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 13 42 A 32 32 0 0 1 77 42"
+                fill="none"
+                stroke="#1A241D"
+                strokeWidth="7"
+                strokeLinecap="round"
+              />
+              <path
+                d="M 13 42 A 32 32 0 0 1 77 42"
+                fill="none"
+                stroke="url(#gaugeCarbs)"
+                strokeWidth="7"
+                strokeLinecap="round"
+                strokeDasharray="100.53"
+                strokeDashoffset={100.53 - (Math.min(100, (totals.carbs / (targets.carbs || 1)) * 100) / 100) * 100.53}
+                style={{ filter: 'drop-shadow(0 0 8px rgba(129,140,248,0.8))' }}
+                className="transition-all duration-700 ease-out"
+              />
+            </svg>
+          </div>
+          <span className="text-xs font-bold text-indigo-400 mt-1">Carbs</span>
+          <span className="text-[10px] text-indigo-400/70 font-medium">Soft Indigo</span>
+          <span className="text-xs font-extrabold text-zinc-200 mt-0.5">{totals.carbs}g / {targets.carbs}g</span>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MealCategory, MealType } from '../types/nutrition';
-import { Plus, SunMedium, Flame, Moon, Apple, Trash2, ChevronDown, Check, CookingPot, Sparkles } from 'lucide-react';
+import { Plus, SunMedium, Flame, Moon, Apple, ChevronDown, Check, CookingPot, Trash2 } from 'lucide-react';
 
 interface MealListProps {
   meals: Record<MealType, MealCategory>;
@@ -26,7 +26,7 @@ export const MealList: React.FC<MealListProps> = ({
   onOpenDiningEstimator,
   onOpenCookLoss
 }) => {
-  const [expandedMeal, setExpandedMeal] = useState<MealType | null>('lunch');
+  const [expandedMeal, setExpandedMeal] = useState<MealType | null>('dinner');
 
   const toggleMeal = (type: MealType) => {
     setExpandedMeal(prev => (prev === type ? null : type));
@@ -131,35 +131,26 @@ export const MealList: React.FC<MealListProps> = ({
             {/* Вміст списку страв прийому (Розгортання) */}
             {isExpanded && (
               <div className="px-4 pb-4 pt-1 space-y-2.5 border-t border-[#1C261F] bg-[#0E1410]/70">
-                {/* Шеф-картка кулінарної фотографії для Вечері (Dinner) згідно з Layout 2 */}
+                {/* Картка страви у стилі Layout 2: Dinner | Gourmet Steak & Greens */}
                 {type === 'dinner' && (
-                  <div className="relative rounded-2xl overflow-hidden border border-[#2A3B2E] shadow-xl my-2">
-                    <div className="h-32 sm:h-40 w-full relative">
+                  <div className="relative rounded-2xl overflow-hidden bg-[#131D16]/90 border border-[#233527] shadow-xl p-3 flex items-center justify-between my-1">
+                    <div className="space-y-1">
+                      <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
+                        Dinner
+                      </span>
+                      <h4 className="text-sm sm:text-base font-extrabold text-white">
+                        Gourmet Steak & Greens
+                      </h4>
+                      <p className="text-xs text-zinc-400 font-medium">
+                        480 kcal • 42g Protein
+                      </p>
+                    </div>
+                    <div className="w-24 h-16 sm:w-28 sm:h-18 rounded-xl overflow-hidden border border-[#2B3F30] shrink-0">
                       <img
-                        src="/dinner_steak.jpg"
-                        alt="Gourmet Seared Steak & Asparagus"
-                        className="w-full h-full object-cover object-center filter brightness-95"
+                        src="/gourmet_steak_dish.jpg"
+                        alt="Gourmet Steak & Greens"
+                        className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0C100E] via-[#0C100E]/50 to-transparent" />
-                      <div className="absolute top-2.5 left-2.5">
-                        <span className="text-[10px] font-bold tracking-wider uppercase bg-amber-500/25 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-full backdrop-blur-md flex items-center gap-1">
-                          <Sparkles className="w-3 h-3 text-amber-300" />
-                          Кулінарний журнал Layout 2
-                        </span>
-                      </div>
-                      <div className="absolute bottom-2.5 left-3 right-3 flex items-end justify-between">
-                        <div>
-                          <h4 className="text-sm sm:text-base font-extrabold text-white drop-shadow-md">
-                            Стейк Рибай та запечена спаржа
-                          </h4>
-                          <p className="text-[11px] text-zinc-300 font-medium">
-                            480 ккал • 42г Білка • Cook-Loss -28%
-                          </p>
-                        </div>
-                        <span className="text-[11px] font-bold text-amber-300 bg-[#0C100E]/80 px-2.5 py-1 rounded-lg border border-amber-400/40 backdrop-blur-md shadow-sm">
-                          Затверджено
-                        </span>
-                      </div>
                     </div>
                   </div>
                 )}
