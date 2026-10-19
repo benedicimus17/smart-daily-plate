@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MealCategory, MealType } from '../types/nutrition';
-import { Plus, SunMedium, Flame, Moon, Apple, Trash2, ChevronDown, Check, CookingPot } from 'lucide-react';
+import { Plus, SunMedium, Flame, Moon, Apple, Trash2, ChevronDown, Check, CookingPot, Sparkles } from 'lucide-react';
 
 interface MealListProps {
   meals: Record<MealType, MealCategory>;
@@ -37,10 +37,11 @@ export const MealList: React.FC<MealListProps> = ({
       {/* Заголовок секції */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-amber-400/90">
+          <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-amber-400/90 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
             Меню дня (Comidas del día)
           </h2>
-          <span className="text-[10px] bg-zinc-800/80 text-zinc-400 px-2 py-0.5 rounded-full border border-zinc-700/60 font-medium">
+          <span className="text-[10px] bg-[#162119] text-zinc-300 px-2 py-0.5 rounded-full border border-[#27392C] font-medium">
             1-тап списання
           </span>
         </div>
@@ -69,7 +70,7 @@ export const MealList: React.FC<MealListProps> = ({
         return (
           <div
             key={type}
-            className="rounded-3xl bg-zinc-900/75 border border-zinc-800/80 hover:border-zinc-700/80 overflow-hidden transition-all duration-300 backdrop-blur-xl shadow-xl shadow-black/40"
+            className="rounded-3xl bg-[#111713]/90 border border-[#212E24]/80 hover:border-[#2E3F32] overflow-hidden transition-all duration-300 backdrop-blur-xl shadow-xl shadow-black/50"
           >
             {/* Заголовок картки прийому їжі */}
             <div
@@ -91,7 +92,7 @@ export const MealList: React.FC<MealListProps> = ({
                       {category.title}
                     </h3>
                     {hasEntries && (
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700/50">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#18231B] text-zinc-300 border border-[#27382B]">
                         {eatenCount}/{category.entries.length} з'їдено
                       </span>
                     )}
@@ -115,7 +116,7 @@ export const MealList: React.FC<MealListProps> = ({
                     e.stopPropagation();
                     onOpenAddModal(type);
                   }}
-                  className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-amber-500/20 border border-zinc-700 hover:border-amber-500/40 text-zinc-300 hover:text-amber-300 flex items-center justify-center transition-all active:scale-90"
+                  className="w-8 h-8 rounded-full bg-[#162119] hover:bg-amber-500/20 border border-[#26372A] hover:border-amber-500/40 text-zinc-300 hover:text-amber-300 flex items-center justify-center transition-all active:scale-90"
                   title="Додати страву"
                 >
                   <Plus className="w-4 h-4" />
@@ -129,7 +130,40 @@ export const MealList: React.FC<MealListProps> = ({
 
             {/* Вміст списку страв прийому (Розгортання) */}
             {isExpanded && (
-              <div className="px-4 pb-4 pt-1 space-y-2.5 border-t border-zinc-800/60 bg-zinc-950/40">
+              <div className="px-4 pb-4 pt-1 space-y-2.5 border-t border-[#1C261F] bg-[#0E1410]/70">
+                {/* Шеф-картка кулінарної фотографії для Вечері (Dinner) згідно з Layout 2 */}
+                {type === 'dinner' && (
+                  <div className="relative rounded-2xl overflow-hidden border border-[#2A3B2E] shadow-xl my-2">
+                    <div className="h-32 sm:h-40 w-full relative">
+                      <img
+                        src="/dinner_steak.jpg"
+                        alt="Gourmet Seared Steak & Asparagus"
+                        className="w-full h-full object-cover object-center filter brightness-95"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0C100E] via-[#0C100E]/50 to-transparent" />
+                      <div className="absolute top-2.5 left-2.5">
+                        <span className="text-[10px] font-bold tracking-wider uppercase bg-amber-500/25 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-full backdrop-blur-md flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-amber-300" />
+                          Кулінарний журнал Layout 2
+                        </span>
+                      </div>
+                      <div className="absolute bottom-2.5 left-3 right-3 flex items-end justify-between">
+                        <div>
+                          <h4 className="text-sm sm:text-base font-extrabold text-white drop-shadow-md">
+                            Стейк Рибай та запечена спаржа
+                          </h4>
+                          <p className="text-[11px] text-zinc-300 font-medium">
+                            480 ккал • 42г Білка • Cook-Loss -28%
+                          </p>
+                        </div>
+                        <span className="text-[11px] font-bold text-amber-300 bg-[#0C100E]/80 px-2.5 py-1 rounded-lg border border-amber-400/40 backdrop-blur-md shadow-sm">
+                          Затверджено
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {!hasEntries ? (
                   <div className="py-6 text-center">
                     <p className="text-xs text-zinc-500 font-medium">
@@ -152,8 +186,8 @@ export const MealList: React.FC<MealListProps> = ({
                         key={entry.id}
                         className={`group p-3.5 rounded-2xl border transition-all duration-200 flex flex-col gap-2 ${
                           isEaten
-                            ? 'bg-zinc-900/90 border-zinc-800/90 hover:border-zinc-700/90 shadow-md'
-                            : 'bg-zinc-900/40 border-dashed border-zinc-700/60 opacity-80 hover:opacity-100'
+                            ? 'bg-[#131A15]/95 border-[#233126]/90 hover:border-[#2E4132] shadow-md'
+                            : 'bg-[#131A15]/40 border-dashed border-[#233126]/60 opacity-80 hover:opacity-100'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
@@ -165,7 +199,7 @@ export const MealList: React.FC<MealListProps> = ({
                               className={`mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 active:scale-90 flex-shrink-0 ${
                                 isEaten
                                   ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-zinc-950 shadow-[0_0_10px_rgba(16,185,129,0.5)]'
-                                  : 'bg-zinc-800/80 border border-zinc-600 text-transparent hover:border-amber-400/60'
+                                  : 'bg-[#19241C] border border-[#2D3E31] text-transparent hover:border-amber-400/60'
                               }`}
                               title={isEaten ? "Позначено як з'їдено" : "Натисніть, щоб списати в кільце калорій"}
                             >
@@ -179,7 +213,7 @@ export const MealList: React.FC<MealListProps> = ({
                                 }`}>
                                   {entry.name}
                                 </h4>
-                                <span className="text-[11px] font-semibold text-zinc-400 bg-zinc-800/80 px-2 py-0.5 rounded-md border border-zinc-700/50">
+                                <span className="text-[11px] font-semibold text-zinc-400 bg-[#162119] px-2 py-0.5 rounded-md border border-[#27382B]">
                                   {entry.weightGrams} г
                                 </span>
                                 {entry.isCookLoss && (
@@ -194,7 +228,7 @@ export const MealList: React.FC<MealListProps> = ({
                                 )}
                               </div>
 
-                              {/* Деталі рецепта / складники (як у старому додатку) */}
+                              {/* Деталі рецепта / складники */}
                               {entry.recipeDetails && (
                                 <p className="text-[11px] text-zinc-400/90 mt-1 line-clamp-2 leading-relaxed">
                                   {entry.recipeDetails}
@@ -223,7 +257,7 @@ export const MealList: React.FC<MealListProps> = ({
                           <button
                             type="button"
                             onClick={() => onRemoveEntry(type, entry.id)}
-                            className="text-zinc-600 hover:text-rose-400 p-1.5 rounded-lg hover:bg-zinc-800 transition-colors opacity-60 group-hover:opacity-100"
+                            className="text-zinc-600 hover:text-rose-400 p-1.5 rounded-lg hover:bg-[#1A251E] transition-colors opacity-60 group-hover:opacity-100"
                             title="Видалити страву"
                           >
                             <Trash2 className="w-4 h-4" />

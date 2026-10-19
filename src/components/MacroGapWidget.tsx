@@ -43,23 +43,23 @@ export const MacroGapWidget: React.FC<MacroGapWidgetProps> = ({
   if (!bestMatch) return null;
 
   return (
-    <div className="glass-card-interactive rounded-3xl p-4 my-3 border border-emerald-100/80 bg-gradient-to-r from-white/90 to-emerald-50/50">
+    <div className="rounded-3xl p-4 my-3 bg-[#111713]/90 border border-[#212E24]/80 backdrop-blur-xl shadow-xl shadow-black/50 select-none">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-brand-emerald/15 text-brand-emerald flex items-center justify-center">
-            <Lightbulb className="w-4 h-4" />
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shadow-inner">
+            <Lightbulb className="w-4 h-4 text-emerald-400" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
                 Macro-Gap Solver
               </span>
-              <span className="text-[9px] font-semibold text-emerald-600 bg-emerald-100/60 px-1.5 py-0.5 rounded-full">
+              <span className="text-[9px] font-semibold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded-full">
                 {bestMatch.gapFitScore}% збіг
               </span>
             </div>
-            <div className="text-xs font-semibold text-slate-800 mt-0.5">
-              Під залишок <span className="text-brand-emerald font-bold">~{remainingMacros.calories} ккал</span>:
+            <div className="text-xs font-semibold text-zinc-200 mt-0.5">
+              Під залишок <span className="text-amber-400 font-bold">~{remainingMacros.calories} ккал</span>:
             </div>
           </div>
         </div>
@@ -72,18 +72,18 @@ export const MacroGapWidget: React.FC<MacroGapWidgetProps> = ({
               bestMatch.resultingMacros
             )
           }
-          className="px-2.5 py-1.5 rounded-xl bg-brand-emerald hover:bg-emerald-600 text-white text-xs font-bold shadow-glow-emerald flex items-center gap-1 transition-all active:scale-95"
+          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-zinc-950 font-extrabold text-xs shadow-[0_0_12px_rgba(16,185,129,0.4)] flex items-center gap-1 transition-all active:scale-95"
         >
-          <Plus className="w-3.5 h-3.5" /> Доїсти
+          <Plus className="w-3.5 h-3.5 stroke-[3]" /> Доїсти
         </button>
       </div>
 
-      <div className="mt-2.5 pt-2 border-t border-slate-100/80 flex items-center justify-between text-xs text-slate-600">
-        <span className="font-medium text-slate-800">
+      <div className="mt-2.5 pt-2 border-t border-[#1E2921] flex items-center justify-between text-xs">
+        <span className="font-semibold text-zinc-200">
           🍽️ {bestMatch.foodItem.name} ({bestMatch.recommendedWeightGrams}г)
         </span>
-        <span className="text-[11px] font-semibold text-slate-500">
-          {bestMatch.resultingMacros.protein}г Б • {bestMatch.resultingMacros.calories} ккал
+        <span className="text-[11px] font-medium text-zinc-400">
+          <strong className="text-emerald-400 font-bold">{bestMatch.resultingMacros.protein}г Б</strong> • {bestMatch.resultingMacros.calories} ккал
         </span>
       </div>
     </div>
