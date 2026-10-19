@@ -13,8 +13,11 @@ interface NutritionState {
   savedCookLossDishes: CookLossDish[];
   
   // Дії щоденника
+  selectedDate: string;
+  setSelectedDate: (date: string) => void;
   addFoodToMeal: (mealType: MealType, entry: Omit<MealEntry, 'id' | 'timestamp'>) => void;
   removeFoodFromMeal: (mealType: MealType, entryId: string) => void;
+  toggleMealEaten: (mealType: MealType, entryId: string) => void;
   updateTargets: (targets: Partial<DailyLog['targets']>) => void;
   quickAddCalories: (mealType: MealType, calories: number, note?: string) => void;
 
@@ -45,7 +48,9 @@ const initialMeals: DailyLog['meals'] = {
         name: 'Вівсянка з ягодами та мигдалем',
         weightGrams: 280,
         macros: { calories: 380, protein: 14, fat: 12, carbs: 54 },
-        timestamp: '08:30'
+        timestamp: '08:30',
+        eaten: true,
+        recipeDetails: 'Вівсяні пластівці 60г, лохина свіжа 80г, мигдаль 15г, протеїн 25г'
       },
       {
         id: 'b-2',
@@ -53,7 +58,8 @@ const initialMeals: DailyLog['meals'] = {
         name: 'Флет-вайт на вівсяному',
         weightGrams: 200,
         macros: { calories: 95, protein: 3, fat: 3, carbs: 14 },
-        timestamp: '08:45'
+        timestamp: '08:45',
+        eaten: true
       }
     ],
     totalMacros: { calories: 475, protein: 17, fat: 15, carbs: 68 }
@@ -69,7 +75,12 @@ const initialMeals: DailyLog['meals'] = {
         name: 'Боул з лососем, кіноа та авокадо',
         weightGrams: 350,
         macros: { calories: 620, protein: 38, fat: 26, carbs: 58 },
-        timestamp: '13:15'
+        timestamp: '13:15',
+        eaten: true,
+        isCookLoss: true,
+        rawWeightGrams: 330,
+        cookedWeightGrams: 250,
+        recipeDetails: 'Лосось свіжий 330г ➔ 250г (-24%), варена кіноа 120г, авокадо 60г, огірок'
       }
     ],
     totalMacros: { calories: 620, protein: 38, fat: 26, carbs: 58 }
@@ -78,8 +89,22 @@ const initialMeals: DailyLog['meals'] = {
     type: 'dinner',
     title: 'Вечеря',
     icon: 'Moon',
-    entries: [],
-    totalMacros: { calories: 0, protein: 0, fat: 0, carbs: 0 }
+    entries: [
+      {
+        id: 'd-1',
+        foodId: 'steak_asparagus',
+        name: 'Стейк рибай та запечена спаржа',
+        weightGrams: 300,
+        macros: { calories: 520, protein: 44, fat: 32, carbs: 10 },
+        timestamp: '19:30',
+        eaten: false, // Заплановано на вечір, ще не з'їдено!
+        isCookLoss: true,
+        rawWeightGrams: 380,
+        cookedWeightGrams: 275,
+        recipeDetails: 'Яловичина 380г ➔ 275г (-28% уварка), спаржа 150г, оливкова олія, спеції'
+      }
+    ],
+    totalMacros: { calories: 0, protein: 0, fat: 0, carbs: 0 } // 0 оскільки eaten === false
   },
   snack: {
     type: 'snack',
@@ -88,16 +113,36 @@ const initialMeals: DailyLog['meals'] = {
     entries: [
       {
         id: 's-1',
-        foodId: 'protein_shake',
-        name: 'Ізолят сироваткового протеїну',
-        weightGrams: 300,
-        macros: { calories: 140, protein: 27, fat: 1.5, carbs: 3 },
-        timestamp: '16:40'
+        foodId: 'protein_yogurt',
+        name: 'Грецький йогурт 0% з лохиною',
+        weightGrams: 250,
+        macros: { calories: 160, protein: 22, fat: 2, carbs: 14 },
+        timestamp: '16:40',
+        eaten: true,
+        recipeDetails: 'Грецький йогурт 200г, свіжа лохина 50г'
       }
     ],
-    totalMacros: { calories: 140, protein: 27, fat: 1.5, carbs: 3 }
+    totalMacros: { calories: 160, protein: 22, fat: 2, carbs: 14 }
   }
 };
+
+export function calculateCategoryTotals(entries: MealEntry[]): Macros {
+  const totals: Macros = { calories: 0, protein: 0, fat: 0, carbs: 0 };
+  entries.forEach(item => {
+    if (item.eaten !== false) {
+      totals.calories += item.macros.calories;
+      totals.protein += item.macros.protein;
+      totals.fat += item.macros.fat;
+      totals.carbs += item.macros.carbs;
+    }
+  });
+  return {
+    calories: Math.round(totals.calories),
+    protein: Math.round(totals.protein * 10) / 10,
+    fat: Math.round(totals.fat * 10) / 10,
+    carbs: Math.round(totals.carbs * 10) / 10,
+  };
+}
 
 function calculateTotals(meals: DailyLog['meals']): Macros {
   const totals: Macros = { calories: 0, protein: 0, fat: 0, carbs: 0 };
@@ -116,21 +161,21 @@ function calculateTotals(meals: DailyLog['meals']): Macros {
 }
 
 const initialWeeklyBank: WeeklyFlexBank = {
-  weekStartDate: '2026-10-12',
-  weekEndDate: '2026-10-18',
+  weekStartDate: '2026-10-19',
+  weekEndDate: '2026-10-25',
   weeklyTargetCalories: 15050, // 2150 * 7
-  weeklyConsumedCalories: 10420,
-  weeklyBalanceCalories: 4630,
-  adjustedDailyBudgetForRemainingDays: 2315,
+  weeklyConsumedCalories: 1255,
+  weeklyBalanceCalories: 13795,
+  adjustedDailyBudgetForRemainingDays: 2299,
   bankHealthStatus: 'safe',
   days: [
-    { date: '2026-10-12', dayName: 'Пн', targetCalories: 2150, consumedCalories: 2050, balanceCalories: 100, isCompleted: true, isToday: false },
-    { date: '2026-10-13', dayName: 'Вт', targetCalories: 2150, consumedCalories: 2200, balanceCalories: -50, isCompleted: true, isToday: false },
-    { date: '2026-10-14', dayName: 'Ср', targetCalories: 2150, consumedCalories: 1980, balanceCalories: 170, isCompleted: true, isToday: false },
-    { date: '2026-10-15', dayName: 'Чт', targetCalories: 2150, consumedCalories: 2110, balanceCalories: 40, isCompleted: true, isToday: false },
-    { date: '2026-10-16', dayName: 'Пт', targetCalories: 2150, consumedCalories: 1235, balanceCalories: 915, isCompleted: false, isToday: true },
-    { date: '2026-10-17', dayName: 'Сб', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
-    { date: '2026-10-18', dayName: 'Нд', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
+    { date: '2026-10-19', dayName: 'Пн', targetCalories: 2150, consumedCalories: 1255, balanceCalories: 895, isCompleted: false, isToday: true },
+    { date: '2026-10-20', dayName: 'Вт', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
+    { date: '2026-10-21', dayName: 'Ср', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
+    { date: '2026-10-22', dayName: 'Чт', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
+    { date: '2026-10-23', dayName: 'Пт', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
+    { date: '2026-10-24', dayName: 'Сб', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
+    { date: '2026-10-25', dayName: 'Нд', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
   ]
 };
 
@@ -138,6 +183,8 @@ export const useNutritionStore = create<NutritionState>()(
   persist(
     (set, get) => ({
       currentDate: new Date().toISOString().split('T')[0],
+      selectedDate: new Date().toISOString().split('T')[0],
+      setSelectedDate: (date) => set({ selectedDate: date }),
       dailyLog: {
         date: new Date().toISOString().split('T')[0],
         targets: DEFAULT_TARGETS,
@@ -159,15 +206,33 @@ export const useNutritionStore = create<NutritionState>()(
         };
 
         const updatedEntries = [...category.entries, newEntry];
-        const categoryMacros = updatedEntries.reduce(
-          (acc, item) => ({
-            calories: acc.calories + item.macros.calories,
-            protein: acc.protein + item.macros.protein,
-            fat: acc.fat + item.macros.fat,
-            carbs: acc.carbs + item.macros.carbs
-          }),
-          { calories: 0, protein: 0, fat: 0, carbs: 0 }
+        const categoryMacros = calculateCategoryTotals(updatedEntries);
+
+        const updatedMeals = {
+          ...dailyLog.meals,
+          [mealType]: {
+            ...category,
+            entries: updatedEntries,
+            totalMacros: categoryMacros
+          }
+        };
+
+        set({
+          dailyLog: {
+            ...dailyLog,
+            meals: updatedMeals,
+            totals: calculateTotals(updatedMeals)
+          }
+        });
+      },
+
+      toggleMealEaten: (mealType, entryId) => {
+        const { dailyLog } = get();
+        const category = dailyLog.meals[mealType];
+        const updatedEntries = category.entries.map(e =>
+          e.id === entryId ? { ...e, eaten: e.eaten === false ? true : false } : e
         );
+        const categoryMacros = calculateCategoryTotals(updatedEntries);
 
         const updatedMeals = {
           ...dailyLog.meals,
@@ -192,6 +257,7 @@ export const useNutritionStore = create<NutritionState>()(
           foodId: 'quick-add',
           name: note,
           weightGrams: 100,
+          eaten: true,
           macros: {
             calories,
             protein: Math.round(calories * 0.15 / 4),
@@ -205,16 +271,7 @@ export const useNutritionStore = create<NutritionState>()(
         const { dailyLog } = get();
         const category = dailyLog.meals[mealType];
         const updatedEntries = category.entries.filter(e => e.id !== entryId);
-        
-        const categoryMacros = updatedEntries.reduce(
-          (acc, item) => ({
-            calories: acc.calories + item.macros.calories,
-            protein: acc.protein + item.macros.protein,
-            fat: acc.fat + item.macros.fat,
-            carbs: acc.carbs + item.macros.carbs
-          }),
-          { calories: 0, protein: 0, fat: 0, carbs: 0 }
-        );
+        const categoryMacros = calculateCategoryTotals(updatedEntries);
 
         const updatedMeals = {
           ...dailyLog.meals,

@@ -37,6 +37,14 @@ export interface MealEntry {
   macros: Macros;
   /** Час додавання */
   timestamp: string;
+  /** Чи з'їдено страву (1-тап чекбокс для планування) */
+  eaten?: boolean;
+  /** Деталі / інгредієнти рецепта */
+  recipeDetails?: string;
+  /** Позначка уварки/ужарки (Cook-Loss) */
+  isCookLoss?: boolean;
+  rawWeightGrams?: number;
+  cookedWeightGrams?: number;
 }
 
 export interface MealCategory {

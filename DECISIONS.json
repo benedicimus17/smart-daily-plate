@@ -1,0 +1,92 @@
+{
+  "project_name": "Smart Daily Plate",
+  "version": "1.0.0",
+  "last_updated": "2026-10-19T14:05:00",
+  "current_stage": "Stage 2: Meal Cards & Cook-Loss UX Implementation",
+  "protocol": "IRON_EXECUTIVE_PROTOCOL_V1",
+  "candidates": {
+    "approved_brand_identity": {
+      "brand_name": "NUTRIQ",
+      "tagline": "Intelligent Nutrition",
+      "app_icon": {
+        "id": "icon_2",
+        "name": "The Refined Macro Arc",
+        "description": "Темний графітовий сквиркл з тонкою золотою дугою та трьома точками БЖУ (Смарагд, Янтар, Індиго)",
+        "source": "C:/Users/Test/.gemini/antigravity/brain/0dbb4b1f-5648-4745-8be9-f0e00298a15e/.user_uploaded/media_1792414314749_b07cff89.png"
+      },
+      "splash_screen": {
+        "id": "splash_vertical_ray_nutriq_option_a",
+        "name": "Vertical Ray NUTRIQ (Option A)",
+        "selected_variant": "Option A: Horizontal Centered Logo (Accent Q)",
+        "description": "Вертикальний світловий промінь на сланці з центрованим логотипом NUTRIQ (виділена золота літера Q та підзаголовок INTELLIGENT NUTRITION)",
+        "final_image": "C:/Users/Test/.gemini/antigravity/brain/0dbb4b1f-5648-4745-8be9-f0e00298a15e/nutriq_horizontal_splash.jpg",
+        "showcase_comparison": "C:/Users/Test/.gemini/antigravity/brain/0dbb4b1f-5648-4745-8be9-f0e00298a15e/nutriq_splash_options_comparison.jpg"
+      },
+      "main_screen_layout": {
+        "id": "layout_2",
+        "name": "Deep Dark Glassmorphism",
+        "description": "Золоте кільце калорій, 3 мікро-шкали макросів (Смарагд/Янтар/Індиго), віджет Cook-Loss та плаваючий скляний док",
+        "source_image": "C:/Users/Test/.gemini/antigravity/brain/0dbb4b1f-5648-4745-8be9-f0e00298a15e/smart_daily_plate_dark_glassmorphism_mockup_1792355108473.jpg",
+        "status": "Approved Gold Standard"
+      },
+      "ecosystem_showcase": "C:/Users/Test/.gemini/antigravity/brain/0dbb4b1f-5648-4745-8be9-f0e00298a15e/nutriq_complete_brand_ecosystem.jpg"
+    },
+    "names_shortlist": [
+      "NUTRIQ",
+      "Calibre"
+    ],
+    "app_icon_finalists": [
+      {
+        "id": "icon_2",
+        "label": "Іконка #2 (The Refined Macro Arc)",
+        "source": "C:/Users/Test/.gemini/antigravity/brain/0dbb4b1f-5648-4745-8be9-f0e00298a15e/.user_uploaded/media_1792414314749_b07cff89.png"
+      }
+    ],
+    "splash_screens_finalists": [
+      {
+        "id": "splash_vertical_ray_nutriq",
+        "label": "Vertical Ray NUTRIQ",
+        "source": "C:/Users/Test/.gemini/antigravity/brain/0dbb4b1f-5648-4745-8be9-f0e00298a15e/nutriq_horizontal_splash.jpg"
+      }
+    ],
+    "main_screen_approved_layout": {
+      "id": "layout_2",
+      "name": "Deep Dark Glassmorphism",
+      "description": "Золоте кільце калорій, 3 мікро-шкали макросів (Смарагд/Янтар/Індиго), віджет Cook-Loss та плаваючий скляний док",
+      "source_image": "C:/Users/Test/.gemini/antigravity/brain/0dbb4b1f-5648-4745-8be9-f0e00298a15e/smart_daily_plate_dark_glassmorphism_mockup_1792355108473.jpg",
+      "status": "Selected Baseline"
+    }
+  },
+  "decisions_log": [
+    {
+      "timestamp": "2026-10-19T14:05:00",
+      "author": "Chief of Staff",
+      "entry": "Ініціалізовано детермінований реєстр рішень DECISIONS.json. Зафіксовано 5 назв, 3 іконки-фіналісти, 4 екрани відкриття та базовий макет Dark Glassmorphism."
+    },
+    {
+      "timestamp": "2026-10-19T14:50:30",
+      "author": "CEO",
+      "entry": "За наказом Власника список app_icon_finalists повністю очищено. Очікується прямий вибір Власника."
+    },
+    {
+      "timestamp": "2026-10-19T14:59:50",
+      "author": "CEO",
+      "entry": "За наказом Власника список splash_screens_finalists повністю очищено. Очікується завантаження нових варіантів від Власника."
+    },
+    {
+      "timestamp": "2026-10-19T15:03:30",
+      "author": "CEO",
+      "entry": "Зафіксовано всі 7 обраних екранів відкриття від Власника. Сформовано детермінований колаж all_7_splash_candidates_grid.jpg (варіанти #1 - #7). Занесено до реєстру рішень."
+    },
+    {
+      "timestamp": "2026-10-19T20:25:00",
+      "author": "CEO",
+      "entry": "Спільний відбір з Власником: Назви звужено до 2 (NUTRIQ, Calibre). Іконки звужено до 3 (#2, #3, #7). Сплеш-скріни звужено до 2 (#2, #5)."
+    },
+    {
+      "timestamp": "2026-10-19T20:50:00",
+      "author": "CEO",
+      "entry": "Власник обрав Варіант А (горизонтальне центрування логотипу з виділеною золотою Q). Золотий стандарт NUTRIQ зафіксовано. Перехід до Етапу 2: Картка прийому їжі та Cook-Loss UX."
+    }
+  ]
+}
