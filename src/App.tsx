@@ -3,7 +3,6 @@ import { useNutritionStore } from './store/nutritionStore';
 import { Header } from './components/Header';
 import { CalorieRings } from './components/CalorieRings';
 import { WeeklyBankWidget } from './components/WeeklyBankWidget';
-import { MacroGapWidget } from './components/MacroGapWidget';
 import { MealList } from './components/MealList';
 import { BottomNav, NavTab } from './components/BottomNav';
 import { SmartGroceryList } from './components/SmartGroceryList';
@@ -41,44 +40,25 @@ export const App: React.FC = () => {
     <>
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
       
-      <div className="min-h-screen bg-[#0C100E] text-zinc-100 flex justify-center selection:bg-amber-400/20 selection:text-amber-300 relative overflow-x-hidden">
+      <div className="min-h-screen bg-slate-moss text-zinc-100 flex justify-center selection:bg-amber-400/20 selection:text-amber-300 relative overflow-x-hidden">
         {/* М'яке атмосферне фонове світіння (NUTRIQ Zen Glow) */}
-        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-gradient-to-b from-amber-500/8 to-transparent rounded-full blur-[120px] pointer-events-none" />
-        <div className="fixed bottom-0 right-0 w-[400px] h-[300px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="fixed top-10 left-1/2 -translate-x-1/2 w-[500px] h-[320px] bg-amber-400/8 rounded-full blur-[110px] pointer-events-none" />
+        <div className="fixed bottom-10 right-0 w-[380px] h-[280px] bg-emerald-400/6 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="w-full max-w-md sm:max-w-lg md:max-w-xl px-4 pt-safe pb-safe flex flex-col relative min-h-screen z-10">
-          {/* Верхня панель зі стрічкою тижня */}
+        <div className="w-full max-w-md px-4 pt-safe pb-safe flex flex-col relative min-h-screen z-10">
+          {/* Верхня панель */}
           <Header date={dailyLog.date} onOpenSplash={() => setShowSplash(true)} />
 
-          {/* 1. Вкладка "Сьогодні" (Головний дашборд) */}
+          {/* 1. Вкладка "Сьогодні" (Головний дашборд за еталонним макетом Layout 2) */}
           {activeTab === 'today' && (
-            <main className="space-y-4 animate-fadeIn">
-              {/* Головне золоте кільце калорій та БЖУ (Dark Glassmorphism) */}
+            <main className="space-y-2.5 animate-fadeIn">
+              {/* 1. Головне золоте кільце калорій та 3 спідометри БЖУ */}
               <CalorieRings totals={dailyLog.totals} targets={dailyLog.targets} />
 
-              {/* Тижневий калорійний банк (Weekly Flex Bank) */}
+              {/* 2. Скляна панель Weekly Flex Bank */}
               <WeeklyBankWidget bank={weeklyBank} />
 
-              {/* Розумний підбір під залишок (Macro-Gap Solver) */}
-              <MacroGapWidget
-                remainingMacros={{
-                  calories: Math.max(0, dailyLog.targets.calories - dailyLog.totals.calories),
-                  protein: Math.max(0, dailyLog.targets.protein - dailyLog.totals.protein),
-                  fat: Math.max(0, dailyLog.targets.fat - dailyLog.totals.fat),
-                  carbs: Math.max(0, dailyLog.targets.carbs - dailyLog.totals.carbs)
-                }}
-                onAddSuggestion={(name, weightGrams, macros) => {
-                  addFoodToMeal('dinner', {
-                    foodId: `gap-${Date.now()}`,
-                    name,
-                    weightGrams,
-                    eaten: true,
-                    macros
-                  });
-                }}
-              />
-
-              {/* Список страв із швидкими чекбоксами [✓] та Cook-Loss бейджами */}
+              {/* 3. Панорамна картка Dinner (Gourmet Steak & Greens) + повне меню */}
               <MealList
                 meals={dailyLog.meals}
                 onOpenAddModal={handleOpenAdd}

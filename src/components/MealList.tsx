@@ -26,42 +26,87 @@ export const MealList: React.FC<MealListProps> = ({
   onOpenDiningEstimator,
   onOpenCookLoss
 }) => {
-  const [expandedMeal, setExpandedMeal] = useState<MealType | null>('dinner');
+  const [expandedMeal, setExpandedMeal] = useState<MealType | null>(null);
+  const [showAllMeals, setShowAllMeals] = useState(false);
 
   const toggleMeal = (type: MealType) => {
     setExpandedMeal(prev => (prev === type ? null : type));
   };
 
   return (
-    <div className="space-y-3.5 pb-24">
-      {/* Заголовок секції */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-amber-400/90 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            Меню дня (Comidas del día)
-          </h2>
-          <span className="text-[10px] bg-[#162119] text-zinc-300 px-2 py-0.5 rounded-full border border-[#27392C] font-medium">
-            1-тап списання
+    <div className="space-y-3 pb-24">
+      {/* Головна панорамна картка Dinner у стилі еталонного макета Layout 2 */}
+      <div
+        onClick={() => {
+          setShowAllMeals(true);
+          setExpandedMeal('dinner');
+        }}
+        className="relative rounded-2xl overflow-hidden liquid-glass cursor-pointer min-h-[126px] flex flex-col justify-between p-4 transition-all active:scale-[0.99] group"
+      >
+        {/* Панорамне фото стейка зі спаржею на темній тарілці на всю ширину картки з м'яким градієнтом без швів */}
+        <div
+          className="absolute inset-0 pointer-events-none overflow-hidden"
+          style={{ backgroundColor: '#162019' }}
+        >
+          <img
+            src="/gourmet_steak_dish.jpg"
+            alt="Gourmet Steak & Greens"
+            className="absolute right-0 inset-y-0 w-[82%] h-full object-cover object-center scale-105 group-hover:scale-110 transition-transform duration-500"
+            style={{
+              WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.4) 18%, rgba(0,0,0,1) 42%)',
+              maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.4) 18%, rgba(0,0,0,1) 42%)'
+            }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(0deg, rgba(16,24,19,0.88) 0%, rgba(16,24,19,0.22) 55%, rgba(16,24,19,0.1) 100%)'
+            }}
+          />
+        </div>
+
+        {/* Верхній підпис Dinner */}
+        <div className="relative z-10 flex items-center justify-between">
+          <span className="text-[14px] font-medium text-[#E2EAE4] tracking-tight drop-shadow">
+            Dinner
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          {onOpenDiningEstimator && (
-            <button
-              type="button"
-              onClick={onOpenDiningEstimator}
-              className="text-[11px] font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 px-3 py-1 rounded-full flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
-              title="Оцінка ресторанних страв без ваг"
-            >
-              🍽️ <span>В ресторані</span>
-            </button>
-          )}
+        {/* Нижній блок із назвою страви та калоріями поверх затіненого краю фото */}
+        <div className="relative z-10 mt-8">
+          <h3 className="text-[17px] sm:text-[18px] font-semibold text-white tracking-[-0.01em] leading-snug drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+            Gourmet Steak & Greens
+          </h3>
+          <p className="text-[12.5px] font-normal text-[#B5C4B9] mt-0.5 drop-shadow">
+            480 kcal • 42g Protein
+          </p>
         </div>
       </div>
 
-      {/* Список прийомів їжі */}
-      {(Object.entries(meals) as [MealType, MealCategory][]).map(([type, category]) => {
+      {/* Кнопка розгортання повного щоденника прийомів їжі та інструментів */}
+      <div className="flex items-center justify-between px-1 pt-1">
+        <button
+          type="button"
+          onClick={() => setShowAllMeals(!showAllMeals)}
+          className="text-xs font-medium text-[#A3B3A8] hover:text-white flex items-center gap-1.5 transition-colors"
+        >
+          <span>{showAllMeals ? 'Згорнути розклад дня' : 'Усі прийоми їжі (Сніданок, Обід, Вечеря)'}</span>
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showAllMeals ? 'rotate-180' : ''}`} />
+        </button>
+
+        {onOpenDiningEstimator && (
+          <button
+            type="button"
+            onClick={onOpenDiningEstimator}
+            className="text-[11px] font-medium text-amber-300/90 hover:text-amber-200 bg-white/[0.04] border border-white/[0.08] px-2.5 py-1 rounded-full transition-all active:scale-95"
+          >
+            В ресторані
+          </button>
+        )}
+      </div>
+
+      {/* Повний список прийомів їжі (відкривається за бажанням користувача) */}
+      {showAllMeals && (Object.entries(meals) as [MealType, MealCategory][]).map(([type, category]) => {
         const IconComponent = ICONS[category.icon as keyof typeof ICONS] || SunMedium;
         const isExpanded = expandedMeal === type;
         const hasEntries = category.entries.length > 0;

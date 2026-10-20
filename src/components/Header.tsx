@@ -66,54 +66,52 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSplash }) => {
 
   return (
     <header className="pt-2 pb-1 select-none relative">
-      {/* Верхній рядок: Чистий мінімалістичний дзен Layout 2 */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-100 font-sans">
-            Today's Balance
-          </h1>
-          <div className="flex items-center gap-2 mt-1 text-xs text-zinc-400 font-medium">
-            <span>{capitalizedSelected}</span>
-            <span>•</span>
-            <span className="text-zinc-300">Привіт!</span>
-          </div>
-        </div>
+      {/* Центрована шапка в стилі еталонного макета Layout 2 */}
+      <div className="relative flex flex-col items-center justify-center text-center pt-1">
+        {/* Кнопки керування в кутах (акуратні, напівпрозорі, не руйнують симетрію) */}
+        <button
+          type="button"
+          onClick={() => setShowDatePicker(!showDatePicker)}
+          className="absolute left-0 top-1.5 w-8 h-8 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-zinc-400 hover:text-amber-300 hover:border-amber-400/30 transition-all active:scale-95"
+          title="Вибір дати"
+        >
+          <Calendar className="w-3.5 h-3.5" />
+        </button>
 
-        {/* Дії: календар та логотип */}
-        <div className="flex items-center gap-2">
+        {onOpenSplash && (
           <button
             type="button"
-            onClick={() => setShowDatePicker(!showDatePicker)}
-            className="w-9 h-9 rounded-full bg-[#141C16] border border-[#233326] flex items-center justify-center text-zinc-300 hover:text-amber-400 hover:border-amber-500/40 transition-all active:scale-95 shadow-sm"
-            title="Календар днів"
+            onClick={onOpenSplash}
+            className="absolute right-0 top-1.5 px-2 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] font-bold tracking-wider text-zinc-300 hover:text-amber-300 transition-all active:scale-95"
+            title="Завантажувальний екран NUTRIQ"
           >
-            <Calendar className="w-4 h-4" />
+            NUTRI<span className="text-amber-400">Q</span>
           </button>
-          {onOpenSplash && (
-            <button
-              type="button"
-              onClick={onOpenSplash}
-              className="px-2.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-xs font-bold text-amber-300 hover:bg-amber-500/20 transition-all"
-              title="Завантажувальний екран NUTRIQ"
-            >
-              NUTRI<span className="text-amber-400">Q</span>
-            </button>
-          )}
-        </div>
+        )}
+
+        <h1 className="text-[26px] sm:text-[28px] font-bold tracking-[-0.02em] text-[#F7F9F7] leading-tight">
+          Today’s Balance
+        </h1>
+        <p className="text-[13px] text-[#A2B2A7] font-normal tracking-tight mt-0.5">
+          {capitalizedSelected}
+        </p>
+        <p className="text-[13px] text-[#C5D1C8] font-medium tracking-tight leading-snug">
+          Hello, Alistair!
+        </p>
       </div>
 
       {/* Компактний випадаючий вибір днів тижня (з'являється лише при кліку на календар) */}
       {showDatePicker && (
-        <div className="mt-3 p-3 rounded-2xl bg-[#111713]/98 border border-[#212E24] shadow-2xl animate-fadeIn">
+        <div className="mt-3 p-3 rounded-2xl liquid-glass z-30 animate-fadeIn">
           <div className="flex items-center justify-between mb-2 px-1">
-            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
               {weekStartStr} – {weekEndStr}
             </span>
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => setWeekOffset(prev => prev - 1)}
-                className="p-1 rounded-lg hover:bg-[#1A251D] text-zinc-400 hover:text-zinc-200"
+                className="p-1 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-zinc-200"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -127,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSplash }) => {
               <button
                 type="button"
                 onClick={() => setWeekOffset(prev => prev + 1)}
-                className="p-1 rounded-lg hover:bg-[#1A251D] text-zinc-400 hover:text-zinc-200"
+                className="p-1 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-zinc-200"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -149,7 +147,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSplash }) => {
                       ? 'bg-amber-400 text-zinc-950 font-black shadow-lg shadow-amber-500/30'
                       : item.isToday
                       ? 'bg-amber-500/15 border border-amber-500/40 text-amber-300 font-bold'
-                      : 'bg-[#151D18] text-zinc-400 hover:text-zinc-200'
+                      : 'bg-white/[0.04] text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
                   <span className="text-[9px] uppercase">{item.shortName}</span>

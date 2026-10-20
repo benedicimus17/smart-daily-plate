@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, ClipboardList, Plus, TrendingUp, User } from 'lucide-react';
+import { Home, ClipboardList, Plus, BarChart3, User } from 'lucide-react';
 
 export type NavTab = 'today' | 'cookloss' | 'grocery' | 'tools';
 
@@ -11,19 +11,19 @@ interface BottomNavProps {
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, onQuickAdd }) => {
   return (
-    <div className="fixed bottom-0 inset-x-0 mx-auto max-w-md px-4 pointer-events-none z-40 pb-[max(1.25rem,env(safe-area-inset-bottom))] mb-1">
-      <div className="rounded-3xl p-1.5 px-3 flex items-center justify-between bg-[#0F1612]/95 border border-[#203023]/90 shadow-[0_15px_40px_rgba(0,0,0,0.95)] backdrop-blur-2xl pointer-events-auto">
+    <div className="fixed bottom-0 inset-x-0 mx-auto max-w-md px-4 pointer-events-none z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="rounded-[28px] py-2 px-4 flex items-center justify-between liquid-dock pointer-events-auto">
         {/* 1. Home (Головна) */}
         <button
           type="button"
           onClick={() => setActiveTab('today')}
-          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all duration-200 ${
+          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all duration-200 ${
             activeTab === 'today'
-              ? 'text-amber-400 font-bold'
-              : 'text-zinc-400 hover:text-zinc-200'
+              ? 'text-[#F5B041] font-semibold'
+              : 'text-[#9AB0A2] hover:text-zinc-200'
           }`}
         >
-          <Home className="w-5 h-5 mb-0.5" />
+          <Home className={`w-5 h-5 mb-0.5 ${activeTab === 'today' ? 'fill-[#F5B041]/25 stroke-[#F5B041]' : ''}`} />
           <span className="text-[10px] tracking-tight">Home</span>
         </button>
 
@@ -31,37 +31,42 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
         <button
           type="button"
           onClick={() => setActiveTab('cookloss')}
-          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all duration-200 ${
+          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all duration-200 ${
             activeTab === 'cookloss'
-              ? 'text-amber-400 font-bold'
-              : 'text-zinc-400 hover:text-zinc-200'
+              ? 'text-[#F5B041] font-semibold'
+              : 'text-[#9AB0A2] hover:text-zinc-200'
           }`}
         >
           <ClipboardList className="w-5 h-5 mb-0.5" />
           <span className="text-[10px] tracking-tight">Log</span>
         </button>
 
-        {/* 3. Головна центральна золота кнопка (+) точно як у макеті */}
+        {/* 3. Центральна матова бурштинова кнопка (+) точно як у макеті */}
         <button
           type="button"
           onClick={onQuickAdd}
-          className="w-12 h-12 -my-2 rounded-full bg-gradient-to-tr from-amber-500 via-amber-400 to-amber-300 text-zinc-950 flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.7)] hover:scale-105 active:scale-95 transition-all"
+          className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+          style={{
+            background: 'radial-gradient(circle at 50% 30%, rgba(245,176,65,0.42) 0%, rgba(180,115,28,0.28) 100%)',
+            border: '1px solid rgba(253,224,71,0.45)',
+            boxShadow: '0 0 18px rgba(245,158,11,0.35), inset 0 1px 1px rgba(255,255,255,0.25)'
+          }}
           title="Quick Add"
         >
-          <Plus className="w-6 h-6 stroke-[3]" />
+          <Plus className="w-5 h-5 text-[#FDE68A] stroke-[2.2]" />
         </button>
 
         {/* 4. Trends (Тренди / Покупки) */}
         <button
           type="button"
           onClick={() => setActiveTab('grocery')}
-          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all duration-200 ${
+          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all duration-200 ${
             activeTab === 'grocery'
-              ? 'text-amber-400 font-bold'
-              : 'text-zinc-400 hover:text-zinc-200'
+              ? 'text-[#F5B041] font-semibold'
+              : 'text-[#9AB0A2] hover:text-zinc-200'
           }`}
         >
-          <TrendingUp className="w-5 h-5 mb-0.5" />
+          <BarChart3 className="w-5 h-5 mb-0.5" />
           <span className="text-[10px] tracking-tight">Trends</span>
         </button>
 
@@ -69,10 +74,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
         <button
           type="button"
           onClick={() => setActiveTab('tools')}
-          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all duration-200 ${
+          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all duration-200 ${
             activeTab === 'tools'
-              ? 'text-amber-400 font-bold'
-              : 'text-zinc-400 hover:text-zinc-200'
+              ? 'text-[#F5B041] font-semibold'
+              : 'text-[#9AB0A2] hover:text-zinc-200'
           }`}
         >
           <User className="w-5 h-5 mb-0.5" />

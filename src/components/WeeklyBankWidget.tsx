@@ -10,41 +10,41 @@ export const WeeklyBankWidget: React.FC<WeeklyBankWidgetProps> = ({ bank }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="w-full my-2 select-none animate-fadeIn">
-      {/* Капсула у стилі Layout 2: WEEKLY FLEX BANK | In Safe Balance (+350 kcal reserve) > */}
-      <div className="flex items-center justify-between mb-1.5 px-1">
-        <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-          Weekly Flex Bank
-        </span>
-      </div>
-
+    <div className="w-full my-1.5 select-none animate-fadeIn">
+      {/* Скляна панель WEEKLY FLEX BANK (заголовок + внутрішня смарагдова капсула в одній картці) */}
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full py-3 px-4 rounded-2xl bg-[#122118]/80 border border-[#234230]/70 hover:border-[#335F45] cursor-pointer flex items-center justify-between transition-all active:scale-[0.99] shadow-lg shadow-black/40 backdrop-blur-xl"
+        className="w-full p-3.5 rounded-2xl liquid-glass cursor-pointer transition-all active:scale-[0.99]"
       >
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)] animate-pulse" />
-          <span className="text-sm font-semibold text-emerald-300">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#B0BEB5]">
+            WEEKLY FLEX BANK
+          </span>
+          <div className="text-[#9AB0A2]">
+            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </div>
+        </div>
+
+        {/* Внутрішня смарагдова капсула */}
+        <div className="inline-flex items-center px-3.5 py-1.5 rounded-full bg-[#1E3B2B]/85 border border-[#346B4C]/60 shadow-inner">
+          <span className="text-xs sm:text-[13px] font-medium text-[#7CE8B2] tracking-tight">
             In Safe Balance (+{bank.weeklyBalanceCalories > 0 ? bank.weeklyBalanceCalories : 350} kcal reserve)
           </span>
         </div>
-        <div className="text-emerald-400/80">
-          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-        </div>
-      </div>
 
-      {/* Розкривні деталі банку (Progressive Disclosure) */}
-      {isExpanded && (
-        <div className="mt-3 pt-3 border-t border-[#1E2921] text-xs text-zinc-300 space-y-2 animate-fadeIn">
-          <p className="leading-relaxed text-zinc-400">
-            🌿 <strong className="text-zinc-200">Антистрес-контроль:</strong> Перевищення або недоїдання автоматично розподіляється на наступні дні без почуття провини.
-          </p>
-          <div className="flex justify-between items-center bg-[#0E1410] border border-[#212E24] p-2.5 rounded-xl mt-2 font-medium">
-            <span className="text-zinc-400">Скоригований бюджет на наступні дні:</span>
-            <span className="text-amber-300 font-extrabold text-sm">~{bank.adjustedDailyBudgetForRemainingDays} ккал/день</span>
+        {/* Розкривні деталі банку (Progressive Disclosure) */}
+        {isExpanded && (
+          <div className="mt-3 pt-3 border-t border-white/10 text-xs text-zinc-300 space-y-2 animate-fadeIn">
+            <p className="leading-relaxed text-zinc-300/90">
+              Перевищення або недоїдання автоматично балансується на наступні дні тижня без стресу.
+            </p>
+            <div className="flex justify-between items-center bg-black/25 border border-white/10 p-2.5 rounded-xl mt-2 font-medium">
+              <span className="text-zinc-400">Скоригований бюджет:</span>
+              <span className="text-amber-300 font-bold text-sm">~{bank.adjustedDailyBudgetForRemainingDays} ккал/день</span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
