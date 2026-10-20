@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNutritionStore } from './store/nutritionStore';
+import { useUserStore } from './store/userStore';
 import { Header } from './components/Header';
 import { CalorieRings } from './components/CalorieRings';
 import { WeeklyBankWidget } from './components/WeeklyBankWidget';
@@ -11,29 +12,54 @@ import { DiningOutEstimatorModal } from './components/DiningOutEstimatorModal';
 import { CookLossCalculator } from './components/CookLossCalculator';
 import { RecipeParser } from './components/RecipeParser';
 import { TrueFatTrend } from './components/TrueFatTrend';
+import { ProfileScreen } from './components/ProfileScreen';
+import { AuthModal } from './components/AuthModal';
 import { SplashScreen } from './components/SplashScreen';
 import { MealType } from './types/nutrition';
-import { TrendingUp, Link2 } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Link2, Sparkles, ChevronRight } from 'lucide-react';
+import { MyPlanWizard } from './components/MyPlanWizard';
 
 export const App: React.FC = () => {
   const { dailyLog, weeklyBank, addFoodToMeal, removeFoodFromMeal, toggleMealEaten } = useNutritionStore();
+  const { user } = useUserStore();
   const [activeTab, setActiveTab] = useState<NavTab>('today');
   const [showSplash, setShowSplash] = useState(true);
   
   // Керування модалками
   const [modalOpen, setModalOpen] = useState(false);
+  const [planWizardOpen, setPlanWizardOpen] = useState(false);
+  const [pendingAddAfterWizard, setPendingAddAfterWizard] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [diningModalOpen, setDiningModalOpen] = useState(false);
   const [targetMealType, setTargetMealType] = useState<MealType>('lunch');
-  const [toolSubTab, setToolSubTab] = useState<'parser' | 'trend'>('parser');
+  const [trendSubTab, setTrendSubTab] = useState<'trend' | 'parser' | 'grocery'>('trend');
 
   const handleOpenAdd = (mealType: MealType) => {
     setTargetMealType(mealType);
-    setModalOpen(true);
+    if (!user.isRegistered) {
+      setPendingAddAfterWizard(true);
+      setPlanWizardOpen(true);
+    } else {
+      setModalOpen(true);
+    }
   };
 
   const handleQuickAddCenter = () => {
     setTargetMealType('dinner');
-    setModalOpen(true);
+    if (!user.isRegistered) {
+      setPendingAddAfterWizard(true);
+      setPlanWizardOpen(true);
+    } else {
+      setModalOpen(true);
+    }
+  };
+
+  const handleWizardCompleted = () => {
+    setPlanWizardOpen(false);
+    if (pendingAddAfterWizard) {
+      setPendingAddAfterWizard(false);
+      setModalOpen(true);
+    }
   };
 
   return (
@@ -54,6 +80,34 @@ export const App: React.FC = () => {
             <main className="space-y-2.5 animate-fadeIn">
               {/* 1. Головне золоте кільце калорій та 3 спідометри БЖУ */}
               <CalorieRings totals={dailyLog.totals} targets={dailyLog.targets} />
+
+              {/* Банер швидкого налаштування «Мій План» для нового користувача */}
+              {!user.hasCompletedPlan && (
+                <div
+                  id="my-plan-banner"
+                  onClick={() => {
+                    setPendingAddAfterWizard(false);
+                    setPlanWizardOpen(true);
+                  }}
+                  className="cursor-pointer p-3.5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-[#18231c] to-emerald-500/10 flex items-center justify-between shadow-lg hover:border-amber-400/50 transition-all active:scale-[0.99]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-300 shrink-0">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <span>Налаштувати «Мій План»</span>
+                        <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-amber-400 text-zinc-950">КРОК 1</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">
+                        Розрахуйте точні норми калорій та БЖУ під вашу вагу
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-amber-400 shrink-0" />
+                </div>
+              )}
 
               {/* 2. Скляна панель Weekly Flex Bank */}
               <WeeklyBankWidget bank={weeklyBank} />
@@ -77,51 +131,57 @@ export const App: React.FC = () => {
             </div>
           )}
 
-          {/* 3. Вкладка "Покупки" (Smart Grocery List - автосписок на тиждень) */}
+          {/* 3. Вкладка "Trends" (Тренди ваги, AI Парсер рецептів та список покупок) */}
           {activeTab === 'grocery' && (
-            <div className="animate-fadeIn">
-              <SmartGroceryList />
-            </div>
-          )}
-
-          {/* 4. Вкладка "Інструменти" (TikTok AI Parser & True Fat Trend) */}
-          {activeTab === 'tools' && (
             <div className="space-y-4 animate-fadeIn pb-24">
               <div className="flex bg-[#121814] p-1 rounded-2xl border border-[#233226]">
                 <button
                   type="button"
-                  onClick={() => setToolSubTab('parser')}
+                  onClick={() => setTrendSubTab('trend')}
                   className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                    toolSubTab === 'parser'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  <Link2 className="w-3.5 h-3.5" />
-                  <span>AI Парсер рецептів</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setToolSubTab('trend')}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                    toolSubTab === 'trend'
+                    trendSubTab === 'trend'
                       ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
                       : 'text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
                   <TrendingUp className="w-3.5 h-3.5" />
-                  <span>True Fat Trend</span>
+                  <span>Тренди</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTrendSubTab('parser')}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                    trendSubTab === 'parser'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  <Link2 className="w-3.5 h-3.5" />
+                  <span>AI Парсер</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTrendSubTab('grocery')}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                    trendSubTab === 'grocery'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <span>Покупки</span>
                 </button>
               </div>
 
-              {toolSubTab === 'parser' && (
-                <RecipeParser />
-              )}
-
-              {toolSubTab === 'trend' && (
-                <TrueFatTrend />
-              )}
+              {trendSubTab === 'trend' && <TrueFatTrend />}
+              {trendSubTab === 'parser' && <RecipeParser />}
+              {trendSubTab === 'grocery' && <SmartGroceryList />}
             </div>
+          )}
+
+          {/* 4. Вкладка "Profile" (Профіль, Акаунт, Мій План, 6 переваг) */}
+          {activeTab === 'profile' && (
+            <ProfileScreen />
           )}
 
           {/* Нижня плаваюча панель (Bottom Dock - Apple Dark Glass) */}
@@ -129,6 +189,29 @@ export const App: React.FC = () => {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             onQuickAdd={handleQuickAddCenter}
+          />
+
+          {/* Майстер індивідуального плану та реєстрації через пошту */}
+          <MyPlanWizard
+            isOpen={planWizardOpen}
+            onClose={() => {
+              setPlanWizardOpen(false);
+              setPendingAddAfterWizard(false);
+            }}
+            onCompleted={handleWizardCompleted}
+          />
+
+          {/* Модалка реєстрації для гостей (Soft Gate лідогенерація) */}
+          <AuthModal
+            isOpen={authModalOpen}
+            onClose={() => {
+              setAuthModalOpen(false);
+              setModalOpen(true);
+            }}
+            onSuccess={() => {
+              setAuthModalOpen(false);
+              setModalOpen(true);
+            }}
           />
 
           {/* Швидка модалка запису страв */}

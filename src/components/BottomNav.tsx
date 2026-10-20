@@ -1,7 +1,7 @@
 import React from 'react';
 import { Home, ClipboardList, Plus, BarChart3, User } from 'lucide-react';
 
-export type NavTab = 'today' | 'cookloss' | 'grocery' | 'tools';
+export type NavTab = 'today' | 'cookloss' | 'grocery' | 'profile';
 
 interface BottomNavProps {
   activeTab: NavTab;
@@ -70,12 +70,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
           <span className="text-[10px] tracking-tight">Trends</span>
         </button>
 
-        {/* 5. Profile (Профіль / Інструменти) */}
+        {/* 5. Profile (Профіль / Мій План) */}
         <button
+          id="tab-profile"
           type="button"
-          onClick={() => setActiveTab('tools')}
+          onClick={() => setActiveTab('profile')}
           className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all duration-200 ${
-            activeTab === 'tools'
+            activeTab === 'profile'
               ? 'text-[#F5B041] font-semibold'
               : 'text-[#9AB0A2] hover:text-zinc-200'
           }`}

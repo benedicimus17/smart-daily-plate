@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNutritionStore } from '../store/nutritionStore';
+import { useUserStore } from '../store/userStore';
 
 interface HeaderProps {
   date: string;
@@ -16,6 +17,7 @@ const formatLocalDate = (d: Date): string => {
 
 export const Header: React.FC<HeaderProps> = ({ onOpenSplash }) => {
   const { selectedDate, setSelectedDate } = useNutritionStore();
+  const { user } = useUserStore();
   // weekOffset: 0 - поточний тиждень, -1 - попередній тиждень, -2 - два тижні тому, etc.
   const [weekOffset, setWeekOffset] = useState<number>(0);
 
@@ -96,7 +98,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSplash }) => {
           {capitalizedSelected}
         </p>
         <p className="text-[13px] text-[#C5D1C8] font-medium tracking-tight leading-snug">
-          Hello, Alistair!
+          Hello, {user.name || 'Alistair'}!
         </p>
       </div>
 

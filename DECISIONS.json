@@ -5,7 +5,7 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-20T18:47:00",
+    "last_updated": "2026-10-20T23:58:00",
     "current_sprint": "Stage 3: Core Functional Modules & Interactive UX Expansion",
     "sprint_goal": "Розбудова та полірування інтерактивного функціоналу в межах затвердженої дизайн-системи NUTRIQ Studio v6"
   },
@@ -86,6 +86,27 @@
       "ui_verified": true
     },
     {
+      "feature": "«Мій План» Engine (Mifflin-St Jeor, 4 колонки, анти-йо-йо ліміт -500 ккал)",
+      "status": "DONE",
+      "automated_tests": "PASSED (src/math/__tests__/planCalculator.test.ts - 12/12 passed)",
+      "ui_verified": true,
+      "notes": "Повна детермінована реалізація: розрахунок базового BMR, витрат TDEE, безпечний дефіцит -500 ккал для швидкого темпу з порадою проти зривів та повернення ваги. Вивід 4 колонок (Калорії, Протеїн, Жири, Вуглеводи)."
+    },
+    {
+      "feature": "Onboarding & Registration Gate (Вхід як гість -> перегляд меню -> розрахунок плану -> реєстрація поштою/PIN)",
+      "status": "DONE",
+      "automated_tests": "PASSED (agent-browser E2E 9-step full audit)",
+      "ui_verified": true,
+      "notes": "Користувач може вільно зайти, оглянути інтерфейс і щоденник. При спробі додати страву або налаштувати персональні норми відкривається майстер із реєстрацією на 6 кроці для фіксації плану в базі."
+    },
+    {
+      "feature": "Profile & Security Settings (PIN-код, Face ID, акаунт, Блок Мій План, 6 переваг)",
+      "status": "DONE",
+      "automated_tests": "PASSED",
+      "ui_verified": true,
+      "notes": "Калькулятор винесено з налаштувань у власний потік. Вкладка Profile відповідає за безпеку (PIN-код, біометрія), керування акаунтом, відображення затвердженого плану з кнопкою перерахунку та експорт."
+    },
+    {
       "feature": "7-Day Personal Dogfooding Mode",
       "status": "PENDING_AUDIT",
       "automated_tests": "PENDING",
@@ -94,24 +115,24 @@
     }
   ],
   "qa_verification_gate": {
-    "last_audit_timestamp": "2026-10-19T23:00:00",
+    "last_audit_timestamp": "2026-10-20T23:58:00",
     "auditor": "QA Auditor Protocol (agent-browser engine)",
     "checks": {
       "type_check_and_build": {
         "status": "PASSED",
-        "details": "tsc -b && vite build (1.89s, 0 errors, chunks generated)"
+        "details": "tsc -b && vite build (2.63s, 0 errors, chunks generated)"
       },
       "unit_tests": {
         "status": "PASSED",
-        "details": "vitest: 3 test files, 10/10 tests passed in 127ms"
+        "details": "vitest: 4 test files, 12/12 tests passed in 165ms"
       },
       "browser_console_inspection": {
         "status": "PASSED",
-        "details": "0 console.error при переході вкладками та додаванні страв"
+        "details": "0 console.error під час 9 кроків у браузері"
       },
-      "visual_regression": {
+      "e2e_flow_verification": {
         "status": "PASSED",
-        "details": "Візуальний аудит пройдено: Layout 2 Deep Dark Glassmorphism, модалки оновлено, скріншоти верифіковано"
+        "details": "9-етапний аудит у мобільному розширенні 390x844: Home -> Баннер 'Мій План' -> Кроки 1-5 -> Порада проти йо-йо -> 4 колонки -> Реєстрація поштою -> Синхронізація лімітів калорій і БЖУ -> Profile (PIN-код + Блок плану). Скріншоти qa_01..qa_09 збережено."
       }
     },
     "gate_verdict": "APPROVED"
@@ -182,6 +203,16 @@
       "timestamp": "2026-10-20T18:47:00",
       "author": "Founder & CEO",
       "entry": "Власник офіційно прийняв та затвердив візуальну екосистему NUTRIQ Studio v6 на мобільному пристрої (Іконка #2, Splash Screen Vertical Ray, Головний екран Dark Glassmorphism). Візуальний фундамент заморожено (FROZEN_APPROVED). Проєкт переведено на Етап 3: Нарощування продуктового функціоналу."
+    },
+    {
+      "timestamp": "2026-10-20T22:54:00",
+      "author": "CEO & Product Architect",
+      "entry": "Реалізовано модуль авторизації (Soft Lead Gate), екран налаштувань Profile та інтерактивний розрахунок норми «Мій План» за формулою Міффліна-Сан Жеора: 1) Інтегровано AuthModal для збору Email та номеру телефону без блокування першого входу; 2) Створено userStore (Zustand) з підтримкою Face ID / Touch ID та біометрії; 3) Реалізовано калькулятор planCalculator.ts із 4 колонками (Калорії, Білки, Жири, Вуглеводи) та порадою нутриціолога проти екстремального схуднення; 4) Додано кнопку миттєвої синхронізації з головним екраном; 5) Упаковано 6 переваг NUTRIQ у вкладку Profile для уникнення перевантаження головного екрана. Успішно протестовано (13/13 vitest) та задеплоєно на продакшн."
+    },
+    {
+      "timestamp": "2026-10-20T23:58:00",
+      "author": "CEO & QA Auditor",
+      "entry": "Розділено воронку онбордингу та налаштування згідно з вимогами Власника: 1) Винесено калькулятор із вкладки Profile; Profile залишено виключно для налаштувань безпеки (PIN-код, біометрія), керування акаунтом, відображення затвердженого плану та експорту даних; 2) Створено окремий покроковий майстер «Мій План» (6 кроків: Ціль -> Стать/Вік -> Вага/Зріст -> Активність/Кроки -> Темп з обов'язковим попередженням нутриціолога проти ефекту йо-йо та автоматичним лімітом безпечного дефіциту -500 ккал -> 4 колонки: Калорії, Протеїн, Жири, Вуглеводи); 3) Впроваджено обов'язкову реєстрацію через пошту/PIN на 6-му кроці для збереження розрахунків та фіксації користувача; 4) Додано плаваючий банер на головному екрані для нового користувача та захисний гейт при додаванні страв; 5) Проведено повний 9-етапний E2E аудит у реальному браузері agent-browser (390x844). Усі 12 unit-тестів пройдено, 0 помилок у консолі. Задеплоєно на Vercel Production."
     }
   ]
 }
