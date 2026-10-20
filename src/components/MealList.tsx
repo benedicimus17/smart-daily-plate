@@ -46,21 +46,18 @@ export const MealList: React.FC<MealListProps> = ({
         {/* Панорамне фото стейка зі спаржею на темній тарілці на всю ширину картки з м'яким градієнтом без швів */}
         <div
           className="absolute inset-0 pointer-events-none overflow-hidden"
-          style={{ backgroundColor: '#162019' }}
+          style={{ backgroundColor: '#111613' }}
         >
           <img
-            src="/gourmet_steak_dish.jpg"
+            src="/dinner_steak_hd.jpg"
             alt="Gourmet Steak & Greens"
-            className="absolute right-0 inset-y-0 w-[82%] h-full object-cover object-center scale-105 group-hover:scale-110 transition-transform duration-500"
-            style={{
-              WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.4) 18%, rgba(0,0,0,1) 42%)',
-              maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.4) 18%, rgba(0,0,0,1) 42%)'
-            }}
+            className="absolute inset-0 w-full h-full object-cover object-right transition-transform duration-500 group-hover:scale-[1.03]"
           />
           <div
             className="absolute inset-0"
             style={{
-              background: 'linear-gradient(0deg, rgba(16,24,19,0.88) 0%, rgba(16,24,19,0.22) 55%, rgba(16,24,19,0.1) 100%)'
+              background:
+                'linear-gradient(90deg, rgba(17,22,19,0.92) 0%, rgba(17,22,19,0.55) 28%, transparent 52%), linear-gradient(0deg, rgba(14,19,16,0.72) 0%, rgba(14,19,16,0.12) 48%, transparent 100%)',
             }}
           />
         </div>
@@ -192,9 +189,9 @@ export const MealList: React.FC<MealListProps> = ({
                     </div>
                     <div className="w-24 h-16 sm:w-28 sm:h-18 rounded-xl overflow-hidden border border-[#2B3F30] shrink-0">
                       <img
-                        src="/gourmet_steak_dish.jpg"
+                        src="/dinner_steak_hd.jpg"
                         alt="Gourmet Steak & Greens"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-right"
                       />
                     </div>
                   </div>

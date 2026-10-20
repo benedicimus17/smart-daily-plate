@@ -338,6 +338,27 @@ const initialWeeklyBank: WeeklyFlexBank = {
   ]
 };
 
+const getTodayDateStr = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+const getOffsetDateStr = (offsetDays: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+const dynamicToday = getTodayDateStr();
+const dynamicYesterday = getOffsetDateStr(-1);
+const dynamicTomorrow = getOffsetDateStr(1);
+
 const defaultHistory: Record<string, DailyLog> = {
   '2026-10-19': {
     date: '2026-10-19',
@@ -359,15 +380,28 @@ const defaultHistory: Record<string, DailyLog> = {
     meals: tomorrowMeals,
     totals: calculateTotals(tomorrowMeals),
     waterMl: 0
+  },
+  [dynamicYesterday]: {
+    date: dynamicYesterday,
+    targets: { calories: 2150, protein: 180, fat: 80, carbs: 270 },
+    meals: yesterdayMeals,
+    totals: calculateTotals(yesterdayMeals),
+    waterMl: 2100
+  },
+  [dynamicToday]: {
+    date: dynamicToday,
+    targets: { calories: 2150, protein: 180, fat: 80, carbs: 270 },
+    meals: todayMeals,
+    totals: calculateTotals(todayMeals),
+    waterMl: 1750
+  },
+  [dynamicTomorrow]: {
+    date: dynamicTomorrow,
+    targets: { calories: 2150, protein: 180, fat: 80, carbs: 270 },
+    meals: tomorrowMeals,
+    totals: calculateTotals(tomorrowMeals),
+    waterMl: 0
   }
-};
-
-const getTodayDateStr = () => {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
 };
 
 const createLogForDate = (dateStr: string): DailyLog => {
@@ -560,7 +594,7 @@ export const useNutritionStore = create<NutritionState>()(
       };
     },
     {
-      name: 'smart-daily-plate-storage-v5', // bump version for exact Layout 2 values
+      name: 'nutriq-studio-storage-v6',
     }
   )
 );

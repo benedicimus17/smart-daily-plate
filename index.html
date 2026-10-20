@@ -2,32 +2,80 @@
 <html lang="uk" class="h-full">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    
-    <!-- Ключовий viewport для iPhone (Notch/Dynamic Island), Android (Navigation Bar) та планшетів -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <link rel="icon" type="image/png" href="/favicon.png?v=6" />
+    <link rel="shortcut icon" href="/favicon.ico?v=6" />
+
+    <!-- Ключовий viewport для iPhone (Notch/Dynamic Island), Android та планшетів -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    
+
     <!-- Android PWA Meta -->
-    <meta name="theme-color" content="#0C100E" />
+    <meta name="theme-color" content="#111613" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="NUTRIQ" />
-    
-    <!-- iOS iPhone / iPad Safari PWA Meta -->
+
+    <!-- iOS iPhone / iPad Safari PWA Meta (v6 Studio Icon) -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="NUTRIQ" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-v6.png?v=6" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-v6.png?v=6" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/pwa-512x512-v6.png?v=6" />
     <meta name="format-detection" content="telephone=no" />
-    
+
     <title>NUTRIQ — Intelligent Nutrition</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+      (function () {
+        try {
+          var PURGE_KEY = 'nutriq_sw_purged_v6';
+          if (localStorage.getItem(PURGE_KEY) !== '1') {
+            // Видаляємо застарілі ключі стору з нульовими калоріями
+            Object.keys(localStorage).forEach(function (k) {
+              if (k.indexOf('sdp-') === 0 || k.indexOf('smart-daily-plate') === 0) {
+                localStorage.removeItem(k);
+              }
+            });
+            localStorage.setItem(PURGE_KEY, '1');
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(function (regs) {
+                var hadSw = regs && regs.length > 0;
+                Promise.all(
+                  regs.map(function (r) {
+                    return r.unregister();
+                  })
+                ).then(function () {
+                  if ('caches' in window) {
+                    caches.keys().then(function (names) {
+                      Promise.all(
+                        names.map(function (n) {
+                          return caches.delete(n);
+                        })
+                      ).then(function () {
+                        if (hadSw) {
+                          window.location.reload();
+                        }
+                      });
+                    });
+                  } else if (hadSw) {
+                    window.location.reload();
+                  }
+                });
+              });
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   </head>
-  <body class="bg-[#0C100E] text-zinc-100 antialiased selection:bg-amber-400/20 selection:text-amber-300 font-['Plus_Jakarta_Sans',sans-serif] min-h-full overscroll-none">
+  <body class="bg-[#111613] text-zinc-100 antialiased selection:bg-amber-400/20 selection:text-amber-300 font-['Plus_Jakarta_Sans',sans-serif] min-h-full overscroll-none">
     <div id="root" class="min-h-full"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

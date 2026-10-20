@@ -5,13 +5,13 @@ interface SplashScreenProps {
   minDurationMs?: number;
 }
 
-export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, minDurationMs = 8000 }) => {
+export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, minDurationMs = 4200 }) => {
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setFading(true);
-      setTimeout(onFinish, 600); // 600ms fade out animation
+      setTimeout(onFinish, 550);
     }, minDurationMs);
 
     return () => clearTimeout(timer);
@@ -27,55 +27,58 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, minDuratio
   return (
     <div
       onClick={handleDismiss}
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-[#0C100E] cursor-pointer transition-opacity duration-700 ease-out select-none ${
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-[#0B0E0D] cursor-pointer transition-opacity duration-500 ease-out select-none overflow-hidden ${
         fading ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
-      title="Натисніть у будь-якому місці для пропуску"
     >
-      {/* Вертикальний світловий промінь та темний сланець (Option A: Vertical Ray) */}
-      <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden bg-[#0C100E]">
-        {/* Фоновий текстурний сланець та промінь */}
-        <div className="absolute inset-0 bg-[#0C100E] pointer-events-none">
-          {/* Світловий вертикальний промінь золота */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-full bg-gradient-to-b from-amber-400/30 via-amber-200 to-amber-500/20 shadow-[0_0_35px_rgba(245,158,11,0.9),0_0_70px_rgba(245,158,11,0.5)] animate-pulse" />
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-72 h-96 bg-amber-500/12 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-56 h-56 bg-emerald-600/8 rounded-full blur-[90px] pointer-events-none" />
-        </div>
+      {/* Оригінальне студійне світлове поле зі сланцем та вертикальним золотим променем (Panel 2) */}
+      <img
+        src="/splash_studio_bg.jpg"
+        alt="NUTRIQ Studio Splash"
+        className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none scale-[1.01]"
+      />
 
-        {/* Фірмовий логотип NUTRIQ (Option A: Центрований логотип із золотою Q) */}
-        <div className="relative z-10 flex flex-col items-center text-center animate-fadeIn px-6">
-          <div className="flex items-baseline">
-            <span className="text-5xl sm:text-6xl font-black tracking-[0.2em] text-[#F5F2EB] font-sans drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)]">
-              NUTRI
-            </span>
-            <span className="text-6xl sm:text-7xl font-black text-amber-400 font-sans ml-1 drop-shadow-[0_0_35px_rgba(245,158,11,0.95)] animate-pulse">
-              Q
-            </span>
-          </div>
+      {/* Живе оптичне дихання центрального світлового променя */}
+      <div
+        className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[3px] pointer-events-none animate-pulse"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(255,248,220,0.85) 0%, rgba(244,185,66,0.95) 50%, rgba(244,185,66,0.15) 95%, transparent 100%)',
+          boxShadow:
+            '0 0 18px 2px rgba(245, 186, 66, 0.75), 0 0 55px 10px rgba(218, 155, 58, 0.38)',
+        }}
+      />
 
-          <div className="mt-4 flex items-center gap-2">
-            <span className="w-10 h-[1px] bg-amber-400/50" />
-            <span className="text-xs font-semibold tracking-[0.3em] uppercase text-zinc-300">
-              Intelligent Nutrition
-            </span>
-            <span className="w-10 h-[1px] bg-amber-400/50" />
-          </div>
-
-          {/* Витончений індикатор завантаження */}
-          <div className="mt-12 flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400/60 animate-ping" />
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80 animate-ping delay-150" />
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping delay-300" />
-          </div>
-          
-          <button
-            type="button"
-            onClick={handleDismiss}
-            className="mt-8 px-4 py-1.5 rounded-full bg-[#162019]/80 border border-amber-500/30 text-xs font-medium text-amber-300/90 hover:text-amber-200 hover:border-amber-400 transition-all shadow-sm"
+      {/* Типографіка еталона Panel 2: NUTRIQ — INTELLIGENT NUTRITION */}
+      <div className="relative z-10 flex flex-col items-center text-center px-6 -mt-2">
+        <div className="flex items-baseline justify-center pl-[0.24em]">
+          <span
+            className="text-[34px] sm:text-[38px] font-normal tracking-[0.26em] text-[#F6F6F4]"
+            style={{
+              textShadow: '0 2px 18px rgba(0, 0, 0, 0.85)',
+            }}
           >
-            Торкніться для входу →
-          </button>
+            NUTRI
+          </span>
+          <span
+            className="text-[35px] sm:text-[39px] font-semibold tracking-[0.06em] text-[#F5BA42] ml-[0.04em]"
+            style={{
+              textShadow:
+                '0 0 16px rgba(245, 186, 66, 0.95), 0 0 36px rgba(245, 186, 66, 0.55), 0 2px 12px rgba(0,0,0,0.9)',
+            }}
+          >
+            Q
+          </span>
         </div>
+
+        <p
+          className="mt-3.5 text-[9.5px] sm:text-[10.5px] font-normal tracking-[0.42em] uppercase text-[#B5B7B2] pl-[0.42em]"
+          style={{
+            textShadow: '0 1px 10px rgba(0, 0, 0, 0.9)',
+          }}
+        >
+          Intelligent Nutrition
+        </p>
       </div>
     </div>
   );

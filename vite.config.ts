@@ -7,32 +7,49 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'favicon.png', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png', 'splash.jpg', 'dinner_steak.jpg'],
+      selfDestroying: true,
+      workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
+      },
+      includeAssets: [
+        'favicon.ico',
+        'favicon.png',
+        'apple-touch-icon.png',
+        'apple-touch-icon-v6.png',
+        'pwa-192x192.png',
+        'pwa-192x192-v6.png',
+        'pwa-512x512.png',
+        'pwa-512x512-v6.png',
+        'splash_studio_bg.jpg',
+        'dinner_steak_hd.jpg',
+      ],
       manifest: {
         name: 'NUTRIQ — Intelligent Nutrition',
         short_name: 'NUTRIQ',
-        description: 'Дзен-контроль харчування, Cook-Loss уварка та розумні списки покупок',
-        theme_color: '#0C100E',
-        background_color: '#0C100E',
+        description: 'Intelligent Nutrition & Daily Balance Studio',
+        theme_color: '#111613',
+        background_color: '#111613',
         display: 'standalone',
         orientation: 'portrait-primary',
-        start_url: '/',
+        start_url: '/?v=6',
         scope: '/',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: 'pwa-192x192-v6.png?v=6',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any maskable',
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'pwa-512x512-v6.png?v=6',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
-          }
-        ]
-      }
-    })
-  ]
+            purpose: 'any maskable',
+          },
+        ],
+      },
+    }),
+  ],
 });

@@ -5,9 +5,9 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-19T23:20:00",
-    "current_sprint": "Stage 2: Meal Cards & Cook-Loss UX + 7-Day Dogfooding Readiness",
-    "sprint_goal": "100% готовність застосунку до 7-денного особистого тестування (Dogfooding) без візуальних багів та збоїв"
+    "last_updated": "2026-10-20T18:47:00",
+    "current_sprint": "Stage 3: Core Functional Modules & Interactive UX Expansion",
+    "sprint_goal": "Розбудова та полірування інтерактивного функціоналу в межах затвердженої дизайн-системи NUTRIQ Studio v6"
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
@@ -28,8 +28,12 @@
       "description": "Темний графітовий сквиркл із тонкою золотою дугою та трьома точками БЖУ (Смарагд, Янтар, Індиго)",
       "installed_assets": [
         "public/apple-touch-icon.png",
+        "public/apple-touch-icon-v6.png",
         "public/pwa-192x192.png",
+        "public/pwa-192x192-v6.png",
         "public/pwa-512x512.png",
+        "public/pwa-512x512-v6.png",
+        "public/icon-1024.png",
         "public/favicon.ico",
         "public/favicon.png"
       ],
@@ -39,7 +43,7 @@
       "id": "splash_vertical_ray_nutriq_option_a",
       "name": "Vertical Ray NUTRIQ (Option A)",
       "description": "Вертикальний світловий промінь на сланці з центрованим логотипом NUTRIQ (виділена золота літера Q)",
-      "installed_asset": "public/splash.jpg",
+      "installed_asset": "public/splash_studio_bg.jpg",
       "status": "FROZEN_APPROVED"
     },
     "visual_theme": {
@@ -168,6 +172,16 @@
       "timestamp": "2026-10-20T15:42:00",
       "author": "CEO",
       "entry": "Завантажено та інтегровано топові дизайн-скіли з skills.sh у центральне сховище C:\\Projects\\Antigravity\\.agents\\skills\\: ui-ux-pro-max, impeccable, design-taste-frontend, apple-design, emil-design-eng, uizze-ui. Перероблено центральну частину інтерфейсу за системою Apple Liquid Glass та еталонним мокапом Layout 2: 1) Встановлено глибокий оливково-графітовий фон bg-slate-moss; 2) Центровано заголовок Today's Balance; 3) Відтворено об'ємний скляний диск головного кільця калорій із міткою 82% на обідку; 4) Текст Protein/Fats/Carbs поміщено безпосередньо всередину під купол 210° дуг спідометрів; 5) Сформовано цілісну скляну картку WEEKLY FLEX BANK із внутрішньою смарагдовою капсулою; 6) Виведено панорамну картку Dinner (Gourmet Steak & Greens) із безшовним розчиненням фото страви на перший екран без прокрутки; 7) Оновлено док навігації з матовою бурштиновою кнопкою '+' та іконкою BarChart3. Задеплоєно на продакшн (dpl_7Cia7H28B5aAhFvyhzDqXEyexBLK)."
+    },
+    {
+      "timestamp": "2026-10-20T18:33:00",
+      "author": "CEO & QA Auditor",
+      "entry": "Усунуто кореневу причину блокування оновлень на iPhone Власника (PWA Service Worker Cache Trap) та доведено всі 3 елементи Brand Identity Ecosystem до студійного фотореалізму (v6): 1) Налаштовано selfDestroying Service Worker у vite.config.ts, Cache-Control: no-store у vercel.json та автоматичний деінсталятор старого SW/кешу у index.html + динамічні дати в nutritionStore.ts (nutriq-studio-storage-v6); 2) Згенеровано 1024x1024 студійний майстер іконки The Refined Macro Arc (#2) без білих кутів та розмиття (apple-touch-icon-v6.png, pwa-512x512-v6.png); 3) Відтворено студійний Splash Screen (Vertical Ray NUTRIQ) на основі сланцевого світлового поля public/splash_studio_bg.jpg без сторонніх рамок і кнопок; 4) У CalorieRings.tsx впроваджено двоступеневий оптичний SVG-фільтр світіння (feGaussianBlur + feMerge) та внутрішню світлову серцевину для ефекту фізичного неонового світла на склі; 5) Екстраговано та очищено оригінальну тарілку стейка зі спаржею з Панелі 3 (public/dinner_steak_hd.jpg). Пройдено повний аудит QA (10/10 vitest, 0 помилок консолі, живі скріншоти продакшну)."
+    },
+    {
+      "timestamp": "2026-10-20T18:47:00",
+      "author": "Founder & CEO",
+      "entry": "Власник офіційно прийняв та затвердив візуальну екосистему NUTRIQ Studio v6 на мобільному пристрої (Іконка #2, Splash Screen Vertical Ray, Головний екран Dark Glassmorphism). Візуальний фундамент заморожено (FROZEN_APPROVED). Проєкт переведено на Етап 3: Нарощування продуктового функціоналу."
     }
   ]
 }
