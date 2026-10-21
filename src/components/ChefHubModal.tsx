@@ -11,7 +11,10 @@ import {
   CheckCircle2,
   Layers,
   BookmarkPlus,
-  Calendar
+  Calendar,
+  Clock,
+  Scale,
+  ChefHat
 } from 'lucide-react';
 import { MealType } from '../types/nutrition';
 import { parseRecipeFromUrl, parseSmartDish } from '../services/recipeParser';
@@ -28,6 +31,8 @@ export interface ChefDishItem {
   prepTime: string;
   cookLossNote?: string;
   shortDesc: string;
+  ingredients?: { name: string; grams: number }[];
+  instructions?: string[];
 }
 
 const CHEF_CATALOG: ChefDishItem[] = [
@@ -42,7 +47,18 @@ const CHEF_CATALOG: ChefDishItem[] = [
     photo: 'https://images.unsplash.com/photo-1575853121743-60c24f0a7502?auto=format&fit=crop&w=500&q=80',
     prepTime: '15 хв',
     cookLossNote: '-14% уварка вологи',
-    shortDesc: 'Ніжні сирники на рисовому борошні без цукру'
+    shortDesc: 'Ніжні сирники на рисовому борошні без цукру',
+    ingredients: [
+      { name: 'Кисломолочний сир 5% / рікота', grams: 140 },
+      { name: 'Куряче яйце', grams: 40 },
+      { name: 'Борошно рисове', grams: 18 },
+      { name: 'Ваніль та стевія', grams: 2 }
+    ],
+    instructions: [
+      'Перетерти рікоту з яйцем та ваніллю до кремової текстури.',
+      'Додати рисове борошно, перемішати та сформувати круглі сирники.',
+      'Обсмажувати на антипригарній пательні на малому вогні по 4 хв з боку.'
+    ]
   },
   {
     id: 'chef-b2',
@@ -53,7 +69,18 @@ const CHEF_CATALOG: ChefDishItem[] = [
     macros: { calories: 380, protein: 28, fat: 24, carbs: 12 },
     photo: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=500&q=80',
     prepTime: '10 хв',
-    shortDesc: '3 добірні яйця, стигле авокадо хасс та оливкова олія'
+    shortDesc: '3 добірні яйця, стигле авокадо хасс та оливкова олія',
+    ingredients: [
+      { name: 'Курячі яйця добірні', grams: 110 },
+      { name: 'Стигле авокадо Хасс', grams: 45 },
+      { name: 'Бейбі-шпинат свіжий', grams: 20 },
+      { name: 'Оливкова олія Extra Virgin', grams: 5 }
+    ],
+    instructions: [
+      'Припустити листя шпинату на пательні 60 секунд.',
+      'Залити збитими яйцями з дрібкою морської солі та готувати під кришкою.',
+      'Викласти слайси авокадо перед подачею.'
+    ]
   },
   {
     id: 'chef-b3',
@@ -64,7 +91,19 @@ const CHEF_CATALOG: ChefDishItem[] = [
     macros: { calories: 340, protein: 32, fat: 6, carbs: 42 },
     photo: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=500&q=80',
     prepTime: '12 хв',
-    shortDesc: 'Вівсянка тривалого варіння, ізолят та лохина'
+    shortDesc: 'Вівсянка тривалого варіння, ізолят та лохина',
+    ingredients: [
+      { name: 'Вівсяне борошно грубого помелу', grams: 60 },
+      { name: 'Сироватковий ізолят (протеїн)', grams: 25 },
+      { name: 'Яєчний білок', grams: 60 },
+      { name: 'Свіжа лохина та малина', grams: 50 },
+      { name: 'Мигдалеве молоко', grams: 25 }
+    ],
+    instructions: [
+      'Збити вівсянку, протеїн, білок та молоко до однорідного тіста.',
+      'Випікати невеликі панкейки на сухій пательні по 2 хв з кожного боку.',
+      'Подавати теплими зі свіжими ягодами.'
+    ]
   },
   {
     id: 'chef-b4',
@@ -75,7 +114,40 @@ const CHEF_CATALOG: ChefDishItem[] = [
     macros: { calories: 395, protein: 22, fat: 23, carbs: 26 },
     photo: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=500&q=80',
     prepTime: '10 хв',
-    shortDesc: 'Цільнозерновий хліб на заквасці з мікрогріном'
+    shortDesc: 'Цільнозерновий хліб на заквасці з мікрогріном',
+    ingredients: [
+      { name: 'Цільнозерновий хліб на заквасці', grams: 85 },
+      { name: 'Стигле авокадо Хасс', grams: 65 },
+      { name: 'Куряче яйце пашот', grams: 55 },
+      { name: 'Мікрогрін та насіння льону', grams: 5 }
+    ],
+    instructions: [
+      'Підсушити хліб у тостері до хрусткості.',
+      'Розім\'яти м\'якоть авокадо з краплею соку лимона та сіллю.',
+      'Зварити яйце пашот 3 хвилини у слабо киплячій воді.',
+      'Зібрати тост: хліб ➔ авокадо ➔ пашот ➔ мікрогрін.'
+    ]
+  },
+  {
+    id: 'chef-b5',
+    name: 'Тости з бананом та арахісовою пастою',
+    category: 'breakfast',
+    categoryLabel: 'Сніданок',
+    weightGrams: 210,
+    macros: { calories: 366, protein: 11.6, fat: 7.7, carbs: 66.2 },
+    photo: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=500&q=80',
+    prepTime: '5 хв',
+    shortDesc: 'Енергетичний тост із цільнозернового хліба, банана та натуральної пасти',
+    ingredients: [
+      { name: 'Цільнозерновий тостовий хліб', grams: 85 },
+      { name: 'Стиглий солодкий банан', grams: 115 },
+      { name: 'Натуральна 100% арахісова паста', grams: 10 }
+    ],
+    instructions: [
+      'Підрум\'янити скибки цільнозернового хліба в тостері.',
+      'Рівномірно намастити тонким шаром натуральної арахісової пасти.',
+      'Викласти кружальця стиглого банана.'
+    ]
   },
 
   // ОБІДИ
@@ -89,7 +161,18 @@ const CHEF_CATALOG: ChefDishItem[] = [
     photo: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80',
     prepTime: '25 хв',
     cookLossNote: '220г сирого ➔ 165г готового (-25%)',
-    shortDesc: 'Запечене філе в прованських травах та суперфуд кіноа'
+    shortDesc: 'Запечене філе в прованських травах та суперфуд кіноа',
+    ingredients: [
+      { name: 'Куряче філе грудки (вага готова)', grams: 110 },
+      { name: 'Відварене кіноа', grams: 70 },
+      { name: 'Броколі на пару', grams: 35 },
+      { name: 'Оливкова олія та трави', grams: 5 }
+    ],
+    instructions: [
+      'Замаринувати філе у спеціях та запекти при 180°C 22 хвилини.',
+      'Відварити кіноа у воді 1:2 протягом 15 хвилин.',
+      'Броколі бланшувати на пару 4 хвилини для максимальної користі.'
+    ]
   },
   {
     id: 'chef-l2',
@@ -100,7 +183,18 @@ const CHEF_CATALOG: ChefDishItem[] = [
     macros: { calories: 520, protein: 40, fat: 22, carbs: 42 },
     photo: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=500&q=80',
     prepTime: '20 хв',
-    shortDesc: 'Омега-3 лосось, свіжий огірок, норі та кунжутний дресинг'
+    shortDesc: 'Омега-3 лосось, свіжий огірок, норі та кунжутний дресинг',
+    ingredients: [
+      { name: 'Філе лосося запечене', grams: 120 },
+      { name: 'Дикий та нешліфований рис', grams: 90 },
+      { name: 'Стигле авокадо', grams: 40 },
+      { name: 'Огірок свіжий та кунжут', grams: 10 }
+    ],
+    instructions: [
+      'Запекти лосось з морською сіллю при 180°C 15 хвилин.',
+      'Викласти теплий рис у боул, додати рибу та слайси авокадо.',
+      'Посипати насінням кунжуту.'
+    ]
   },
   {
     id: 'chef-l3',
@@ -111,7 +205,18 @@ const CHEF_CATALOG: ChefDishItem[] = [
     macros: { calories: 490, protein: 38, fat: 11, carbs: 58 },
     photo: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=500&q=80',
     prepTime: '15 хв',
-    shortDesc: 'Тверді сорти пшениці, креветки 16/20, часник та базилік'
+    shortDesc: 'Тверді сорти пшениці, креветки 16/20, часник та базилік',
+    ingredients: [
+      { name: 'Паста з твердих сортів al dente', grams: 140 },
+      { name: 'Тигрові креветки очищені', grams: 110 },
+      { name: 'Томати чері та часник', grams: 25 },
+      { name: 'Оливкова олія Extra Virgin', grams: 5 }
+    ],
+    instructions: [
+      'Відварити пасту до стану al dente 8-9 хвилин.',
+      'Швидко обсмажити креветки з часником по 1.5 хвилини з боку.',
+      'З\'єднати пасту з соковитими креветками та базиліком.'
+    ]
   },
   {
     id: 'chef-l4',
@@ -122,7 +227,39 @@ const CHEF_CATALOG: ChefDishItem[] = [
     macros: { calories: 420, protein: 42, fat: 16, carbs: 18 },
     photo: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80',
     prepTime: '18 хв',
-    shortDesc: 'Нежирна яловичина, томати чері та діжонська заправка'
+    shortDesc: 'Нежирна яловичина, томати чері та діжонська заправка',
+    ingredients: [
+      { name: 'Теляча вирізка на грилі', grams: 130 },
+      { name: 'Хрусткий салатний мікс', grams: 50 },
+      { name: 'Томати чері соковиті', grams: 40 },
+      { name: 'Діжонська заправка з кедровими горішками', grams: 20 }
+    ],
+    instructions: [
+      'Обсмажити телятину на грилі до ступеня Medium (по 2.5 хв).',
+      'Викласти салатне листя та томати на тарілку.',
+      'Нарізати тепле м\'ясо тонкими скибочками та полити заправкою.'
+    ]
+  },
+  {
+    id: 'chef-l5',
+    name: 'Тонкі домашні крепси з соковитим м\'ясом',
+    category: 'lunch',
+    categoryLabel: 'Обід',
+    weightGrams: 250,
+    macros: { calories: 499, protein: 28.2, fat: 30.4, carbs: 28.6 },
+    photo: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80',
+    prepTime: '20 хв',
+    shortDesc: 'Автентичні крепси з відбірним яловичим фаршем — вірусний рецепт з TikTok',
+    ingredients: [
+      { name: 'Тонкі домашні крепси / млинці', grams: 120 },
+      { name: 'Відбірний яловичий фарш', grams: 120 },
+      { name: 'Цибуля ріпчаста та олія', grams: 10 }
+    ],
+    instructions: [
+      'Обсмажити дрібно нарізану цибулю та фарш зі спеціями до повної готовності.',
+      'Загорнути начинку у тонкий золотистий млинець конвертиком.',
+      'Підрум\'янити на пательні по 1 хвилині з кожного боку.'
+    ]
   },
 
   // ПЕРЕКУСИ
@@ -135,7 +272,15 @@ const CHEF_CATALOG: ChefDishItem[] = [
     macros: { calories: 120, protein: 25, fat: 1, carbs: 2 },
     photo: 'https://images.unsplash.com/photo-1553787499-6f9133860278?auto=format&fit=crop&w=500&q=80',
     prepTime: '2 хв',
-    shortDesc: 'Швидке засвоєння білка без зайвих калорій'
+    shortDesc: 'Швидке засвоєння білка без зайвих калорій',
+    ingredients: [
+      { name: 'Сироватковий ізолят (протеїн)', grams: 30 },
+      { name: 'Очищена вода або мигдалеве молоко', grams: 250 }
+    ],
+    instructions: [
+      'Налити у шейкер рідину, додати скуп протеїну.',
+      'Інтенсивно збовтати 20 секунд до появи легкої кремової пінки.'
+    ]
   },
   {
     id: 'chef-s2',
@@ -146,7 +291,16 @@ const CHEF_CATALOG: ChefDishItem[] = [
     macros: { calories: 190, protein: 15, fat: 4, carbs: 22 },
     photo: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80',
     prepTime: '3 хв',
-    shortDesc: 'Автентичний густий йогурт, свіжа чорниця та малина'
+    shortDesc: 'Автентичний густий йогурт, свіжа чорниця та малина',
+    ingredients: [
+      { name: 'Грецький йогурт 2%', grams: 140 },
+      { name: 'Мікс свіжих лісових ягід', grams: 35 },
+      { name: 'Мигдалеві пелюстки', grams: 5 }
+    ],
+    instructions: [
+      'Викласти охолоджений густий йогурт у креманку.',
+      'Додати свіжі ягоди та присипати мигдалем.'
+    ]
   },
   {
     id: 'chef-s3',
@@ -157,7 +311,17 @@ const CHEF_CATALOG: ChefDishItem[] = [
     macros: { calories: 210, protein: 18, fat: 7, carbs: 16 },
     photo: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=500&q=80',
     prepTime: '5 хв',
-    shortDesc: 'Насіння чіа, антиоксиданти та рослинний білок'
+    shortDesc: 'Насіння чіа, антиоксиданти та рослинний білок',
+    ingredients: [
+      { name: 'Насіння чіа органічне', grams: 25 },
+      { name: 'Мигдалеве молоко несолодке', grams: 130 },
+      { name: 'Ванільний протеїн', grams: 15 },
+      { name: 'Ягоди для прикраси', grams: 20 }
+    ],
+    instructions: [
+      'Змішати насіння чіа з рослинним молоком та протеїном.',
+      'Залишити в холодильнику на 2 години (або на ніч) до желювання.'
+    ]
   },
 
   // ВЕЧЕРІ
@@ -171,7 +335,18 @@ const CHEF_CATALOG: ChefDishItem[] = [
     photo: '/dinner_steak_hd.jpg',
     prepTime: '20 хв',
     cookLossNote: '350г сирого м\'яса ➔ 260г готового (-26%)',
-    shortDesc: 'Еталонний соковитий стейк зернової відгодівлі'
+    shortDesc: 'Еталонний соковитий стейк зернової відгодівлі',
+    ingredients: [
+      { name: 'Яловичий стейк Рибай (вага готова)', grams: 180 },
+      { name: 'Спаржа молода на грилі', grams: 75 },
+      { name: 'Вершкове масло та розмарин', grams: 5 }
+    ],
+    instructions: [
+      'Дістати м\'ясо за 20 хв до смаження для вирівнювання температури.',
+      'Обсмажити на розпеченій пательні по 3.5 хв з кожного боку.',
+      'Бланшувати спаржу 2 хвилини та прогріти з вершковим маслом.',
+      'Дати стейку відпочити 5 хвилин перед подачею.'
+    ]
   },
   {
     id: 'chef-d2',
@@ -182,7 +357,17 @@ const CHEF_CATALOG: ChefDishItem[] = [
     macros: { calories: 430, protein: 42, fat: 18, carbs: 10 },
     photo: 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=500&q=80',
     prepTime: '22 хв',
-    shortDesc: 'Біла морська риба, лимонний чебрець та молоді цукіні'
+    shortDesc: 'Біла морська риба, лимонний чебрець та молоді цукіні',
+    ingredients: [
+      { name: 'Філе сібаса свіже', grams: 170 },
+      { name: 'Цукіні на грилі', grams: 100 },
+      { name: 'Оливкова олія та лимонний чебрець', grams: 10 }
+    ],
+    instructions: [
+      'Запекти рибу у духовці при 190°C рівно 15 хвилин.',
+      'Підрум\'янити кружальця цукіні на сухій гриль-пательні.',
+      'Збризнути лимоном та свіжими травами.'
+    ]
   },
   {
     id: 'chef-d3',
@@ -193,7 +378,18 @@ const CHEF_CATALOG: ChefDishItem[] = [
     macros: { calories: 460, protein: 48, fat: 19, carbs: 6 },
     photo: 'https://images.unsplash.com/photo-1501595091296-3aa970afb3ff?auto=format&fit=crop&w=500&q=80',
     prepTime: '15 хв',
-    shortDesc: 'Швидка прожарка Rare/Medium Rare, хрусткий кунжут'
+    shortDesc: 'Швидка прожарка Rare/Medium Rare, хрусткий кунжут',
+    ingredients: [
+      { name: 'Стейк жовтоперого тунця', grams: 160 },
+      { name: 'Чорний кунжут для панірування', grams: 10 },
+      { name: 'Стигле авокадо Хасс', grams: 70 },
+      { name: 'Соєвий соус та лайм', grams: 10 }
+    ],
+    instructions: [
+      'Обваляти стейк у кунжуті.',
+      'Обсмажити на пательні по 60 секунд з кожного боку (всередині має бути соковитий рожевий колір).',
+      'Нарізати тонкими скибочками і подати з авокадо.'
+    ]
   }
 ];
 
@@ -221,6 +417,11 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   const [selectedFilter, setSelectedFilter] = useState<'all' | MealType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [addedDishId, setAddedDishId] = useState<string | null>(null);
+
+  // Стан для детального перегляду рецепта з каталогу (Preview Modal)
+  const [selectedDishPreview, setSelectedDishPreview] = useState<ChefDishItem | null>(null);
+  const [previewTargetSlot, setPreviewTargetSlot] = useState<MealType>('breakfast');
+  const [isPreviewAdded, setIsPreviewAdded] = useState(false);
 
   // Стан для AI Парсера
   const [parserUrl, setParserUrl] = useState('https://www.tiktok.com/@chef/video/crepes-with-meat');
@@ -260,6 +461,28 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     setAddedDishId(item.id);
     setTimeout(() => {
       setAddedDishId(null);
+      onClose();
+    }, 900);
+  };
+
+  // Додавання страви з детального перегляду (Preview Modal)
+  const handleAddPreviewDish = () => {
+    if (!selectedDishPreview) return;
+    const defaultTime = previewTargetSlot === 'breakfast' ? '08:30' :
+                        previewTargetSlot === 'lunch' ? '13:00' :
+                        previewTargetSlot === 'snack' ? '16:00' : '19:30';
+
+    onAddDishToDay(previewTargetSlot, {
+      name: selectedDishPreview.name,
+      weightGrams: selectedDishPreview.weightGrams,
+      macros: selectedDishPreview.macros,
+      timestamp: defaultTime
+    });
+
+    setIsPreviewAdded(true);
+    setTimeout(() => {
+      setIsPreviewAdded(false);
+      setSelectedDishPreview(null);
       onClose();
     }, 900);
   };
@@ -452,14 +675,18 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                   return (
                     <div
                       key={item.id}
-                      className="p-2.5 rounded-2xl bg-black/40 border border-white/10 flex items-center gap-3 transition-all hover:border-amber-400/30"
+                      onClick={() => {
+                        setSelectedDishPreview(item);
+                        setPreviewTargetSlot(item.category);
+                      }}
+                      className="p-2.5 rounded-2xl bg-black/40 border border-white/10 flex items-center gap-3 transition-all hover:border-amber-400/40 cursor-pointer active:scale-[0.99] group"
                     >
                       {/* Міні-фото */}
                       <div className="w-16 h-16 rounded-xl overflow-hidden bg-black shrink-0 relative">
                         <img
                           src={item.photo}
                           alt={item.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
                             (e.currentTarget as HTMLImageElement).src = '/dinner_steak_hd.jpg';
                           }}
@@ -478,7 +705,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                           <span className="text-[10px] text-zinc-500 font-semibold">{item.weightGrams}г</span>
                         </div>
 
-                        <h4 className="text-xs font-bold text-white truncate mt-0.5">
+                        <h4 className="text-xs font-bold text-white truncate mt-0.5 group-hover:text-amber-300 transition-colors">
                           {item.name}
                         </h4>
 
@@ -494,13 +721,16 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                       {/* Кнопка швидкого додавання в розклад */}
                       <button
                         type="button"
-                        onClick={() => handleAddCatalogItem(item)}
-                        className={`p-2 rounded-xl text-xs font-bold flex items-center justify-center transition-all shrink-0 active:scale-95 ${
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddCatalogItem(item);
+                        }}
+                        className={`p-2.5 rounded-xl text-xs font-bold flex items-center justify-center transition-all shrink-0 active:scale-95 ${
                           isAdded
                             ? 'bg-emerald-500 text-zinc-950'
                             : 'bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 shadow-md shadow-amber-400/20 hover:brightness-110'
                         }`}
-                        title="Додати в розклад"
+                        title="Швидко додати в розклад"
                       >
                         {isAdded ? (
                           <Check className="w-4 h-4 stroke-[3]" />
@@ -789,6 +1019,190 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
             </div>
           )}
         </div>
+
+        {/* ========================================================= */}
+        {/* РЕЖИМ ПЕРЕГЛЯДУ СТРАВИ ТА РЕЦЕПТА (DISH RECIPE PREVIEW) */}
+        {/* ========================================================= */}
+        {selectedDishPreview && (
+          <div className="absolute inset-0 bg-[#0d120f]/98 backdrop-blur-xl z-50 rounded-[32px] flex flex-col overflow-hidden animate-fadeIn">
+            {/* Фото та шапка */}
+            <div className="relative h-48 shrink-0 w-full overflow-hidden bg-black">
+              <img
+                src={selectedDishPreview.photo}
+                alt={selectedDishPreview.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/dinner_steak_hd.jpg';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0d120f] via-transparent to-black/70" />
+
+              {/* Кнопка повернення/закриття */}
+              <button
+                type="button"
+                onClick={() => setSelectedDishPreview(null)}
+                className="absolute top-3 right-3 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-md border border-white/10 transition-all z-10 active:scale-95"
+                title="Закрити перегляд"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {/* Бейджі категорії та часу */}
+              <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
+                <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-400 text-zinc-950 shadow-md">
+                  {selectedDishPreview.categoryLabel}
+                </span>
+                <span className="text-[11px] font-bold text-amber-300 bg-black/80 px-2.5 py-0.5 rounded-lg border border-white/15 flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-amber-400" />
+                  {selectedDishPreview.prepTime}
+                </span>
+              </div>
+            </div>
+
+            {/* Вміст перегляду зі скролом */}
+            <div className="p-4 overflow-y-auto flex-1 space-y-3.5 text-xs">
+              <div>
+                <h3 className="text-base font-black text-white leading-tight">
+                  {selectedDishPreview.name}
+                </h3>
+                <p className="text-zinc-400 text-xs mt-1 leading-relaxed">
+                  {selectedDishPreview.shortDesc}
+                </p>
+              </div>
+
+              {/* Cook-Loss примітка, якщо є */}
+              {selectedDishPreview.cookLossNote && (
+                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-center gap-2">
+                  <Scale className="w-4 h-4 shrink-0 text-amber-400" />
+                  <span className="text-[11px] font-medium leading-tight">{selectedDishPreview.cookLossNote}</span>
+                </div>
+              )}
+
+              {/* КБЖВ картки */}
+              <div className="grid grid-cols-4 gap-1.5">
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5 text-center">
+                  <div className="text-[9px] uppercase font-bold text-zinc-400">Калорії</div>
+                  <div className="text-xs font-black text-amber-300 mt-0.5">{selectedDishPreview.macros.calories}</div>
+                  <div className="text-[8px] text-zinc-500 font-bold">ккал</div>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-emerald-500/20 text-center">
+                  <div className="text-[9px] uppercase font-bold text-emerald-400">Білок</div>
+                  <div className="text-xs font-black text-emerald-300 mt-0.5">{selectedDishPreview.macros.protein}г</div>
+                  <div className="text-[8px] text-zinc-500 font-bold">{Math.round((selectedDishPreview.macros.protein * 4 / selectedDishPreview.macros.calories) * 100)}%</div>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-amber-500/20 text-center">
+                  <div className="text-[9px] uppercase font-bold text-amber-400">Жири</div>
+                  <div className="text-xs font-black text-amber-300 mt-0.5">{selectedDishPreview.macros.fat}г</div>
+                  <div className="text-[8px] text-zinc-500 font-bold">{Math.round((selectedDishPreview.macros.fat * 9 / selectedDishPreview.macros.calories) * 100)}%</div>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-sky-500/20 text-center">
+                  <div className="text-[9px] uppercase font-bold text-sky-400">Вуглеводи</div>
+                  <div className="text-xs font-black text-sky-300 mt-0.5">{selectedDishPreview.macros.carbs}г</div>
+                  <div className="text-[8px] text-zinc-500 font-bold">{Math.round((selectedDishPreview.macros.carbs * 4 / selectedDishPreview.macros.calories) * 100)}%</div>
+                </div>
+              </div>
+
+              {/* Склад та інгредієнти у грамах */}
+              {selectedDishPreview.ingredients && selectedDishPreview.ingredients.length > 0 && (
+                <div className="space-y-1.5">
+                  <div className="text-zinc-300 font-bold text-[11px] flex items-center gap-1.5">
+                    <ChefHat className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Склад страви (на {selectedDishPreview.weightGrams}г):</span>
+                  </div>
+                  <div className="space-y-1 bg-black/40 p-2.5 rounded-xl border border-white/5">
+                    {selectedDishPreview.ingredients.map((ing, idx) => (
+                      <div key={idx} className="flex justify-between items-center text-[11px] py-0.5 border-b border-white/5 last:border-0">
+                        <span className="text-zinc-200">{ing.name}</span>
+                        <span className="text-amber-400 font-mono font-bold shrink-0">{ing.grams}г</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Покроковий рецепт */}
+              {selectedDishPreview.instructions && selectedDishPreview.instructions.length > 0 && (
+                <div className="space-y-1.5">
+                  <div className="text-zinc-300 font-bold text-[11px] flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Приготування:</span>
+                  </div>
+                  <div className="space-y-2 bg-black/40 p-2.5 rounded-xl border border-white/5">
+                    {selectedDishPreview.instructions.map((step, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-[11px] text-zinc-300 leading-relaxed">
+                        <span className="w-4 h-4 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-[9px] shrink-0 mt-0.5">
+                          {idx + 1}
+                        </span>
+                        <span>{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Вибір прийому їжі для додавання */}
+              <div className="space-y-1.5 pt-1">
+                <label className="text-[11px] font-bold text-zinc-300 block">
+                  Призначити на прийом:
+                </label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {(['breakfast', 'lunch', 'snack', 'dinner'] as MealType[]).map((slot) => {
+                    const labels = { breakfast: 'Сніданок', lunch: 'Обід', snack: 'Перекус', dinner: 'Вечеря' };
+                    const isSel = previewTargetSlot === slot;
+                    return (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => setPreviewTargetSlot(slot)}
+                        className={`py-1.5 rounded-xl text-[10.5px] font-bold transition-all ${
+                          isSel
+                            ? 'bg-amber-400 text-zinc-950 font-black shadow-md shadow-amber-400/20'
+                            : 'bg-white/5 text-zinc-400 hover:text-white border border-white/5'
+                        }`}
+                      >
+                        {labels[slot]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Нижня панель дій */}
+            <div className="p-3.5 bg-black/80 border-t border-white/10 shrink-0 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedDishPreview(null)}
+                className="px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 font-bold text-xs transition-all active:scale-95"
+              >
+                Назад
+              </button>
+
+              <button
+                id="btn-add-preview-dish"
+                type="button"
+                onClick={handleAddPreviewDish}
+                className={`flex-1 py-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
+                  isPreviewAdded
+                    ? 'bg-emerald-500 text-zinc-950'
+                    : 'bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 shadow-md shadow-amber-400/20 hover:brightness-110'
+                }`}
+              >
+                {isPreviewAdded ? (
+                  <>
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    <span>Додано в {previewTargetSlot === 'breakfast' ? 'Сніданок' : previewTargetSlot === 'lunch' ? 'Обід' : previewTargetSlot === 'snack' ? 'Перекус' : 'Вечерю'}!</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 stroke-[3]" />
+                    <span>Додати в {previewTargetSlot === 'breakfast' ? 'Сніданок' : previewTargetSlot === 'lunch' ? 'Обід' : previewTargetSlot === 'snack' ? 'Перекус' : 'Вечерю'}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -129,6 +129,129 @@ const DEFAULT_RECIPES: Record<string, {
       'Запекти філе лосося з сіллю та прованськими травами при 180°C 15 хвилин.',
       'Викласти в боул разом із теплим кіноа та шматочками авокадо.'
     ]
+  },
+  'toast_avocado': {
+    photo: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Цільнозерновий хліб на заквасці', grams: 85, calories: 205, protein: 7.8, fat: 2.4, carbs: 38 },
+      { name: 'Стигле авокадо Хасс', grams: 65, calories: 104, protein: 1.3, fat: 9.6, carbs: 5.5 },
+      { name: 'Куряче яйце пашот', grams: 55, calories: 78, protein: 7.0, fat: 5.2, carbs: 0.4 },
+      { name: 'Мікрогрін та насіння льону', grams: 5, calories: 8, protein: 0.3, fat: 0.5, carbs: 0.7 }
+    ],
+    instructions: [
+      'Підсушити скибочки цільнозернового хліба в тостері або на пательні до золотистої скоринки.',
+      'Розім\'яти м\'якоть стиглого авокадо виделкою з кількома краплями лимонного соку та сіллю.',
+      'Приготувати ніжне яйце пашот у слабо киплячій воді 3 хвилини.',
+      'Викласти авокадо-крем на хрусткий тост, зверху помістити яйце пашот і прикрасити мікрогріном.'
+    ]
+  },
+  'toast_banana': {
+    photo: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Цільнозерновий тостовий хліб', grams: 85, calories: 205, protein: 7.8, fat: 2.4, carbs: 38 },
+      { name: 'Стиглий банан', grams: 115, calories: 102, protein: 1.3, fat: 0.3, carbs: 26.2 },
+      { name: 'Натуральна арахісова паста', grams: 10, calories: 59, protein: 2.5, fat: 5.0, carbs: 2.0 }
+    ],
+    instructions: [
+      'Підсушити скибочки тостів до хрусткості.',
+      'Рівномірно змастити натуральною арахісовою пастою.',
+      'Нарізати банан кружальцями та гарно викласти зверху.'
+    ]
+  },
+  'crepes_meat': {
+    photo: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Тонкі домашні крепси / млинці', grams: 120, calories: 252, protein: 7.8, fat: 8.4, carbs: 36 },
+      { name: 'Нежирний яловичий фарш', grams: 120, calories: 258, protein: 24.0, fat: 18.0, carbs: 0 },
+      { name: 'Оливкова олія та цибуля', grams: 10, calories: 88, protein: 0.2, fat: 10.0, carbs: 0.5 }
+    ],
+    instructions: [
+      'Обсмажити подрібнену цибулю та фарш зі спеціями до готовності.',
+      'Викласти соковиту начинку в центр тонкого млинця.',
+      'Згорнути конвертиком та підрум\'янити на пательні по 1 хв з кожного боку.'
+    ]
+  },
+  'pancakes': {
+    photo: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Вівсяне борошно грубого помелу', grams: 60, calories: 215, protein: 8.0, fat: 3.5, carbs: 38 },
+      { name: 'Сироватковий ізолят (протеїн)', grams: 25, calories: 95, protein: 22.0, fat: 0.5, carbs: 1 },
+      { name: 'Яєчний білок', grams: 60, calories: 30, protein: 6.5, fat: 0.1, carbs: 0.4 },
+      { name: 'Свіжа лохина та малина', grams: 50, calories: 28, protein: 0.5, fat: 0.2, carbs: 6 }
+    ],
+    instructions: [
+      'Збити вівсянку, протеїн та білки до однорідної маси.',
+      'Випікати невеликі панкейки на сухій пательні по 2 хв з боку.',
+      'Подавати теплими зі свіжими ягодами.'
+    ]
+  },
+  'pasta_shrimp': {
+    photo: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Паста з твердих сортів al dente', grams: 140, calories: 210, protein: 8.0, fat: 1.5, carbs: 42 },
+      { name: 'Тигрові креветки очищені', grams: 110, calories: 120, protein: 24.0, fat: 1.2, carbs: 1 },
+      { name: 'Томати чері та часник', grams: 25, calories: 15, protein: 0.5, fat: 0.1, carbs: 3 },
+      { name: 'Оливкова олія Extra Virgin', grams: 5, calories: 44, protein: 0, fat: 5.0, carbs: 0 }
+    ],
+    instructions: [
+      'Відварити пасту до стану al dente 8-9 хвилин.',
+      'Швидко обсмажити креветки з часником по 1.5 хвилини з боку.',
+      'З\'єднати пасту з креветками та свіжим базиліком.'
+    ]
+  },
+  'beef_salad': {
+    photo: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Теляча вирізка на грилі', grams: 130, calories: 240, protein: 34.0, fat: 11.0, carbs: 0 },
+      { name: 'Хрусткий салатний мікс', grams: 50, calories: 12, protein: 1.0, fat: 0.2, carbs: 2 },
+      { name: 'Томати чері соковиті', grams: 40, calories: 10, protein: 0.4, fat: 0.1, carbs: 2 },
+      { name: 'Діжонська заправка з кедровими горішками', grams: 20, calories: 85, protein: 1.5, fat: 8.0, carbs: 2 }
+    ],
+    instructions: [
+      'Обсмажити телятину на грилі до ступеня Medium.',
+      'Викласти салатне листя та томати на тарілку.',
+      'Нарізати тепле м\'ясо слайсами та полити заправкою.'
+    ]
+  },
+  'chia_pudding': {
+    photo: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Насіння чіа органічне', grams: 25, calories: 120, protein: 4.5, fat: 7.5, carbs: 10 },
+      { name: 'Мигдалеве молоко несолодке', grams: 130, calories: 20, protein: 0.8, fat: 1.5, carbs: 0.5 },
+      { name: 'Ванільний протеїн', grams: 15, calories: 60, protein: 12.0, fat: 0.5, carbs: 1 },
+      { name: 'Ягоди для прикраси', grams: 20, calories: 10, protein: 0.2, fat: 0.1, carbs: 2 }
+    ],
+    instructions: [
+      'Змішати насіння чіа з рослинним молоком та протеїном.',
+      'Залишити в холодильнику на 2 години до желювання.'
+    ]
+  },
+  'sea_bass': {
+    photo: 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Філе сібаса свіже', grams: 170, calories: 220, protein: 32.0, fat: 9.0, carbs: 0 },
+      { name: 'Цукіні на грилі', grams: 100, calories: 20, protein: 1.5, fat: 0.2, carbs: 4 },
+      { name: 'Оливкова олія та лимонний чебрець', grams: 10, calories: 75, protein: 0.1, fat: 8.0, carbs: 0.5 }
+    ],
+    instructions: [
+      'Запекти сібас у духовці при 190°C 15 хвилин.',
+      'Обсмажити кружальця цукіні на гриль-пательні.',
+      'Збризнути лимоном та подавати теплим.'
+    ]
+  },
+  'tuna_steak': {
+    photo: 'https://images.unsplash.com/photo-1501595091296-3aa970afb3ff?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Стейк жовтоперого тунця', grams: 160, calories: 210, protein: 40.0, fat: 5.0, carbs: 0 },
+      { name: 'Чорний кунжут', grams: 10, calories: 55, protein: 1.8, fat: 4.8, carbs: 1.5 },
+      { name: 'Стигле авокадо Хасс', grams: 70, calories: 112, protein: 1.4, fat: 10.5, carbs: 6 },
+      { name: 'Соєвий соус та лайм', grams: 10, calories: 10, protein: 0.8, fat: 0, carbs: 1.5 }
+    ],
+    instructions: [
+      'Обваляти стейк тунця у кунжуті.',
+      'Обсмажити на пательні по 60 секунд з кожного боку (Rare/Medium Rare).',
+      'Нарізати тонкими слайсами та подати з авокадо.'
+    ]
   }
 };
 
@@ -150,13 +273,30 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
   const lowerName = entry.name.toLowerCase();
   let recipeMeta = DEFAULT_RECIPES['steak'];
 
-  if (
+  if (lowerName.includes('тост') && lowerName.includes('банан')) {
+    recipeMeta = DEFAULT_RECIPES['toast_banana'];
+  } else if (lowerName.includes('тост') && (lowerName.includes('авокадо') || lowerName.includes('пашот'))) {
+    recipeMeta = DEFAULT_RECIPES['toast_avocado'];
+  } else if (lowerName.includes('креп') || lowerName.includes('млинц') || lowerName.includes('налисник')) {
+    recipeMeta = DEFAULT_RECIPES['crepes_meat'];
+  } else if (lowerName.includes('панкейк')) {
+    recipeMeta = DEFAULT_RECIPES['pancakes'];
+  } else if (lowerName.includes('паста') || lowerName.includes('кревет')) {
+    recipeMeta = DEFAULT_RECIPES['pasta_shrimp'];
+  } else if (lowerName.includes('сібас') || lowerName.includes('сибас')) {
+    recipeMeta = DEFAULT_RECIPES['sea_bass'];
+  } else if (lowerName.includes('тунц') || lowerName.includes('тунець')) {
+    recipeMeta = DEFAULT_RECIPES['tuna_steak'];
+  } else if (lowerName.includes('салат') && (lowerName.includes('телят') || lowerName.includes('яловичин'))) {
+    recipeMeta = DEFAULT_RECIPES['beef_salad'];
+  } else if (lowerName.includes('чіа') || lowerName.includes('chia') || lowerName.includes('пудинг')) {
+    recipeMeta = DEFAULT_RECIPES['chia_pudding'];
+  } else if (
     lowerName.includes('сирник') ||
     lowerName.includes('рікот') ||
     lowerName.includes('рикот') ||
     lowerName.includes('сир кисломол') ||
-    lowerName.includes('творог') ||
-    lowerName.includes('панкейк')
+    lowerName.includes('творог')
   ) {
     recipeMeta = DEFAULT_RECIPES['syrniki'];
   } else if (
@@ -169,8 +309,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
     recipeMeta = DEFAULT_RECIPES['protein_shake'];
   } else if (
     lowerName.includes('омлет') ||
-    lowerName.includes('яйц') ||
-    lowerName.includes('авокадо')
+    lowerName.includes('яйц')
   ) {
     recipeMeta = DEFAULT_RECIPES['omelet'];
   } else if (
@@ -182,6 +321,8 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
   } else if (
     lowerName.includes('кур') ||
     lowerName.includes('філе') ||
+    lowerName.includes('грудк') ||
+    lowerName.includes('грудин') ||
     lowerName.includes('кіноа') ||
     lowerName.includes('гречк')
   ) {
