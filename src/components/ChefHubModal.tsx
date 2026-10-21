@@ -532,6 +532,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   <button
+                    id="btn-example-crepes"
                     type="button"
                     onClick={() => {
                       setParserUrl('https://www.tiktok.com/@chef/video/crepes-with-meat');
@@ -609,6 +610,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
               </div>
 
               <button
+                id="btn-parse-video"
                 type="button"
                 onClick={() => handleParseVideo(parserUrl)}
                 disabled={isParsing}
@@ -754,6 +756,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
               </div>
 
               <button
+                id="btn-auto-calc-smart"
                 type="button"
                 onClick={handleSmartTextRecognize}
                 className="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-amber-300 flex items-center justify-center gap-1.5 transition-all"
@@ -775,6 +778,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
               )}
 
               <button
+                id="btn-add-smart-dish"
                 type="button"
                 onClick={handleAddSmartTextDish}
                 className="w-full py-2.5 rounded-xl font-black text-xs text-zinc-950 bg-gradient-to-r from-amber-400 to-amber-500 shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all"
