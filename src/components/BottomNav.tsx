@@ -29,6 +29,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
 
         {/* 2. Log (Щоденник / Каструля) */}
         <button
+          id="tab-log"
           type="button"
           onClick={() => setActiveTab('cookloss')}
           className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all duration-200 ${

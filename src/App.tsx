@@ -4,23 +4,24 @@ import { useUserStore } from './store/userStore';
 import { Header } from './components/Header';
 import { CalorieRings } from './components/CalorieRings';
 import { WeeklyBankWidget } from './components/WeeklyBankWidget';
-import { MealList } from './components/MealList';
 import { BottomNav, NavTab } from './components/BottomNav';
 import { SmartGroceryList } from './components/SmartGroceryList';
 import { QuickAddModal } from './components/QuickAddModal';
 import { DiningOutEstimatorModal } from './components/DiningOutEstimatorModal';
-import { CookLossCalculator } from './components/CookLossCalculator';
 import { RecipeParser } from './components/RecipeParser';
 import { TrueFatTrend } from './components/TrueFatTrend';
 import { ProfileScreen } from './components/ProfileScreen';
 import { AuthModal } from './components/AuthModal';
 import { SplashScreen } from './components/SplashScreen';
 import { MealType } from './types/nutrition';
-import { TrendingUp, ShoppingBag, Link2, Sparkles, ChevronRight } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Link2 } from 'lucide-react';
 import { MyPlanWizard } from './components/MyPlanWizard';
+import { NextMealSpotlight } from './components/NextMealSpotlight';
+import { WaterTracker } from './components/WaterTracker';
+import { LogScreen } from './components/LogScreen';
 
 export const App: React.FC = () => {
-  const { dailyLog, weeklyBank, addFoodToMeal, removeFoodFromMeal, toggleMealEaten } = useNutritionStore();
+  const { dailyLog, weeklyBank, addFoodToMeal } = useNutritionStore();
   const { user } = useUserStore();
   const [activeTab, setActiveTab] = useState<NavTab>('today');
   const [showSplash, setShowSplash] = useState(true);
@@ -71,64 +72,42 @@ export const App: React.FC = () => {
         <div className="fixed top-10 left-1/2 -translate-x-1/2 w-[500px] h-[320px] bg-amber-400/8 rounded-full blur-[110px] pointer-events-none" />
         <div className="fixed bottom-10 right-0 w-[380px] h-[280px] bg-emerald-400/6 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="w-full max-w-md px-4 pt-safe pb-safe flex flex-col relative min-h-screen z-10">
+        <div className={`w-full max-w-md px-4 pt-safe pb-safe flex flex-col relative z-10 ${activeTab === 'today' ? 'h-screen max-h-screen overflow-hidden' : 'min-h-screen'}`}>
           {/* Верхня панель */}
-          <Header date={dailyLog.date} onOpenSplash={() => setShowSplash(true)} />
+          {activeTab !== 'cookloss' && (
+            <Header
+              date={dailyLog.date}
+              onOpenSplash={() => setShowSplash(true)}
+              hideCalendarButton={activeTab === 'today'}
+            />
+          )}
 
-          {/* 1. Вкладка "Сьогодні" (Головний дашборд за еталонним макетом Layout 2) */}
+          {/* 1. Вкладка "Сьогодні" (Концептуальний статичний 1-екранний дашборд) */}
           {activeTab === 'today' && (
-            <main className="space-y-2.5 animate-fadeIn">
+            <main className="flex-1 flex flex-col justify-between py-0.5 pb-24 animate-fadeIn select-none overflow-hidden">
               {/* 1. Головне золоте кільце калорій та 3 спідометри БЖУ */}
               <CalorieRings totals={dailyLog.totals} targets={dailyLog.targets} />
 
-              {/* Банер швидкого налаштування «Мій План» для нового користувача */}
-              {!user.hasCompletedPlan && (
-                <div
-                  id="my-plan-banner"
-                  onClick={() => {
-                    setPendingAddAfterWizard(false);
-                    setPlanWizardOpen(true);
-                  }}
-                  className="cursor-pointer p-3.5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-[#18231c] to-emerald-500/10 flex items-center justify-between shadow-lg hover:border-amber-400/50 transition-all active:scale-[0.99]"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-300 shrink-0">
-                      <Sparkles className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <span>Налаштувати «Мій План»</span>
-                        <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-amber-400 text-zinc-950">КРОК 1</span>
-                      </div>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">
-                        Розрахуйте точні норми калорій та БЖУ під вашу вагу
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-amber-400 shrink-0" />
-                </div>
-              )}
+              {/* 2. Скляна капсула Weekly Flex Bank */}
+              <div className="w-full my-0.5">
+                <WeeklyBankWidget bank={weeklyBank} />
+              </div>
 
-              {/* 2. Скляна панель Weekly Flex Bank */}
-              <WeeklyBankWidget bank={weeklyBank} />
+              {/* 3. НАСТУПНИЙ ПРИЙОМ ЇЖІ (Smart Meal Spotlight з кнопкою "Рецепт") */}
+              <div className="w-full my-0.5">
+                <NextMealSpotlight onOpenLog={() => setActiveTab('cookloss')} />
+              </div>
 
-              {/* 3. Панорамна картка Dinner (Gourmet Steak & Greens) + повне меню */}
-              <MealList
-                meals={dailyLog.meals}
-                onOpenAddModal={handleOpenAdd}
-                onRemoveEntry={removeFoodFromMeal}
-                onToggleEaten={toggleMealEaten}
-                onOpenDiningEstimator={() => setDiningModalOpen(true)}
-                onOpenCookLoss={() => setActiveTab('cookloss')}
-              />
+              {/* 4. ГЕЙМІФІКОВАНИЙ ТРЕКЕР: 6 СКЛЯНОК ВОДИ (Aqua Zen) */}
+              <div className="w-full my-0.5">
+                <WaterTracker />
+              </div>
             </main>
           )}
 
-          {/* 2. Вкладка "Каструля" (Cook-Loss Engine) */}
+          {/* 2. Вкладка "Log" (Щоденник страв, розклад дня, ШІ-Балансувальник та Каструля) */}
           {activeTab === 'cookloss' && (
-            <div className="animate-fadeIn">
-              <CookLossCalculator />
-            </div>
+            <LogScreen onOpenQuickAdd={handleOpenAdd} />
           )}
 
           {/* 3. Вкладка "Trends" (Тренди ваги, AI Парсер рецептів та список покупок) */}

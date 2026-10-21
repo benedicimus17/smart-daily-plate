@@ -6,6 +6,7 @@ import { useUserStore } from '../store/userStore';
 interface HeaderProps {
   date: string;
   onOpenSplash?: () => void;
+  hideCalendarButton?: boolean;
 }
 
 const formatLocalDate = (d: Date): string => {
@@ -15,7 +16,7 @@ const formatLocalDate = (d: Date): string => {
   return `${y}-${m}-${day}`;
 };
 
-export const Header: React.FC<HeaderProps> = ({ onOpenSplash }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenSplash, hideCalendarButton }) => {
   const { selectedDate, setSelectedDate } = useNutritionStore();
   const { user } = useUserStore();
   // weekOffset: 0 - поточний тиждень, -1 - попередній тиждень, -2 - два тижні тому, etc.
@@ -71,14 +72,16 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSplash }) => {
       {/* Центрована шапка в стилі еталонного макета Layout 2 */}
       <div className="relative flex flex-col items-center justify-center text-center pt-1">
         {/* Кнопки керування в кутах (акуратні, напівпрозорі, не руйнують симетрію) */}
-        <button
-          type="button"
-          onClick={() => setShowDatePicker(!showDatePicker)}
-          className="absolute left-0 top-1.5 w-8 h-8 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-zinc-400 hover:text-amber-300 hover:border-amber-400/30 transition-all active:scale-95"
-          title="Вибір дати"
-        >
-          <Calendar className="w-3.5 h-3.5" />
-        </button>
+        {!hideCalendarButton && (
+          <button
+            type="button"
+            onClick={() => setShowDatePicker(!showDatePicker)}
+            className="absolute left-0 top-1.5 w-8 h-8 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-zinc-400 hover:text-amber-300 hover:border-amber-400/30 transition-all active:scale-95"
+            title="Вибір дати"
+          >
+            <Calendar className="w-3.5 h-3.5" />
+          </button>
+        )}
 
         {onOpenSplash && (
           <button
