@@ -16,8 +16,10 @@ export interface NutritionState {
   
   // Дії щоденника
   setSelectedDate: (date: string) => void;
-  addFoodToMeal: (mealType: MealType, entry: Omit<MealEntry, 'id' | 'timestamp'>) => void;
+  addFoodToMeal: (mealType: MealType, entry: Omit<MealEntry, 'id' | 'timestamp'> & { timestamp?: string }) => void;
   removeFoodFromMeal: (mealType: MealType, entryId: string) => void;
+  updateMealEntry: (mealType: MealType, entryId: string, updates: Partial<MealEntry>) => void;
+  moveMealEntry: (fromMealType: MealType, toMealType: MealType, entryId: string, newTimestamp?: string) => void;
   toggleMealEaten: (mealType: MealType, entryId: string) => void;
   updateTargets: (targets: Partial<DailyLog['targets']>) => void;
   quickAddCalories: (mealType: MealType, calories: number, note?: string) => void;
@@ -454,7 +456,7 @@ export const useNutritionStore = create<NutritionState>()(
           const newEntry: MealEntry = {
             ...entryData,
             id: `entry-${Date.now()}`,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            timestamp: entryData.timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           };
 
           const updatedEntries = [...category.entries, newEntry];
@@ -467,6 +469,84 @@ export const useNutritionStore = create<NutritionState>()(
               entries: updatedEntries,
               totalMacros: categoryMacros
             }
+          };
+
+          const updatedLog: DailyLog = {
+            ...dailyLog,
+            meals: updatedMeals,
+            totals: calculateTotals(updatedMeals)
+          };
+
+          set({
+            dailyLog: updatedLog,
+            historyLogs: {
+              ...historyLogs,
+              [selectedDate]: updatedLog
+            }
+          });
+        },
+
+        updateMealEntry: (mealType, entryId, updates) => {
+          const { dailyLog, selectedDate, historyLogs } = get();
+          const category = dailyLog.meals[mealType];
+          const updatedEntries = category.entries.map(e =>
+            e.id === entryId ? { ...e, ...updates } : e
+          );
+          const categoryMacros = calculateCategoryTotals(updatedEntries);
+
+          const updatedMeals = {
+            ...dailyLog.meals,
+            [mealType]: {
+              ...category,
+              entries: updatedEntries,
+              totalMacros: categoryMacros
+            }
+          };
+
+          const updatedLog: DailyLog = {
+            ...dailyLog,
+            meals: updatedMeals,
+            totals: calculateTotals(updatedMeals)
+          };
+
+          set({
+            dailyLog: updatedLog,
+            historyLogs: {
+              ...historyLogs,
+              [selectedDate]: updatedLog
+            }
+          });
+        },
+
+        moveMealEntry: (fromMealType, toMealType, entryId, newTimestamp) => {
+          const { dailyLog, selectedDate, historyLogs } = get();
+          const fromCategory = dailyLog.meals[fromMealType];
+          const entryToMove = fromCategory.entries.find(e => e.id === entryId);
+          if (!entryToMove) return;
+
+          const updatedFromEntries = fromCategory.entries.filter(e => e.id !== entryId);
+          const updatedFromCategory = {
+            ...fromCategory,
+            entries: updatedFromEntries,
+            totalMacros: calculateCategoryTotals(updatedFromEntries)
+          };
+
+          const toCategory = dailyLog.meals[toMealType];
+          const updatedEntry: MealEntry = {
+            ...entryToMove,
+            timestamp: newTimestamp || entryToMove.timestamp
+          };
+          const updatedToEntries = [...toCategory.entries, updatedEntry];
+          const updatedToCategory = {
+            ...toCategory,
+            entries: updatedToEntries,
+            totalMacros: calculateCategoryTotals(updatedToEntries)
+          };
+
+          const updatedMeals = {
+            ...dailyLog.meals,
+            [fromMealType]: updatedFromCategory,
+            [toMealType]: updatedToCategory
           };
 
           const updatedLog: DailyLog = {

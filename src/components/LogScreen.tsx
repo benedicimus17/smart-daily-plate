@@ -16,7 +16,8 @@ import {
   Sparkles,
   UtensilsCrossed,
   Trash2,
-  ChevronRight as ChevronRightIcon
+  ChevronRight as ChevronRightIcon,
+  Clock
 } from 'lucide-react';
 
 interface LogScreenProps {
@@ -30,19 +31,18 @@ const formatLocalDate = (d: Date): string => {
   return `${y}-${m}-${day}`;
 };
 
-interface MealSlotConfig {
-  type: MealType;
-  title: string;
-  time: string;
-  targetKcal: number;
-}
+const timeToMinutes = (t?: string): number => {
+  if (!t) return 0;
+  const [h, m] = t.split(':').map(Number);
+  return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
+};
 
-const MEAL_SLOTS: MealSlotConfig[] = [
-  { type: 'breakfast', title: 'Сніданок', time: '08:30', targetKcal: 380 },
-  { type: 'lunch', title: 'Обід', time: '13:00', targetKcal: 520 },
-  { type: 'snack', title: 'Перекус', time: '16:30', targetKcal: 200 },
-  { type: 'dinner', title: 'Вечеря', time: '19:30', targetKcal: 500 }
-];
+const CATEGORY_LABELS: Record<MealType, string> = {
+  breakfast: 'Сніданок',
+  snack: 'Перекус',
+  lunch: 'Обід',
+  dinner: 'Вечеря'
+};
 
 export const LogScreen: React.FC<LogScreenProps> = () => {
   const {
@@ -51,16 +51,20 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
     setSelectedDate,
     removeFoodFromMeal,
     addFoodToMeal,
-    toggleMealEaten
+    toggleMealEaten,
+    updateMealEntry
   } = useNutritionStore();
 
   const [balancerOpen, setBalancerOpen] = useState(false);
   const [cookLossOpen, setCookLossOpen] = useState(false);
   const [diningOpen, setDiningOpen] = useState(false);
-  const [quickAddMealType, setQuickAddMealType] = useState<MealType | null>(null);
+  const [quickAddConfig, setQuickAddConfig] = useState<{ mealType: MealType; initialTime?: string } | null>(null);
 
   // Стан для модалки деталей страви
   const [selectedDish, setSelectedDish] = useState<{ mealType: MealType; entry: MealEntry } | null>(null);
+
+  // Стан редагування часу на картці
+  const [editingTimeId, setEditingTimeId] = useState<string | null>(null);
 
   // ШІ-Балансувальник: стан перебору
   const [isOverLimit, setIsOverLimit] = useState(true);
@@ -103,7 +107,8 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
       name: newDishName,
       weightGrams: 200,
       macros: newMacros,
-      eaten: true
+      eaten: true,
+      timestamp: '19:30'
     });
     setIsOverLimit(false);
   };
@@ -111,6 +116,20 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
   const handleApplyFlexBank = (_excess: number) => {
     setIsOverLimit(false);
   };
+
+  // Збираємо всі страви поточного дня та сортуємо їх ХРОНОЛОГІЧНО ЗА ЧАСОМ
+  const timelineEntries = (['breakfast', 'snack', 'lunch', 'dinner'] as MealType[]).flatMap(type => {
+    const cat = dailyLog.meals[type];
+    if (!cat || !cat.entries) return [];
+    return cat.entries.map(entry => ({
+      mealType: type,
+      categoryTitle: CATEGORY_LABELS[type],
+      entry,
+      timeMinutes: timeToMinutes(entry.timestamp)
+    }));
+  });
+
+  timelineEntries.sort((a, b) => a.timeMinutes - b.timeMinutes);
 
   return (
     <div className="space-y-3.5 pb-28 animate-fadeIn select-none">
@@ -189,7 +208,7 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
         </div>
       </div>
 
-      {/* 2. КОМПАКТНА ШІ-ПЛАШКА БАЛАНСУВАННЯ (БЕЗ ДУБЛЮВАННЯ КІЛЬЦЯ) */}
+      {/* 2. КОМПАКТНА ШІ-ПЛАШКА БАЛАНСУВАННЯ */}
       {isOverLimit && (
         <div className="p-2.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 flex items-center justify-between animate-fadeIn">
           <div className="flex items-center gap-2">
@@ -240,129 +259,182 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
         </button>
       </div>
 
-      {/* 4. ТАЙМЛАЙН ПРИЙОМІВ ЇЖІ (ДИНАМІЧНИЙ РОЗКЛАД З РЕАЛЬНОГО STORE) */}
+      {/* 4. ДИНАМІЧНИЙ ХРОНОЛОГІЧНИЙ РОЗКЛАД ДНЯ (СОРТУВАННЯ ЗА ЧАСОМ) */}
       <div className="space-y-3">
-        {MEAL_SLOTS.map((slot) => {
-          const category = dailyLog.meals[slot.type];
-          const entries = category?.entries || [];
+        {timelineEntries.length > 0 ? (
+          timelineEntries.map(({ mealType, categoryTitle, entry }) => {
+            const isEaten = entry.eaten !== false;
+            const isEditingTime = editingTimeId === entry.id;
 
-          return (
-            <div
-              key={slot.type}
-              className="rounded-3xl p-3.5 bg-black/40 border border-white/10 shadow-sm transition-all"
-            >
-              {/* Заголовок тайм-слота */}
-              <div className="flex items-center justify-between pb-2 border-b border-white/5">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-extrabold text-amber-300 px-2 py-0.5 rounded-lg bg-amber-400/15 border border-amber-400/30">
-                    {slot.time}
-                  </span>
-                  <h4 className="text-sm font-bold text-white tracking-tight">{slot.title}</h4>
-                  <span className="text-[10px] text-zinc-500">
-                    • Ціль ~{slot.targetKcal} ккал
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setQuickAddMealType(slot.type)}
-                  className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all active:scale-95"
-                  title="Додати страву"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Список страв слота */}
-              {entries.length > 0 ? (
-                <div className="divide-y divide-white/5 pt-1">
-                  {entries.map((entry) => {
-                    const isEaten = entry.eaten !== false;
-
-                    return (
-                      <div
-                        key={entry.id}
-                        onClick={() => setSelectedDish({ mealType: slot.type, entry })}
-                        className="py-2.5 flex items-center justify-between cursor-pointer group hover:bg-white/[0.02] px-1 rounded-xl transition-all"
+            return (
+              <div
+                key={entry.id}
+                className={`rounded-3xl p-3.5 transition-all ${
+                  isEaten
+                    ? 'bg-black/25 border border-white/5 opacity-65'
+                    : 'bg-black/45 border border-white/10 opacity-100 shadow-sm'
+                }`}
+              >
+                {/* Шапка прийому: Година (редагована) + Категорія + Ціль + Кнопка [+] */}
+                <div className="flex items-center justify-between pb-2 border-b border-white/5">
+                  <div className="flex items-center gap-2">
+                    {/* Кнопка зміни часу прямо на плашці */}
+                    {!isEditingTime ? (
+                      <button
+                        type="button"
+                        onClick={() => setEditingTimeId(entry.id)}
+                        className={`text-[11px] font-black px-2 py-0.5 rounded-lg border flex items-center gap-1 transition-all ${
+                          isEaten
+                            ? 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                            : 'bg-amber-400/15 border-amber-400/30 text-amber-300 hover:border-amber-400/60'
+                        }`}
+                        title="Натисніть щоб змінити час"
                       >
-                        {/* Інтерактивна галочка з'їденого */}
-                        <div className="flex items-center gap-2.5 flex-1 min-w-0 pr-2">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleMealEaten(slot.type, entry.id);
-                            }}
-                            className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 active:scale-90 ${
-                              isEaten
-                                ? 'bg-emerald-400 text-zinc-950 shadow-sm shadow-emerald-400/30'
-                                : 'border-2 border-white/25 bg-black/40 hover:border-amber-400'
-                            }`}
-                            title={isEaten ? 'Позначено як з\'їдено' : 'Позначити з\'їденим'}
-                          >
-                            {isEaten && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                          </button>
-
-                          {/* Інформація про страву (тап відкриває деталі) */}
-                          <div className="min-w-0">
-                            <div className={`text-xs font-bold truncate ${isEaten ? 'text-zinc-200' : 'text-zinc-400'}`}>
-                              {entry.name}
-                            </div>
-                            <div className="text-[10.5px] text-zinc-500 flex items-center gap-1.5 flex-wrap mt-0.5">
-                              <span>{entry.weightGrams}г</span>
-                              <span>•</span>
-                              <span className="text-amber-400/90 font-bold">{entry.macros.calories} ккал</span>
-                              <span>•</span>
-                              <span className="text-emerald-400/80">{entry.macros.protein}г Б</span>
-                              <span>•</span>
-                              <span className="text-amber-400/80">{entry.macros.fat}г Ж</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Кнопки дій: стрілочка деталей та видалення */}
-                        <div className="flex items-center gap-1 shrink-0">
-                          <ChevronRightIcon className="w-3.5 h-3.5 text-zinc-500 group-hover:text-amber-400 transition-colors" />
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeFoodFromMeal(slot.type, entry.id);
-                            }}
-                            className="p-1 text-zinc-600 hover:text-rose-400 transition-colors ml-1"
-                            title="Видалити"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                        <Clock className="w-2.5 h-2.5" />
+                        <span>{entry.timestamp || '08:30'}</span>
+                        <span className="text-[9px] opacity-60">✎</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-1 bg-black/80 p-0.5 rounded-lg border border-amber-400">
+                        <input
+                          type="time"
+                          defaultValue={entry.timestamp || '08:30'}
+                          onBlur={(e) => {
+                            updateMealEntry(mealType, entry.id, { timestamp: e.target.value });
+                            setEditingTimeId(null);
+                          }}
+                          onChange={(e) => {
+                            updateMealEntry(mealType, entry.id, { timestamp: e.target.value });
+                          }}
+                          autoFocus
+                          className="bg-transparent text-amber-300 font-black text-[11px] px-1 focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setEditingTimeId(null)}
+                          className="px-1.5 py-0.5 rounded bg-amber-400 text-zinc-950 text-[9.5px] font-black"
+                        >
+                          OK
+                        </button>
                       </div>
-                    );
-                  })}
+                    )}
+
+                    <h4 className={`text-sm font-bold tracking-tight ${isEaten ? 'text-zinc-400' : 'text-white'}`}>
+                      {categoryTitle}
+                    </h4>
+
+                    <span className="text-[10px] text-zinc-500">
+                      • {entry.macros.calories} ккал
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setQuickAddConfig({ mealType, initialTime: entry.timestamp })}
+                    className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all active:scale-95"
+                    title="Додати страву в цей прийом"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
                 </div>
-              ) : (
+
+                {/* Рядок страви: Інтерактивний чекбокс + Текст + Деталі */}
                 <div
-                  onClick={() => setQuickAddMealType(slot.type)}
-                  className="py-3 text-center cursor-pointer text-zinc-600 hover:text-zinc-400 text-xs transition-colors"
+                  onClick={() => setSelectedDish({ mealType, entry })}
+                  className="pt-2.5 flex items-center justify-between cursor-pointer group hover:bg-white/[0.02] px-1 rounded-xl transition-all"
                 >
-                  Немає страв • Натисніть [+] щоб додати
+                  {/* Інтерактивна галочка з'їденого (виразне приглушення при виконанні) */}
+                  <div className="flex items-center gap-2.5 flex-1 min-w-0 pr-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleMealEaten(mealType, entry.id);
+                      }}
+                      className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 active:scale-90 ${
+                        isEaten
+                          ? 'bg-emerald-400 text-zinc-950 shadow-sm shadow-emerald-400/30'
+                          : 'border-2 border-white/30 bg-black/40 hover:border-amber-400'
+                      }`}
+                      title={isEaten ? 'Позначено як з\'їдено' : 'Позначити з\'їденим'}
+                    >
+                      {isEaten && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                    </button>
+
+                    {/* Інформація про страву (тьмяніша і закреслена якщо виконано) */}
+                    <div className="min-w-0">
+                      <div
+                        className={`text-xs font-bold truncate transition-all ${
+                          isEaten
+                            ? 'line-through decoration-zinc-500 text-zinc-500'
+                            : 'text-zinc-100'
+                        }`}
+                      >
+                        {entry.name}
+                      </div>
+                      <div
+                        className={`text-[10.5px] flex items-center gap-1.5 flex-wrap mt-0.5 ${
+                          isEaten ? 'text-zinc-600' : 'text-zinc-400'
+                        }`}
+                      >
+                        <span>{entry.weightGrams}г</span>
+                        <span>•</span>
+                        <span className={isEaten ? 'text-zinc-500' : 'text-amber-300 font-bold'}>
+                          {entry.macros.calories} ккал
+                        </span>
+                        <span>•</span>
+                        <span className={isEaten ? 'text-zinc-500' : 'text-emerald-400/90'}>
+                          {entry.macros.protein}г Б
+                        </span>
+                        <span>•</span>
+                        <span className={isEaten ? 'text-zinc-500' : 'text-amber-400/80'}>
+                          {entry.macros.fat}г Ж
+                        </span>
+                        <span>•</span>
+                        <span className={isEaten ? 'text-zinc-500' : 'text-indigo-400/80'}>
+                          {entry.macros.carbs}г В
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Кнопки дій: стрілочка деталей та видалення */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    <ChevronRightIcon className="w-3.5 h-3.5 text-zinc-500 group-hover:text-amber-400 transition-colors" />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFoodFromMeal(mealType, entry.id);
+                      }}
+                      className="p-1 text-zinc-600 hover:text-rose-400 transition-colors ml-1"
+                      title="Видалити"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
-          );
-        })}
+              </div>
+            );
+          })
+        ) : (
+          <div className="p-8 text-center bg-black/30 rounded-3xl border border-white/5 text-zinc-500 text-xs">
+            На цей день ще немає запланованих прийомів їжі.
+          </div>
+        )}
       </div>
 
-      {/* 5. КНОПКА ДОДАВАННЯ СВОГО ПРИЙОМУ ЇЖІ */}
+      {/* 5. КНОПКА ДОДАВАННЯ СВОГО ПРИЙОМУ ЇЖІ АБО ПЕРЕКУСУ */}
       <button
         type="button"
-        onClick={() => setQuickAddMealType('snack')}
-        className="w-full py-3 rounded-2xl bg-white/[0.04] border border-dashed border-white/20 hover:border-amber-400/50 text-xs font-bold text-zinc-300 hover:text-amber-300 flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+        onClick={() => setQuickAddConfig({ mealType: 'snack', initialTime: '11:00' })}
+        className="w-full py-3.5 rounded-2xl bg-white/[0.04] border border-dashed border-white/20 hover:border-amber-400/50 text-xs font-bold text-zinc-300 hover:text-amber-300 flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
       >
         <Plus className="w-4 h-4 text-amber-400" />
-        <span>+ Додати свій прийом їжі або перекус</span>
+        <span>+ Додати свій прийом їжі або перекус (наприклад, 11:00)</span>
       </button>
 
-      {/* МОДАЛКА ДЕТАЛЕЙ СТРАВИ (ФОТО, ІНГРЕДІЄНТИ В ГРАМАХ, РЕЦЕПТ, КБЖВ) */}
+      {/* МОДАЛКА ДЕТАЛЕЙ СТРАВИ (ФОТО, ТОЧНІ ГРАМИ, РЕЦЕПТ, ЗМІНА ЧАСУ) */}
       <DishDetailModal
         isOpen={selectedDish !== null}
         mealType={selectedDish?.mealType || null}
@@ -370,6 +442,15 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
         onClose={() => setSelectedDish(null)}
         onToggleEaten={toggleMealEaten}
         onRemove={removeFoodFromMeal}
+        onUpdateTime={(mealType, entryId, newTime) => {
+          updateMealEntry(mealType, entryId, { timestamp: newTime });
+          if (selectedDish) {
+            setSelectedDish({
+              ...selectedDish,
+              entry: { ...selectedDish.entry, timestamp: newTime }
+            });
+          }
+        }}
       />
 
       {/* МОДАЛКА ШІ-БАЛАНСУВАЛЬНИКА */}
@@ -401,17 +482,18 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
       <DiningOutEstimatorModal
         isOpen={diningOpen}
         onClose={() => setDiningOpen(false)}
-        onAddMeal={(type, data) => addFoodToMeal(type, { ...data, eaten: true, foodId: `dining-${Date.now()}` })}
+        onAddMeal={(type, data) => addFoodToMeal(type, { ...data, eaten: true, foodId: `dining-${Date.now()}`, timestamp: '19:30' })}
       />
 
-      {/* МОДАЛКА ШВИДКОГО ДОДАВАННЯ СТРАВИ */}
+      {/* МОДАЛКА ШВИДКОГО ДОДАВАННЯ СТРАВИ З ВИБОРОМ ЧАСУ ТА ШЕЙКІВ */}
       <QuickAddModal
-        isOpen={quickAddMealType !== null}
-        mealType={quickAddMealType}
-        onClose={() => setQuickAddMealType(null)}
+        isOpen={quickAddConfig !== null}
+        mealType={quickAddConfig?.mealType || null}
+        initialTime={quickAddConfig?.initialTime}
+        onClose={() => setQuickAddConfig(null)}
         onAdd={(type, data) => {
           addFoodToMeal(type, { ...data, eaten: true, foodId: `item-${Date.now()}` });
-          setQuickAddMealType(null);
+          setQuickAddConfig(null);
         }}
       />
     </div>

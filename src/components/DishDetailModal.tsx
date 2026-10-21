@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Check, ChefHat, Sparkles, Scale } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Check, ChefHat, Sparkles, Scale, Clock } from 'lucide-react';
 import { MealEntry, MealType } from '../types/nutrition';
 
 interface DishDetailModalProps {
@@ -9,6 +9,7 @@ interface DishDetailModalProps {
   onClose: () => void;
   onToggleEaten: (mealType: MealType, entryId: string) => void;
   onRemove: (mealType: MealType, entryId: string) => void;
+  onUpdateTime?: (mealType: MealType, entryId: string, newTime: string) => void;
 }
 
 const MEAL_LABELS: Record<MealType, string> = {
@@ -24,6 +25,36 @@ const DEFAULT_RECIPES: Record<string, {
   instructions: string[];
   cookLossNote?: string;
 }> = {
+  'syrniki': {
+    photo: 'https://images.unsplash.com/photo-1575853121743-60c24f0a7502?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Кисломолочний сир 5% або рікота', grams: 200, calories: 242, protein: 34, fat: 10, carbs: 4 },
+      { name: 'Куряче яйце (велике)', grams: 55, calories: 78, protein: 7, fat: 5.2, carbs: 0.4 },
+      { name: 'Борошно рисове / вівсяне', grams: 25, calories: 90, protein: 2.5, fat: 0.5, carbs: 19 },
+      { name: 'Ванільний екстракт та стевія', grams: 2, calories: 5, protein: 0, fat: 0, carbs: 1 }
+    ],
+    instructions: [
+      'Перетерти рікоту або сир виделкою з яйцем та натуральним підсолоджувачем до кремової текстури.',
+      'Додати рисове борошно і замішати ніжне, еластичне тісто.',
+      'Сформувати круглі сирники товщиною 2 см за допомогою кулінарного кільця або широкої склянки.',
+      'Смажити на антипригарній пательні на мінімальному вогні під кришкою по 4-5 хв з кожного боку до золотистої скоринки.',
+      'Подавати теплими зі свіжими лісовими ягодами або грецьким йогуртом.'
+    ],
+    cookLossNote: 'Маса сирого тіста: 280г ➔ Готові сирники: 240г (-14% випаровування вологи)'
+  },
+  'protein_shake': {
+    photo: 'https://images.unsplash.com/photo-1553787499-6f9133860278?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Сироватковий протеїн ізолят (1 скуп)', grams: 30, calories: 120, protein: 25, fat: 1.2, carbs: 1.8 },
+      { name: 'Фільтрована вода або мигдалеве молоко', grams: 250, calories: 25, protein: 1, fat: 2, carbs: 0.5 }
+    ],
+    instructions: [
+      'Налити 250 мл холодної води або несолодкого мигдалевого молока у шейкер.',
+      'Додати 1 мірну ложку (30г) сухого протеїну ізоляту.',
+      'Щільно закрити клапан та струшувати протягом 20-30 секунд до утворення легкої кремової пінки.',
+      'Випити як легкий білковий перекус або через 30 хвилин після активності.'
+    ]
+  },
   'omelet': {
     photo: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80',
     ingredients: [
@@ -86,6 +117,18 @@ const DEFAULT_RECIPES: Record<string, {
       'Дати стейку відпочити 5 хвилин на теплій дошці перед нарізкою.'
     ],
     cookLossNote: 'Ужарка стейка: 350г сирого м\'яса ➔ 260г на тарілці (-26% Cook-Loss)'
+  },
+  'salmon': {
+    photo: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Філе лосося слабосолоне або запечене', grams: 200, calories: 380, protein: 40, fat: 24, carbs: 0 },
+      { name: 'Кіноа відварене', grams: 150, calories: 180, protein: 6, fat: 3, carbs: 32 },
+      { name: 'Стигле авокадо', grams: 60, calories: 96, protein: 1.2, fat: 9, carbs: 5 }
+    ],
+    instructions: [
+      'Запекти філе лосося з сіллю та прованськими травами при 180°C 15 хвилин.',
+      'Викласти в боул разом із теплим кіноа та шматочками авокадо.'
+    ]
   }
 };
 
@@ -95,22 +138,70 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
   entry,
   onClose,
   onToggleEaten,
-  onRemove
+  onRemove,
+  onUpdateTime
 }) => {
   if (!isOpen || !entry || !mealType) return null;
+
+  const [isEditingTime, setIsEditingTime] = useState(false);
+  const [timeValue, setTimeValue] = useState(entry.timestamp || '08:30');
 
   // Визначаємо деталі страви за назвою
   const lowerName = entry.name.toLowerCase();
   let recipeMeta = DEFAULT_RECIPES['steak'];
-  if (lowerName.includes('омлет') || lowerName.includes('яйц') || lowerName.includes('авокадо')) {
+
+  if (
+    lowerName.includes('сирник') ||
+    lowerName.includes('рікот') ||
+    lowerName.includes('рикот') ||
+    lowerName.includes('сир кисломол') ||
+    lowerName.includes('творог') ||
+    lowerName.includes('панкейк')
+  ) {
+    recipeMeta = DEFAULT_RECIPES['syrniki'];
+  } else if (
+    lowerName.includes('протеїн') ||
+    lowerName.includes('шейк') ||
+    lowerName.includes('коктейль') ||
+    lowerName.includes('гейнер') ||
+    lowerName.includes('ізолят')
+  ) {
+    recipeMeta = DEFAULT_RECIPES['protein_shake'];
+  } else if (
+    lowerName.includes('омлет') ||
+    lowerName.includes('яйц') ||
+    lowerName.includes('авокадо')
+  ) {
     recipeMeta = DEFAULT_RECIPES['omelet'];
-  } else if (lowerName.includes('кур') || lowerName.includes('філе') || lowerName.includes('кіноа') || lowerName.includes('гречк')) {
+  } else if (
+    lowerName.includes('лосос') ||
+    lowerName.includes('сьомг') ||
+    lowerName.includes('боул')
+  ) {
+    recipeMeta = DEFAULT_RECIPES['salmon'];
+  } else if (
+    lowerName.includes('кур') ||
+    lowerName.includes('філе') ||
+    lowerName.includes('кіноа') ||
+    lowerName.includes('гречк')
+  ) {
     recipeMeta = DEFAULT_RECIPES['chicken'];
-  } else if (lowerName.includes('йогурт') || lowerName.includes('ягід') || lowerName.includes('перекус')) {
+  } else if (
+    lowerName.includes('йогурт') ||
+    lowerName.includes('ягід') ||
+    lowerName.includes('перекус')
+  ) {
     recipeMeta = DEFAULT_RECIPES['yogurt'];
   }
 
   const isEaten = entry.eaten !== false;
+
+  const handleSaveTime = () => {
+    if (onUpdateTime && timeValue) {
+      onUpdateTime(mealType, entry.id, timeValue);
+    }
+    setIsEditingTime(false);
+  };
 
   return (
     <div
@@ -137,17 +228,41 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
             alt={entry.name}
             className="w-full h-full object-cover object-center"
             onError={(e) => {
-              // Fallback на локальний стейк
               (e.currentTarget as HTMLImageElement).src = '/dinner_steak_hd.jpg';
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#121814] via-[#121814]/40 to-transparent" />
 
-          {/* Плашка часу та типу */}
+          {/* Плашка часу та типу з можливістю редагування */}
           <div className="absolute bottom-3 left-4 flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-xl bg-amber-400/90 text-zinc-950 text-[11px] font-black tracking-tight shadow-md">
-              {entry.timestamp || 'За розкладом'}
-            </span>
+            {!isEditingTime ? (
+              <button
+                type="button"
+                onClick={() => setIsEditingTime(true)}
+                className="px-2.5 py-1 rounded-xl bg-amber-400 text-zinc-950 text-[11px] font-black tracking-tight shadow-md flex items-center gap-1 active:scale-95 transition-all"
+                title="Натисніть щоб змінити час"
+              >
+                <Clock className="w-3 h-3 text-zinc-950" />
+                <span>{entry.timestamp || 'За розкладом'}</span>
+                <span className="text-[9px] opacity-75">✎</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-1 bg-black/80 p-1 rounded-xl border border-amber-400">
+                <input
+                  type="time"
+                  value={timeValue}
+                  onChange={(e) => setTimeValue(e.target.value)}
+                  className="bg-black text-amber-300 font-black text-xs px-1.5 py-0.5 rounded focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveTime}
+                  className="px-2 py-0.5 rounded bg-amber-400 text-zinc-950 text-[10px] font-extrabold"
+                >
+                  OK
+                </button>
+              </div>
+            )}
             <span className="px-2.5 py-1 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-zinc-200 text-[11px] font-bold">
               {MEAL_LABELS[mealType]}
             </span>
