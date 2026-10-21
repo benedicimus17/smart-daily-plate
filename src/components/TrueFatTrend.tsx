@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { LineChart, TrendingDown, Info, Plus } from 'lucide-react';
+import { TrendingDown, Info, Plus, Sparkles, Activity } from 'lucide-react';
 import { calculateTrueFatTrend, WeightEntry } from '../math/trueFatTrend';
 
 export const TrueFatTrend: React.FC = () => {
   const [entries, setEntries] = useState<WeightEntry[]>([
-    { date: '10.10', rawWeightKg: 74.8 },
-    { date: '11.10', rawWeightKg: 74.5 },
-    { date: '12.10', rawWeightKg: 74.3 },
-    { date: '13.10', rawWeightKg: 74.1 },
-    { date: '14.10', rawWeightKg: 75.2 }, // Стрибок через натрій/воду після солоної їжі
-    { date: '15.10', rawWeightKg: 74.4 },
-    { date: '16.10', rawWeightKg: 73.9 },
+    { date: '15.10', rawWeightKg: 74.8 },
+    { date: '16.10', rawWeightKg: 74.5 },
+    { date: '17.10', rawWeightKg: 74.3 },
+    { date: '18.10', rawWeightKg: 74.1 },
+    { date: '19.10', rawWeightKg: 75.2 }, // Стрибок через натрій/воду після солоної вечері
+    { date: '20.10', rawWeightKg: 74.4 },
+    { date: '21.10', rawWeightKg: 73.9 },
   ]);
 
   const [inputWeight, setInputWeight] = useState('');
@@ -30,92 +30,116 @@ export const TrueFatTrend: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 animate-fadeIn pb-24">
-      <div className="glass-card rounded-4xl p-5 border border-white">
+    <div className="space-y-4 animate-fadeIn pb-24 text-white select-none">
+      {/* 1. ГОЛОВНА КАРТКА ТРЕНДУ В ТЕМНОМУ СКЛІ */}
+      <div className="rounded-3xl p-5 bg-[#121814] border border-white/10 shadow-2xl relative overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-brand-rose/10 text-brand-rose flex items-center justify-center">
-              <LineChart className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-2xl bg-amber-400/15 border border-amber-400/30 text-amber-400 flex items-center justify-center">
+              <Activity className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-800">True Fat Trend</h2>
-              <p className="text-xs text-slate-400">EMA α=0.1: відсікання стрибків солі та води</p>
+              <h2 className="text-base font-black text-white tracking-tight">True Fat Trend</h2>
+              <p className="text-xs text-zinc-400">Істинний тренд: відсікання стрибків солі та води</p>
+            </div>
+          </div>
+          <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+            EMA α=0.1
+          </span>
+        </div>
+
+        {/* 2. РОЗ'ЯСНЕННЯ ДЛЯ КОРИСТУВАЧА ПРО ВОДУ VS ЖИР */}
+        <div className="p-3.5 rounded-2xl bg-black/40 border border-white/10 flex gap-2.5 items-start text-xs text-zinc-300">
+          <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <p className="leading-relaxed text-[11.5px]">
+            <strong className="text-white font-bold">Чому ваги брешуть?</strong> Щоденна вага стрибає на 1–2 кг через натрій, вуглеводи та воду. Алгоритм NUTRIQ відфільтровує набряки і показує реальну швидкість спалювання чистого жиру.
+          </p>
+        </div>
+
+        {/* 3. ПОРІВНЯННЯ: СИРА ВАГА ПРОТИ ЧИСТОГО ЖИРУ */}
+        <div className="grid grid-cols-2 gap-2.5 mt-3.5">
+          {/* Сира вага */}
+          <div className="p-3.5 rounded-2xl bg-black/50 border border-white/10">
+            <span className="text-[10.5px] text-zinc-400 font-bold uppercase tracking-wider block">
+              Ваги сьогодні
+            </span>
+            <div className="text-2xl font-black text-white mt-0.5">
+              {latest.rawWeightKg} <span className="text-xs font-semibold text-zinc-500">кг</span>
+            </div>
+            <div className="text-[10.5px] font-semibold text-amber-300/90 mt-1">
+              {latest.waterRetentionDeltaKg > 0
+                ? `+${latest.waterRetentionDeltaKg} кг води/набряку`
+                : 'Без затримки води'}
+            </div>
+          </div>
+
+          {/* Істинний жировий тренд */}
+          <div className="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30">
+            <span className="text-[10.5px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
+              <TrendingDown className="w-3.5 h-3.5" /> Чистий жир
+            </span>
+            <div className="text-2xl font-black text-emerald-400 mt-0.5">
+              {latest.emaWeightKg} <span className="text-xs font-semibold text-emerald-500/70">кг</span>
+            </div>
+            <div className="text-[10.5px] text-zinc-300 font-semibold mt-1">
+              {(latest.emaWeightKg - previous.emaWeightKg).toFixed(1)} кг за тиждень
             </div>
           </div>
         </div>
 
-        {/* Порівняння: ваги проти істинного тренду */}
-        <div className="p-4 rounded-3xl bg-slate-50/80 border border-slate-100 flex items-center justify-between">
-          <div>
-            <span className="text-xs text-slate-400 font-medium">Ваги сьогодні</span>
-            <div className="text-2xl font-extrabold text-slate-800">
-              {latest.rawWeightKg} <span className="text-sm font-normal text-slate-400">кг</span>
-            </div>
-            <div className="text-[11px] font-semibold text-slate-500 mt-0.5">
-              {latest.waterRetentionDeltaKg > 0 ? `+${latest.waterRetentionDeltaKg} кг набряку` : 'Без затримки'}
-            </div>
-          </div>
-
-          <div className="w-px h-10 bg-slate-200" />
-
-          <div>
-            <span className="text-xs text-brand-emerald font-semibold flex items-center gap-1">
-              <TrendingDown className="w-3.5 h-3.5" /> Чистий жировий тренд
-            </span>
-            <div className="text-2xl font-extrabold text-brand-emerald">
-              {latest.emaWeightKg} <span className="text-sm font-normal text-emerald-600/70">кг</span>
-            </div>
-            <span className="text-[11px] text-slate-500 font-medium">
-              {(latest.emaWeightKg - previous.emaWeightKg).toFixed(1)} кг за останній запис
+        {/* 4. НЕОНОВИЙ ДИНАМІЧНИЙ ГРАФІК ТРЕНДУ (7 ДНІВ) */}
+        <div className="mt-4 pt-3.5 border-t border-white/10">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-zinc-300">Динаміка жирового тренду за 7 днів</span>
+            <span className="text-[10px] text-emerald-400 font-extrabold flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> Стабільний спад
             </span>
           </div>
-        </div>
 
-        {/* Візуальний міні-графік останніх днів */}
-        <div className="mt-4 pt-3 border-t border-slate-100">
-          <span className="text-xs font-semibold text-slate-500 block mb-2">Хід тренду (EMA фільтр)</span>
-          <div className="flex items-end justify-between h-24 gap-1.5 px-2">
+          <div className="flex items-end justify-between h-28 gap-1.5 px-2 bg-black/40 p-3 rounded-2xl border border-white/5">
             {trendData.slice(-7).map((item, idx) => {
-              const heightPercent = Math.max(20, Math.min(100, (item.emaWeightKg - 72) * 25));
+              const heightPercent = Math.max(25, Math.min(100, (item.emaWeightKg - 72) * 35));
+              const isLatest = idx === trendData.slice(-7).length - 1;
+
               return (
                 <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end">
-                  <span className="text-[9px] text-slate-400 mb-1">{item.emaWeightKg}</span>
+                  <span className={`text-[9px] mb-1 font-bold ${isLatest ? 'text-amber-300 font-black' : 'text-zinc-500'}`}>
+                    {item.emaWeightKg}
+                  </span>
                   <div
-                    className="w-full bg-brand-emerald/70 rounded-t-lg transition-all"
+                    className={`w-full rounded-t-lg transition-all ${
+                      isLatest
+                        ? 'bg-gradient-to-t from-emerald-500 to-amber-400 shadow-lg shadow-emerald-500/30'
+                        : 'bg-emerald-600/60 hover:bg-emerald-500/80'
+                    }`}
                     style={{ height: `${heightPercent}%` }}
                     title={`Ваги: ${item.rawWeightKg}кг, Тренд: ${item.emaWeightKg}кг`}
                   />
-                  <span className="text-[9px] text-slate-400 mt-1">{item.date}</span>
+                  <span className="text-[9px] text-zinc-500 mt-1 font-semibold">{item.date}</span>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Форма швидкого запису ранкової ваги */}
-        <form onSubmit={handleAddWeight} className="mt-4 pt-3 border-t border-slate-100 flex gap-2">
+        {/* 5. ФОРМА ШВИДКОГО ВНЕСЕННЯ РАНКОВОЇ ВАГИ */}
+        <form onSubmit={handleAddWeight} className="mt-4 pt-3.5 border-t border-white/10 flex gap-2">
           <input
             type="number"
             step="0.1"
             value={inputWeight}
             onChange={(e) => setInputWeight(e.target.value)}
             placeholder="Ранкова вага (наприклад 74.2)"
-            className="flex-1 px-3 py-2 text-xs rounded-xl bg-white border border-slate-200 focus:outline-none focus:border-brand-emerald"
+            className="flex-1 px-3.5 py-2.5 text-xs font-bold rounded-xl bg-black/60 border border-white/15 text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
           />
           <button
             type="submit"
-            className="px-3 py-2 rounded-xl bg-brand-emerald text-white text-xs font-bold flex items-center gap-1 shadow-glow-emerald active:scale-95"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 text-xs font-black flex items-center gap-1.5 shadow-md shadow-amber-400/20 active:scale-95 transition-all"
           >
-            <Plus className="w-3.5 h-3.5" /> Записати
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>Записати вагу</span>
           </button>
         </form>
-
-        <div className="mt-3 p-3 rounded-2xl bg-indigo-50/50 border border-indigo-100/50 flex gap-2.5 items-start text-xs text-slate-600">
-          <Info className="w-4 h-4 text-brand-indigo shrink-0 mt-0.5" />
-          <p className="leading-relaxed">
-            EMA фільтрує до 1-2 кг затримки глікогену та води після солоної їжі, оберігаючи від психологічних зривів дієти.
-          </p>
-        </div>
       </div>
     </div>
   );

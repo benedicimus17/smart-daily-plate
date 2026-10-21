@@ -8,13 +8,13 @@ import { BottomNav, NavTab } from './components/BottomNav';
 import { SmartGroceryList } from './components/SmartGroceryList';
 import { QuickAddModal } from './components/QuickAddModal';
 import { DiningOutEstimatorModal } from './components/DiningOutEstimatorModal';
-import { RecipeParser } from './components/RecipeParser';
+import { ChefHubModal } from './components/ChefHubModal';
 import { TrueFatTrend } from './components/TrueFatTrend';
 import { ProfileScreen } from './components/ProfileScreen';
 import { AuthModal } from './components/AuthModal';
 import { SplashScreen } from './components/SplashScreen';
 import { MealType } from './types/nutrition';
-import { TrendingUp, ShoppingBag, Link2 } from 'lucide-react';
+import { TrendingUp, ShoppingBag } from 'lucide-react';
 import { MyPlanWizard } from './components/MyPlanWizard';
 import { NextMealSpotlight } from './components/NextMealSpotlight';
 import { WaterTracker } from './components/WaterTracker';
@@ -28,12 +28,13 @@ export const App: React.FC = () => {
   
   // Керування модалками
   const [modalOpen, setModalOpen] = useState(false);
+  const [chefHubOpen, setChefHubOpen] = useState(false);
   const [planWizardOpen, setPlanWizardOpen] = useState(false);
   const [pendingAddAfterWizard, setPendingAddAfterWizard] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [diningModalOpen, setDiningModalOpen] = useState(false);
   const [targetMealType, setTargetMealType] = useState<MealType>('lunch');
-  const [trendSubTab, setTrendSubTab] = useState<'trend' | 'parser' | 'grocery'>('trend');
+  const [trendSubTab, setTrendSubTab] = useState<'trend' | 'grocery'>('trend');
 
   const handleOpenAdd = (mealType: MealType) => {
     setTargetMealType(mealType);
@@ -46,12 +47,11 @@ export const App: React.FC = () => {
   };
 
   const handleQuickAddCenter = () => {
-    setTargetMealType('dinner');
     if (!user.isRegistered) {
       setPendingAddAfterWizard(true);
       setPlanWizardOpen(true);
     } else {
-      setModalOpen(true);
+      setChefHubOpen(true);
     }
   };
 
@@ -59,7 +59,7 @@ export const App: React.FC = () => {
     setPlanWizardOpen(false);
     if (pendingAddAfterWizard) {
       setPendingAddAfterWizard(false);
-      setModalOpen(true);
+      setChefHubOpen(true);
     }
   };
 
@@ -110,50 +110,37 @@ export const App: React.FC = () => {
             <LogScreen onOpenQuickAdd={handleOpenAdd} />
           )}
 
-          {/* 3. Вкладка "Trends" (Тренди ваги, AI Парсер рецептів та список покупок) */}
+          {/* 3. Вкладка "Trends" (Істинний жировий тренд та згрупований список покупок) */}
           {activeTab === 'grocery' && (
             <div className="space-y-4 animate-fadeIn pb-24">
-              <div className="flex bg-[#121814] p-1 rounded-2xl border border-[#233226]">
+              <div className="flex bg-[#121814] p-1 rounded-2xl border border-white/10 shadow-lg">
                 <button
                   type="button"
                   onClick={() => setTrendSubTab('trend')}
                   className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                     trendSubTab === 'trend'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200'
+                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40 shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
                   }`}
                 >
                   <TrendingUp className="w-3.5 h-3.5" />
-                  <span>Тренди</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTrendSubTab('parser')}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                    trendSubTab === 'parser'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  <Link2 className="w-3.5 h-3.5" />
-                  <span>AI Парсер</span>
+                  <span>Істинний тренд</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setTrendSubTab('grocery')}
                   className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                     trendSubTab === 'grocery'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200'
+                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40 shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
                   }`}
                 >
                   <ShoppingBag className="w-3.5 h-3.5" />
-                  <span>Покупки</span>
+                  <span>Список покупок</span>
                 </button>
               </div>
 
               {trendSubTab === 'trend' && <TrueFatTrend />}
-              {trendSubTab === 'parser' && <RecipeParser />}
               {trendSubTab === 'grocery' && <SmartGroceryList />}
             </div>
           )}
@@ -193,7 +180,20 @@ export const App: React.FC = () => {
             }}
           />
 
-          {/* Швидка модалка запису страв */}
+          {/* Центральний Шеф-Хаб: Каталог 50 рецептів, AI Парсер соцмереж та Вільний текст */}
+          <ChefHubModal
+            isOpen={chefHubOpen}
+            onClose={() => setChefHubOpen(false)}
+            onAddDishToDay={(mealType, data) => {
+              addFoodToMeal(mealType, {
+                ...data,
+                eaten: true,
+                foodId: `chef-${Date.now()}`
+              });
+            }}
+          />
+
+          {/* Швидка модалка запису страв для окремих слотів */}
           <QuickAddModal
             isOpen={modalOpen}
             mealType={targetMealType}
