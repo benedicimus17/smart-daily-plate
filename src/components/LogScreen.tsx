@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNutritionStore } from '../store/nutritionStore';
-import { MealType } from '../types/nutrition';
+import { MealType, MealEntry } from '../types/nutrition';
 import { SmartBalancerModal } from './SmartBalancerModal';
 import { CookLossCalculator } from './CookLossCalculator';
 import { DiningOutEstimatorModal } from './DiningOutEstimatorModal';
 import { QuickAddModal } from './QuickAddModal';
+import { DishDetailModal } from './DishDetailModal';
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -14,7 +15,8 @@ import {
   CookingPot,
   Sparkles,
   UtensilsCrossed,
-  Trash2
+  Trash2,
+  ChevronRight as ChevronRightIcon
 } from 'lucide-react';
 
 interface LogScreenProps {
@@ -28,15 +30,39 @@ const formatLocalDate = (d: Date): string => {
   return `${y}-${m}-${day}`;
 };
 
+interface MealSlotConfig {
+  type: MealType;
+  title: string;
+  time: string;
+  targetKcal: number;
+}
+
+const MEAL_SLOTS: MealSlotConfig[] = [
+  { type: 'breakfast', title: 'Сніданок', time: '08:30', targetKcal: 380 },
+  { type: 'lunch', title: 'Обід', time: '13:00', targetKcal: 520 },
+  { type: 'snack', title: 'Перекус', time: '16:30', targetKcal: 200 },
+  { type: 'dinner', title: 'Вечеря', time: '19:30', targetKcal: 500 }
+];
+
 export const LogScreen: React.FC<LogScreenProps> = () => {
-  const { dailyLog, selectedDate, setSelectedDate, removeFoodFromMeal, addFoodToMeal } = useNutritionStore();
+  const {
+    dailyLog,
+    selectedDate,
+    setSelectedDate,
+    removeFoodFromMeal,
+    addFoodToMeal,
+    toggleMealEaten
+  } = useNutritionStore();
 
   const [balancerOpen, setBalancerOpen] = useState(false);
   const [cookLossOpen, setCookLossOpen] = useState(false);
   const [diningOpen, setDiningOpen] = useState(false);
   const [quickAddMealType, setQuickAddMealType] = useState<MealType | null>(null);
 
-  // Стан для демонстрації перебору (якщо активний, показуємо кнопку балансування)
+  // Стан для модалки деталей страви
+  const [selectedDish, setSelectedDish] = useState<{ mealType: MealType; entry: MealEntry } | null>(null);
+
+  // ШІ-Балансувальник: стан перебору
   const [isOverLimit, setIsOverLimit] = useState(true);
   const excessKcal = 240;
 
@@ -163,80 +189,35 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
         </div>
       </div>
 
-      {/* 2. ПІДСУМОК ДНЯ ТА ПЛАШКА БАЛАНСУВАННЯ */}
-      <div
-        className="rounded-3xl p-3.5 relative overflow-hidden shadow-lg"
-        style={{
-          background: 'linear-gradient(165deg, rgba(20,28,23,0.92) 0%, rgba(12,17,14,0.98) 100%)',
-          border: '1px solid rgba(255,255,255,0.1)'
-        }}
-      >
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-              Баланс обраного дня
-            </span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-lg font-black text-white">
-                {dailyLog.totals.calories}
-              </span>
-              <span className="text-xs text-zinc-400">/ {dailyLog.targets.calories} ккал</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-right">
+      {/* 2. КОМПАКТНА ШІ-ПЛАШКА БАЛАНСУВАННЯ (БЕЗ ДУБЛЮВАННЯ КІЛЬЦЯ) */}
+      {isOverLimit && (
+        <div className="p-2.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 flex items-center justify-between animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping shrink-0" />
             <div>
-              <span className="text-[10px] text-zinc-500 block">Протеїн</span>
-              <span className="text-xs font-bold text-emerald-400">{dailyLog.totals.protein} / {dailyLog.targets.protein}г</span>
-            </div>
-            <div className="w-px h-6 bg-white/10" />
-            <div>
-              <span className="text-[10px] text-zinc-500 block">Жири</span>
-              <span className="text-xs font-bold text-amber-400">{dailyLog.totals.fat} / {dailyLog.targets.fat}г</span>
-            </div>
-            <div className="w-px h-6 bg-white/10" />
-            <div>
-              <span className="text-[10px] text-zinc-500 block">Вуглеводи</span>
-              <span className="text-xs font-bold text-indigo-400">{dailyLog.totals.carbs} / {dailyLog.targets.carbs}г</span>
-            </div>
-          </div>
-        </div>
-
-        {/* ШІ-ПЛАШКА ПЕРЕБОРУ ТА БАЛАНСУВАННЯ */}
-        {isOverLimit ? (
-          <div className="mt-2.5 p-2.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 flex items-center justify-between animate-fadeIn">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping" />
-              <div>
-                <div className="text-[11px] font-bold text-rose-200">
-                  Перевищення вечері +{excessKcal} ккал
-                </div>
-                <div className="text-[9.5px] text-rose-300/80">
-                  Забагато жирів у поєднанні з ситною вечерею
-                </div>
+              <div className="text-[11px] font-bold text-rose-200">
+                Перевищення вечері +{excessKcal} ккал
+              </div>
+              <div className="text-[9.5px] text-rose-300/80">
+                ШІ пропонує зменшити порцію або списати у Flex Bank
               </div>
             </div>
+          </div>
 
-            <button
-              id="btn-open-balancer"
-              type="button"
-              onClick={() => setBalancerOpen(true)}
-              className="px-3 py-1.5 rounded-xl font-bold text-[11px] text-zinc-950 flex items-center gap-1.5 shadow-md transition-all active:scale-95"
-              style={{
-                background: 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)'
-              }}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-zinc-950" />
-              <span>Збалансувати</span>
-            </button>
-          </div>
-        ) : (
-          <div className="mt-2.5 p-2 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-2 text-[11px] text-emerald-300 font-semibold">
-            <Check className="w-3.5 h-3.5 stroke-[3]" />
-            <span>День ідеально збалансовано в межах цільового дефіциту!</span>
-          </div>
-        )}
-      </div>
+          <button
+            id="btn-open-balancer"
+            type="button"
+            onClick={() => setBalancerOpen(true)}
+            className="px-3 py-1.5 rounded-xl font-bold text-[11px] text-zinc-950 flex items-center gap-1.5 shadow-md transition-all active:scale-95 shrink-0"
+            style={{
+              background: 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)'
+            }}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-zinc-950" />
+            <span>Збалансувати</span>
+          </button>
+        </div>
+      )}
 
       {/* 3. КНОПКИ ШВИДКИХ ІНСТРУМЕНТІВ ШЕФА */}
       <div className="grid grid-cols-2 gap-2">
@@ -259,183 +240,116 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
         </button>
       </div>
 
-      {/* 4. ТАЙМЛАЙН ПРИЙОМІВ ЇЖІ (ДИНАМІЧНИЙ РОЗКЛАД) */}
+      {/* 4. ТАЙМЛАЙН ПРИЙОМІВ ЇЖІ (ДИНАМІЧНИЙ РОЗКЛАД З РЕАЛЬНОГО STORE) */}
       <div className="space-y-3">
-        {/* 1. Сніданок */}
-        <div className="rounded-3xl p-3.5 bg-black/40 border border-white/10 shadow-sm">
-          <div className="flex items-center justify-between pb-2 border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-extrabold text-amber-300 px-2 py-0.5 rounded-lg bg-amber-400/15 border border-amber-400/30">
-                08:30
-              </span>
-              <h4 className="text-sm font-bold text-white tracking-tight">Сніданок</h4>
-              <span className="text-[10px] text-zinc-500">• Ціль ~380 ккал</span>
-            </div>
+        {MEAL_SLOTS.map((slot) => {
+          const category = dailyLog.meals[slot.type];
+          const entries = category?.entries || [];
 
-            <button
-              type="button"
-              onClick={() => setQuickAddMealType('breakfast')}
-              className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white"
+          return (
+            <div
+              key={slot.type}
+              className="rounded-3xl p-3.5 bg-black/40 border border-white/10 shadow-sm transition-all"
             >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
+              {/* Заголовок тайм-слота */}
+              <div className="flex items-center justify-between pb-2 border-b border-white/5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-extrabold text-amber-300 px-2 py-0.5 rounded-lg bg-amber-400/15 border border-amber-400/30">
+                    {slot.time}
+                  </span>
+                  <h4 className="text-sm font-bold text-white tracking-tight">{slot.title}</h4>
+                  <span className="text-[10px] text-zinc-500">
+                    • Ціль ~{slot.targetKcal} ккал
+                  </span>
+                </div>
 
-          <div className="pt-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300"
-              >
-                <Check className="w-3 h-3 stroke-[3]" />
-              </button>
-              <div>
-                <div className="text-xs font-bold text-zinc-200">Омлет з авокадо та шпинатом</div>
-                <div className="text-[10.5px] text-zinc-500">180 г • 380 ккал • 28г Б • 24г Ж</div>
+                <button
+                  type="button"
+                  onClick={() => setQuickAddMealType(slot.type)}
+                  className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all active:scale-95"
+                  title="Додати страву"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
               </div>
+
+              {/* Список страв слота */}
+              {entries.length > 0 ? (
+                <div className="divide-y divide-white/5 pt-1">
+                  {entries.map((entry) => {
+                    const isEaten = entry.eaten !== false;
+
+                    return (
+                      <div
+                        key={entry.id}
+                        onClick={() => setSelectedDish({ mealType: slot.type, entry })}
+                        className="py-2.5 flex items-center justify-between cursor-pointer group hover:bg-white/[0.02] px-1 rounded-xl transition-all"
+                      >
+                        {/* Інтерактивна галочка з'їденого */}
+                        <div className="flex items-center gap-2.5 flex-1 min-w-0 pr-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleMealEaten(slot.type, entry.id);
+                            }}
+                            className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 active:scale-90 ${
+                              isEaten
+                                ? 'bg-emerald-400 text-zinc-950 shadow-sm shadow-emerald-400/30'
+                                : 'border-2 border-white/25 bg-black/40 hover:border-amber-400'
+                            }`}
+                            title={isEaten ? 'Позначено як з\'їдено' : 'Позначити з\'їденим'}
+                          >
+                            {isEaten && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                          </button>
+
+                          {/* Інформація про страву (тап відкриває деталі) */}
+                          <div className="min-w-0">
+                            <div className={`text-xs font-bold truncate ${isEaten ? 'text-zinc-200' : 'text-zinc-400'}`}>
+                              {entry.name}
+                            </div>
+                            <div className="text-[10.5px] text-zinc-500 flex items-center gap-1.5 flex-wrap mt-0.5">
+                              <span>{entry.weightGrams}г</span>
+                              <span>•</span>
+                              <span className="text-amber-400/90 font-bold">{entry.macros.calories} ккал</span>
+                              <span>•</span>
+                              <span className="text-emerald-400/80">{entry.macros.protein}г Б</span>
+                              <span>•</span>
+                              <span className="text-amber-400/80">{entry.macros.fat}г Ж</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Кнопки дій: стрілочка деталей та видалення */}
+                        <div className="flex items-center gap-1 shrink-0">
+                          <ChevronRightIcon className="w-3.5 h-3.5 text-zinc-500 group-hover:text-amber-400 transition-colors" />
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeFoodFromMeal(slot.type, entry.id);
+                            }}
+                            className="p-1 text-zinc-600 hover:text-rose-400 transition-colors ml-1"
+                            title="Видалити"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div
+                  onClick={() => setQuickAddMealType(slot.type)}
+                  className="py-3 text-center cursor-pointer text-zinc-600 hover:text-zinc-400 text-xs transition-colors"
+                >
+                  Немає страв • Натисніть [+] щоб додати
+                </div>
+              )}
             </div>
-
-            <button
-              type="button"
-              onClick={() => removeFoodFromMeal('breakfast', 'omelet-1')}
-              className="p-1 text-zinc-600 hover:text-rose-400"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* 2. Обід */}
-        <div className="rounded-3xl p-3.5 bg-black/40 border border-white/10 shadow-sm">
-          <div className="flex items-center justify-between pb-2 border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-extrabold text-amber-300 px-2 py-0.5 rounded-lg bg-amber-400/15 border border-amber-400/30">
-                13:00
-              </span>
-              <h4 className="text-sm font-bold text-white tracking-tight">Обід</h4>
-              <span className="text-[10px] text-zinc-500">• Ціль ~520 ккал</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setQuickAddMealType('lunch')}
-              className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="pt-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300"
-              >
-                <Check className="w-3 h-3 stroke-[3]" />
-              </button>
-              <div>
-                <div className="text-xs font-bold text-zinc-200">Куряче філе запечене з киноа</div>
-                <div className="text-[10.5px] text-zinc-500">220 г • 480 ккал • 44г Б • 12г Ж</div>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => removeFoodFromMeal('lunch', 'chicken-1')}
-              className="p-1 text-zinc-600 hover:text-rose-400"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* 3. Перекус */}
-        <div className="rounded-3xl p-3.5 bg-black/40 border border-white/10 shadow-sm">
-          <div className="flex items-center justify-between pb-2 border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-extrabold text-amber-300 px-2 py-0.5 rounded-lg bg-amber-400/15 border border-amber-400/30">
-                16:30
-              </span>
-              <h4 className="text-sm font-bold text-white tracking-tight">Перекус</h4>
-              <span className="text-[10px] text-zinc-500">• Ціль ~200 ккал</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setQuickAddMealType('snack')}
-              className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="pt-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300"
-              >
-                <Check className="w-3 h-3 stroke-[3]" />
-              </button>
-              <div>
-                <div className="text-xs font-bold text-zinc-200">Грецький йогурт 2% з лісовими ягодами</div>
-                <div className="text-[10.5px] text-zinc-500">150 г • 190 ккал • 15г Б • 4г Ж</div>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => removeFoodFromMeal('snack', 'yogurt-1')}
-              className="p-1 text-zinc-600 hover:text-rose-400"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* 4. Вечеря (Панорамна картка Gourmet Steak & Greens) */}
-        <div className="rounded-3xl p-3.5 bg-black/40 border border-amber-400/30 shadow-sm relative overflow-hidden">
-          <div className="flex items-center justify-between pb-2 border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-extrabold text-amber-300 px-2 py-0.5 rounded-lg bg-amber-400/15 border border-amber-400/30">
-                19:30
-              </span>
-              <h4 className="text-sm font-bold text-white tracking-tight">Вечеря</h4>
-              <span className="text-[10px] text-amber-400">• Ціль ~500 ккал</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setQuickAddMealType('dinner')}
-              className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="pt-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300"
-              >
-                <Check className="w-3 h-3 stroke-[3]" />
-              </button>
-              <div>
-                <div className="text-xs font-bold text-white">Gourmet Steak & Greens (Рибай зі спаржею)</div>
-                <div className="text-[10.5px] text-zinc-400">220 г • 510 ккал • 46г Б • 24г Ж</div>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => removeFoodFromMeal('dinner', 'steak-1')}
-              className="p-1 text-zinc-600 hover:text-rose-400"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
       {/* 5. КНОПКА ДОДАВАННЯ СВОГО ПРИЙОМУ ЇЖІ */}
@@ -448,6 +362,16 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
         <span>+ Додати свій прийом їжі або перекус</span>
       </button>
 
+      {/* МОДАЛКА ДЕТАЛЕЙ СТРАВИ (ФОТО, ІНГРЕДІЄНТИ В ГРАМАХ, РЕЦЕПТ, КБЖВ) */}
+      <DishDetailModal
+        isOpen={selectedDish !== null}
+        mealType={selectedDish?.mealType || null}
+        entry={selectedDish?.entry || null}
+        onClose={() => setSelectedDish(null)}
+        onToggleEaten={toggleMealEaten}
+        onRemove={removeFoodFromMeal}
+      />
+
       {/* МОДАЛКА ШІ-БАЛАНСУВАЛЬНИКА */}
       <SmartBalancerModal
         isOpen={balancerOpen}
@@ -458,18 +382,17 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
         excessCalories={excessKcal}
       />
 
-      {/* МОДАЛКА КАСТРУЛІ (COOK-LOSS) */}
+      {/* МОДАЛКА КАСТРУЛІ (COOK-LOSS) З НАДІЙНИМ ЗАКРИТТЯМ */}
       {cookLossOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-sm rounded-[30px] p-4 bg-[#121814] border border-white/10 relative max-h-[90vh] overflow-y-auto">
-            <button
-              type="button"
-              onClick={() => setCookLossOpen(false)}
-              className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white"
-            >
-              ✕
-            </button>
-            <CookLossCalculator />
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn"
+          onClick={() => setCookLossOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-[30px] p-4 bg-[#121814] border border-white/10 relative max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(0,0,0,0.85)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CookLossCalculator onClose={() => setCookLossOpen(false)} />
           </div>
         </div>
       )}

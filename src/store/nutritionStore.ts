@@ -89,25 +89,16 @@ const todayMeals: DailyLog['meals'] = {
     entries: [
       {
         id: 'b-1',
-        foodId: 'oats',
-        name: 'Вівсянка з ягодами та мигдалем',
-        weightGrams: 280,
-        macros: { calories: 520, protein: 42, fat: 22, carbs: 78 },
+        foodId: 'omelet_avocado',
+        name: 'Омлет з авокадо та шпинатом',
+        weightGrams: 180,
+        macros: { calories: 380, protein: 28, fat: 24, carbs: 12 },
         timestamp: '08:30',
         eaten: true,
-        recipeDetails: 'Вівсяні пластівці 70г, протеїн ізолят 35г, лохина 80г, мигдаль 20г'
-      },
-      {
-        id: 'b-2',
-        foodId: 'coffee',
-        name: 'Флет-вайт',
-        weightGrams: 200,
-        macros: { calories: 120, protein: 6, fat: 5, carbs: 14 },
-        timestamp: '08:45',
-        eaten: true
+        recipeDetails: 'Курячі яйця 3 шт, авокадо хасс 60г, шпинат свіжий 50г, оливкова олія 5г'
       }
     ],
-    totalMacros: { calories: 640, protein: 48, fat: 27, carbs: 92 }
+    totalMacros: { calories: 380, protein: 28, fat: 24, carbs: 12 }
   },
   lunch: {
     type: 'lunch',
@@ -116,19 +107,37 @@ const todayMeals: DailyLog['meals'] = {
     entries: [
       {
         id: 'l-1',
-        foodId: 'salmon_bowl',
-        name: 'Боул з лососем та кіноа',
-        weightGrams: 420,
-        macros: { calories: 810, protein: 92, fat: 38, carbs: 128 },
-        timestamp: '13:15',
+        foodId: 'chicken_quinoa',
+        name: 'Куряче філе запечене з кіноа',
+        weightGrams: 220,
+        macros: { calories: 480, protein: 44, fat: 12, carbs: 48 },
+        timestamp: '13:00',
         eaten: true,
         isCookLoss: true,
-        rawWeightGrams: 350,
-        cookedWeightGrams: 260,
-        recipeDetails: 'Філе лосося 350г ➔ 260г (-26%), кіноа 160г, авокадо 70г'
+        rawWeightGrams: 220,
+        cookedWeightGrams: 165,
+        recipeDetails: 'Філе курки 220г ➔ 165г (-25%), кіноа відварене 150г, броколі на пару'
       }
     ],
-    totalMacros: { calories: 810, protein: 92, fat: 38, carbs: 128 }
+    totalMacros: { calories: 480, protein: 44, fat: 12, carbs: 48 }
+  },
+  snack: {
+    type: 'snack',
+    title: 'Перекус',
+    icon: 'Apple',
+    entries: [
+      {
+        id: 's-1',
+        foodId: 'greek_yogurt_berries',
+        name: 'Грецький йогурт 2% з лісовими ягодами',
+        weightGrams: 150,
+        macros: { calories: 190, protein: 15, fat: 4, carbs: 22 },
+        timestamp: '16:30',
+        eaten: true,
+        recipeDetails: 'Грецький йогурт 2% 150г, лісові ягоди (чорниця, малина) 60г'
+      }
+    ],
+    totalMacros: { calories: 190, protein: 15, fat: 4, carbs: 22 }
   },
   dinner: {
     type: 'dinner',
@@ -138,24 +147,17 @@ const todayMeals: DailyLog['meals'] = {
       {
         id: 'd-1',
         foodId: 'steak_greens',
-        name: 'Gourmet Steak & Greens',
-        weightGrams: 320,
-        macros: { calories: 480, protein: 42, fat: 12, carbs: 20 },
+        name: 'Gourmet Steak & Greens (Рибай зі спаржею)',
+        weightGrams: 260,
+        macros: { calories: 510, protein: 46, fat: 24, carbs: 8 },
         timestamp: '19:30',
         eaten: false, // Заплановано
         isCookLoss: true,
         rawWeightGrams: 350,
         cookedWeightGrams: 260,
-        recipeDetails: 'Стейк яловичий 350г ➔ 260г (-26% Cook-Loss), спаржа свіжа 150г'
+        recipeDetails: 'Стейк яловичий 350г ➔ 260г (-26% Cook-Loss), спаржа свіжа 140г'
       }
     ],
-    totalMacros: { calories: 0, protein: 0, fat: 0, carbs: 0 }
-  },
-  snack: {
-    type: 'snack',
-    title: 'Перекус',
-    icon: 'Apple',
-    entries: [],
     totalMacros: { calories: 0, protein: 0, fat: 0, carbs: 0 }
   }
 };
