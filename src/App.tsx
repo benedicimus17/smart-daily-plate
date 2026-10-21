@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNutritionStore } from './store/nutritionStore';
-import { useUserStore } from './store/userStore';
 import { Header } from './components/Header';
 import { CalorieRings } from './components/CalorieRings';
 import { WeeklyBankWidget } from './components/WeeklyBankWidget';
@@ -22,7 +21,6 @@ import { LogScreen } from './components/LogScreen';
 
 export const App: React.FC = () => {
   const { dailyLog, weeklyBank, addFoodToMeal } = useNutritionStore();
-  const { user } = useUserStore();
   const [activeTab, setActiveTab] = useState<NavTab>('today');
   const [showSplash, setShowSplash] = useState(true);
   
@@ -38,21 +36,11 @@ export const App: React.FC = () => {
 
   const handleOpenAdd = (mealType: MealType) => {
     setTargetMealType(mealType);
-    if (!user.isRegistered) {
-      setPendingAddAfterWizard(true);
-      setPlanWizardOpen(true);
-    } else {
-      setModalOpen(true);
-    }
+    setModalOpen(true);
   };
 
   const handleQuickAddCenter = () => {
-    if (!user.isRegistered) {
-      setPendingAddAfterWizard(true);
-      setPlanWizardOpen(true);
-    } else {
-      setChefHubOpen(true);
-    }
+    setChefHubOpen(true);
   };
 
   const handleWizardCompleted = () => {
