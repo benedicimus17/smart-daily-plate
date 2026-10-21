@@ -51,11 +51,41 @@ describe('Recipe Parser Service (1-Click TikTok / Reels / Web)', () => {
     const parsed = parseSmartDish('тост з бананом', 210);
     expect(parsed.title).toContain('Тости з бананом');
     expect(parsed.totalWeightGrams).toBe(210);
-    // 210г тостів з бананом мають містити більше 300 ккал та понад 50г корисних вуглеводів
     expect(parsed.totalMacros.calories).toBeGreaterThan(320);
     expect(parsed.totalMacros.carbs).toBeGreaterThan(55);
     expect(parsed.totalMacros.protein).toBeGreaterThan(9);
     expect(parsed.ingredients).toHaveLength(3);
+  });
+
+  it('коректно розраховує Біг Мак (не плутає з макаронами)', () => {
+    const parsed = parseSmartDish('Біг Мак', 210);
+    expect(parsed.title).toContain('Біг Мак');
+    expect(parsed.totalWeightGrams).toBe(210);
+    // 210г Біг Мак має містити ~480-550 ккал, 25-30г білка, понад 20г жирів, ~40-45г вуглеводів
+    expect(parsed.totalMacros.calories).toBeGreaterThan(450);
+    expect(parsed.totalMacros.calories).toBeLessThan(580);
+    expect(parsed.totalMacros.protein).toBeGreaterThan(24);
+    expect(parsed.totalMacros.fat).toBeGreaterThan(18); // не 3.2г!
+    expect(parsed.totalMacros.carbs).toBeLessThan(55);  // не 151г!
+  });
+
+  it('коректно розраховує круасан (не дає занижений фоллбек)', () => {
+    const parsed = parseSmartDish('круасан', 100);
+    expect(parsed.title).toContain('круасан');
+    expect(parsed.totalMacros.calories).toBeGreaterThan(380); // ~406 ккал, не 145 ккал!
+    expect(parsed.totalMacros.fat).toBeGreaterThan(18);
+  });
+
+  it('коректно розпізнає горішки, салат та снек', () => {
+    const nuts = parseSmartDish('горішки', 100);
+    expect(nuts.totalMacros.calories).toBeGreaterThan(550); // ~607 ккал
+    expect(nuts.totalMacros.fat).toBeGreaterThan(45);
+
+    const salad = parseSmartDish('салат', 100);
+    expect(salad.totalMacros.calories).toBeLessThan(120);
+
+    const snack = parseSmartDish('снек', 100);
+    expect(snack.totalMacros.protein).toBeGreaterThan(15);
   });
 
   it('розпізнає TikTok-відео з крепсами з м’ясом за описом та URL', () => {
@@ -63,5 +93,15 @@ describe('Recipe Parser Service (1-Click TikTok / Reels / Web)', () => {
     expect(parsed.title).toContain('крепси з соковитим м’ясним фаршем');
     expect(parsed.ingredients.some(i => i.name.includes('Фарш') || i.name.includes('м’яс'))).toBe(true);
     expect(parsed.macrosPerServing.protein).toBeGreaterThan(20);
+  });
+
+  it('динамічно розпізнає будь-яке відео з TikTok за введеною назвою (не завжди паста)', () => {
+    const croissantVideo = parseRecipeFromUrl('https://www.tiktok.com/@baker/video/12345', 'круасан', 1);
+    expect(croissantVideo.title).toContain('круасан');
+    expect(croissantVideo.macrosPerServing.calories).toBeGreaterThan(350);
+
+    const saladVideo = parseRecipeFromUrl('https://www.tiktok.com/@chef/video/99999', 'салат', 1);
+    expect(saladVideo.title).toContain('салат');
+    expect(saladVideo.macrosPerServing.calories).toBeLessThan(200);
   });
 });

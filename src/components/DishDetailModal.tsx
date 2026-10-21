@@ -252,6 +252,62 @@ const DEFAULT_RECIPES: Record<string, {
       'Обсмажити на пательні по 60 секунд з кожного боку (Rare/Medium Rare).',
       'Нарізати тонкими слайсами та подати з авокадо.'
     ]
+  },
+  'big_mac': {
+    photo: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Булочка з кунжутом', grams: 85, calories: 210, protein: 7.5, fat: 2.5, carbs: 39 },
+      { name: 'Котлета з добірної яловичини', grams: 85, calories: 215, protein: 20.0, fat: 15.0, carbs: 0 },
+      { name: 'Сир Чеддер', grams: 20, calories: 76, protein: 5.0, fat: 6.0, carbs: 0.3 },
+      { name: 'Соус Біг Мак та мариновані огірки', grams: 20, calories: 39, protein: 0.5, fat: 3.5, carbs: 1.5 }
+    ],
+    instructions: [
+      'Обсмажити котлету з яловичини на грилі.',
+      'Підрум’янити булочку на пательні.',
+      'Зібрати соковитий бургер з сиром та соусом.'
+    ]
+  },
+  'croissant': {
+    photo: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Французький масляний круасан', grams: 80, calories: 325, protein: 6.6, fat: 16.8, carbs: 36.6 }
+    ],
+    instructions: [
+      'Злегка прогріти в духовці 2 хвилини.',
+      'Подавати з кавою чи улюбленим теплим напоєм.'
+    ]
+  },
+  'nuts': {
+    photo: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Мікс добірних горіхів (мигдаль, волоські, фундук)', grams: 50, calories: 304, protein: 9.0, fat: 27.0, carbs: 7.0 }
+    ],
+    instructions: [
+      'Натуральний чистий снек, готовий до споживання.',
+      'Відмінне джерело корисних омега-3 жирів.'
+    ]
+  },
+  'greek_salad': {
+    photo: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Свіжі томати чері', grams: 80, calories: 15, protein: 0.7, fat: 0.2, carbs: 3.1 },
+      { name: 'Свіжі хрусткі огірки', grams: 80, calories: 12, protein: 0.6, fat: 0.1, carbs: 2.4 },
+      { name: 'Грецька фета', grams: 45, calories: 117, protein: 6.3, fat: 9.5, carbs: 1.8 },
+      { name: 'Оливкова олія Extra Virgin', grams: 15, calories: 133, protein: 0, fat: 15.0, carbs: 0 }
+    ],
+    instructions: [
+      'Нарізати томати та огірки великими скибками.',
+      'Додати шматочки фети, заправити оливковою олією та сухим орегано.'
+    ]
+  },
+  'snack_bar': {
+    photo: 'https://images.unsplash.com/photo-1622484216850-4d5162a40fd9?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Протеїновий снек-батончик (шоколад-арахіс)', grams: 60, calories: 228, protein: 12.0, fat: 7.2, carbs: 28.8 }
+    ],
+    instructions: [
+      'Зручний поживний снек без доданого цукру.'
+    ]
   }
 };
 
@@ -273,7 +329,15 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
   const lowerName = entry.name.toLowerCase();
   let recipeMeta = DEFAULT_RECIPES['steak'];
 
-  if (lowerName.includes('тост') && lowerName.includes('банан')) {
+  if (lowerName.includes('біг мак') || lowerName.includes('бігмак') || lowerName.includes('бургер') || lowerName.includes('макдональд')) {
+    recipeMeta = DEFAULT_RECIPES['big_mac'];
+  } else if (lowerName.includes('круас')) {
+    recipeMeta = DEFAULT_RECIPES['croissant'];
+  } else if (lowerName.includes('горіх') || lowerName.includes('мигдал') || lowerName.includes('фундук')) {
+    recipeMeta = DEFAULT_RECIPES['nuts'];
+  } else if (lowerName.includes('снек') || lowerName.includes('батончик')) {
+    recipeMeta = DEFAULT_RECIPES['snack_bar'];
+  } else if (lowerName.includes('тост') && lowerName.includes('банан')) {
     recipeMeta = DEFAULT_RECIPES['toast_banana'];
   } else if (lowerName.includes('тост') && (lowerName.includes('авокадо') || lowerName.includes('пашот'))) {
     recipeMeta = DEFAULT_RECIPES['toast_avocado'];
@@ -289,6 +353,8 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
     recipeMeta = DEFAULT_RECIPES['tuna_steak'];
   } else if (lowerName.includes('салат') && (lowerName.includes('телят') || lowerName.includes('яловичин'))) {
     recipeMeta = DEFAULT_RECIPES['beef_salad'];
+  } else if (lowerName.includes('салат')) {
+    recipeMeta = DEFAULT_RECIPES['greek_salad'];
   } else if (lowerName.includes('чіа') || lowerName.includes('chia') || lowerName.includes('пудинг')) {
     recipeMeta = DEFAULT_RECIPES['chia_pudding'];
   } else if (

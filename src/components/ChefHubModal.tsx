@@ -390,6 +390,96 @@ const CHEF_CATALOG: ChefDishItem[] = [
       'Обсмажити на пательні по 60 секунд з кожного боку (всередині має бути соковитий рожевий колір).',
       'Нарізати тонкими скибочками і подати з авокадо.'
     ]
+  },
+  {
+    id: 'chef-s4',
+    name: 'Мікс добірних горішків (мигдаль, фундук, волоські)',
+    category: 'snack',
+    categoryLabel: 'Перекус',
+    weightGrams: 50,
+    macros: { calories: 304, protein: 9.0, fat: 27.0, carbs: 7.0 },
+    photo: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=500&q=80',
+    prepTime: '1 хв',
+    shortDesc: 'Натуральні добірні горіхи без солі — заряд корисної енергії (здоровий снек)',
+    ingredients: [
+      { name: 'Горіхи асорті (мигдаль, волоські, фундук)', grams: 50 }
+    ],
+    instructions: [
+      'Готовий до вживання поживний снек, багатий на омега-3 та магній.'
+    ]
+  },
+  {
+    id: 'chef-b6',
+    name: 'Французький масляний круасан',
+    category: 'breakfast',
+    categoryLabel: 'Сніданок',
+    weightGrams: 80,
+    macros: { calories: 325, protein: 6.6, fat: 16.8, carbs: 36.6 },
+    photo: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=500&q=80',
+    prepTime: '2 хв',
+    shortDesc: 'Ніжний пухкий круасан на натуральному вершковому маслі',
+    ingredients: [
+      { name: 'Круасан вершковий французький', grams: 80 }
+    ],
+    instructions: [
+      'Злегка підігріти в духовці або тостері перед подачею.',
+      'Ідеально смакує з ранковою кавою або чаєм.'
+    ]
+  },
+  {
+    id: 'chef-l6',
+    name: 'Грецький салат зі свіжими овочами та фетою',
+    category: 'lunch',
+    categoryLabel: 'Обід',
+    weightGrams: 220,
+    macros: { calories: 253, protein: 7.7, fat: 20.9, carbs: 8.8 },
+    photo: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80',
+    prepTime: '8 хв',
+    shortDesc: 'Хрусткі огірки, томати чері, маслини каламата, грецька фета та олія',
+    ingredients: [
+      { name: 'Помідори свіжі', grams: 80 },
+      { name: 'Огірок свіжий', grams: 80 },
+      { name: 'Сир фета / бринза', grams: 45 },
+      { name: 'Оливкова олія extra virgin', grams: 15 }
+    ],
+    instructions: [
+      'Нарізати овочі великими шматочками, додати кубики фети.',
+      'Заправити оливковою олією Extra Virgin та орегано.'
+    ]
+  },
+  {
+    id: 'chef-l7',
+    name: 'Бургер Біг Мак із соковитою телятиною',
+    category: 'lunch',
+    categoryLabel: 'Обід',
+    weightGrams: 210,
+    macros: { calories: 540, protein: 25.2, fat: 29.4, carbs: 44.1 },
+    photo: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80',
+    prepTime: '15 хв',
+    shortDesc: 'Дві соковиті яловичі котлети, булочка з кунжутом, сир Чеддер та фірмовий соус',
+    ingredients: [
+      { name: 'Бургер Біг Мак (McDonalds)', grams: 210 }
+    ],
+    instructions: [
+      'Підсмажити котлети на грилі, підігріти булочку та зібрати класичний бургер.'
+    ]
+  },
+  {
+    id: 'chef-s5',
+    name: 'Протеїновий снек-батончик (шоколад-арахіс)',
+    category: 'snack',
+    categoryLabel: 'Перекус',
+    weightGrams: 60,
+    macros: { calories: 228, protein: 12.0, fat: 7.2, carbs: 28.8 },
+    photo: 'https://images.unsplash.com/photo-1622484216850-4d5162a40fd9?auto=format&fit=crop&w=500&q=80',
+    prepTime: '1 хв',
+    shortDesc: 'Поживний швидкий снек без доданого цукру для відновлення м’язів',
+    ingredients: [
+      { name: 'Протеїновий снек-батончик', grams: 60 }
+    ],
+    instructions: [
+      'Ідеальний снек перед або після фізичної активності чи як перекус у дорозі.'
+    ]
   }
 ];
 
@@ -439,10 +529,23 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
 
   // Фільтрація каталогу
   const filteredCatalog = CHEF_CATALOG.filter((item) => {
-    const matchesCategory = selectedFilter === 'all' || item.category === selectedFilter;
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.shortDesc.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) {
+      return selectedFilter === 'all' || item.category === selectedFilter;
+    }
+
+    const matchesSearch =
+      item.name.toLowerCase().includes(q) ||
+      item.shortDesc.toLowerCase().includes(q) ||
+      item.categoryLabel.toLowerCase().includes(q) ||
+      (q.includes('снек') && (item.category === 'snack' || item.name.toLowerCase().includes('снек'))) ||
+      (q.includes('горіх') && (item.name.toLowerCase().includes('горіх') || item.shortDesc.toLowerCase().includes('горіх') || item.name.toLowerCase().includes('мигдал'))) ||
+      (q.includes('салат') && (item.name.toLowerCase().includes('салат') || item.shortDesc.toLowerCase().includes('салат'))) ||
+      (q.includes('бургер') || q.includes('мак') || q.includes('біг') ? item.name.toLowerCase().includes('бургер') || item.name.toLowerCase().includes('мак') : false) ||
+      (q.includes('круас') && item.name.toLowerCase().includes('круас')) ||
+      (item.ingredients && item.ingredients.some(ing => ing.name.toLowerCase().includes(q)));
+
+    return matchesSearch;
   });
 
   // Додавання страви з каталогу в розклад
@@ -842,7 +945,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
               <button
                 id="btn-parse-video"
                 type="button"
-                onClick={() => handleParseVideo(parserUrl)}
+                onClick={() => handleParseVideo(parserUrl, videoDishHint)}
                 disabled={isParsing}
                 className="w-full py-2.5 rounded-xl font-black text-xs text-zinc-950 bg-gradient-to-r from-amber-400 to-amber-500 shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all"
               >
