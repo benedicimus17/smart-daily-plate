@@ -10,10 +10,11 @@ import {
   Search,
   CheckCircle2,
   Layers,
-  BookmarkPlus
+  BookmarkPlus,
+  Calendar
 } from 'lucide-react';
 import { MealType } from '../types/nutrition';
-import { parseRecipeFromUrl, parseRecipeFromText } from '../services/recipeParser';
+import { parseRecipeFromUrl, parseSmartDish } from '../services/recipeParser';
 import { ParsedRecipe } from '../types/recipe';
 
 export interface ChefDishItem {
@@ -198,6 +199,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
 
 interface ChefHubModalProps {
   isOpen: boolean;
+  targetDate?: string;
   onClose: () => void;
   onAddDishToDay: (mealType: MealType, data: { name: string; weightGrams: number; macros: { calories: number; protein: number; fat: number; carbs: number }; timestamp?: string }) => void;
   onSaveToRecipeBook?: (recipe: ParsedRecipe) => void;
@@ -205,6 +207,7 @@ interface ChefHubModalProps {
 
 export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   isOpen,
+  targetDate,
   onClose,
   onAddDishToDay,
   onSaveToRecipeBook
@@ -220,13 +223,14 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   const [addedDishId, setAddedDishId] = useState<string | null>(null);
 
   // Стан для AI Парсера
-  const [parserUrl, setParserUrl] = useState('https://www.tiktok.com/@chef/video/pasta-shrimp-spinach');
+  const [parserUrl, setParserUrl] = useState('https://www.tiktok.com/@chef/video/crepes-with-meat');
+  const [videoDishHint, setVideoDishHint] = useState('');
   const [isParsing, setIsParsing] = useState(false);
   const [parsedRecipe, setParsedRecipe] = useState<ParsedRecipe | null>(null);
   const [addedMealSlot, setAddedMealSlot] = useState<MealType | null>(null);
 
   // Стан для Розумного тексту
-  const [smartInputText, setSmartInputText] = useState('Тости з авокадо та яйцем пашот');
+  const [smartInputText, setSmartInputText] = useState('Тости з бананом');
   const [smartWeight, setSmartWeight] = useState('210');
   const [smartMealType, setSmartMealType] = useState<MealType>('breakfast');
   const [smartTime, setSmartTime] = useState('08:30');
@@ -261,11 +265,12 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   };
 
   // Робота AI Парсера
-  const handleParseVideo = (urlToParse: string) => {
+  const handleParseVideo = (urlToParse: string, hint?: string) => {
     setIsParsing(true);
     setAddedMealSlot(null);
+    const effectiveHint = hint !== undefined ? hint : videoDishHint;
     setTimeout(() => {
-      const res = parseRecipeFromUrl(urlToParse, 2);
+      const res = parseRecipeFromUrl(urlToParse, effectiveHint, 2);
       setParsedRecipe(res);
       setIsParsing(false);
     }, 350);
@@ -293,7 +298,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
 
   // Робота Розумного тексту (Natural Language)
   const handleSmartTextRecognize = () => {
-    const parsed = parseRecipeFromText(smartInputText, `- ${smartWeight}г ${smartInputText}`, 1);
+    const parsed = parseSmartDish(smartInputText, parseFloat(smartWeight) || 210);
     setSmartCalculated(parsed.macrosPerServing);
   };
 
@@ -327,9 +332,17 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
         {/* ШАПКА ХАБУ */}
         <div className="p-4 pb-3 border-b border-white/10 flex items-center justify-between shrink-0">
           <div>
-            <span className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider block">
-              Центр створення раціону
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider block">
+                Центр створення раціону
+              </span>
+              {targetDate && (
+                <span className="text-[9.5px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Calendar className="w-2.5 h-2.5" />
+                  {targetDate}
+                </span>
+              )}
+            </div>
             <h3 className="text-base font-black text-white tracking-tight">Шеф-Хаб NUTRIQ</h3>
           </div>
 
@@ -521,10 +534,22 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      setParserUrl('https://www.tiktok.com/@chef/video/pasta-shrimp-spinach');
-                      handleParseVideo('https://www.tiktok.com/@chef/video/pasta-shrimp-spinach');
+                      setParserUrl('https://www.tiktok.com/@chef/video/crepes-with-meat');
+                      setVideoDishHint('крепси з м’ясом');
+                      handleParseVideo('https://www.tiktok.com/@chef/video/crepes-with-meat', 'крепси з м’ясом');
                     }}
-                    className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-amber-300"
+                    className="px-2.5 py-1 rounded-xl bg-amber-400/15 hover:bg-amber-400/25 border border-amber-400/30 text-[10.5px] font-bold text-amber-300"
+                  >
+                    🥞 TikTok: Крепси з м'ясом
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setParserUrl('https://www.tiktok.com/@chef/video/pasta-shrimp-spinach');
+                      setVideoDishHint('паста з креветками');
+                      handleParseVideo('https://www.tiktok.com/@chef/video/pasta-shrimp-spinach', 'паста з креветками');
+                    }}
+                    className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300 hover:text-white"
                   >
                     🍝 TikTok: Паста з креветками
                   </button>
@@ -532,9 +557,10 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                     type="button"
                     onClick={() => {
                       setParserUrl('https://www.instagram.com/reels/protein-oat-pancakes');
-                      handleParseVideo('https://www.instagram.com/reels/protein-oat-pancakes');
+                      setVideoDishHint('панкейки');
+                      handleParseVideo('https://www.instagram.com/reels/protein-oat-pancakes', 'панкейки');
                     }}
-                    className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-amber-300"
+                    className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300 hover:text-white"
                   >
                     🥞 Reels: Панкейки
                   </button>
@@ -542,27 +568,44 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                     type="button"
                     onClick={() => {
                       setParserUrl('https://www.tiktok.com/@healthy/video/salmon-quinoa-bowl');
-                      handleParseVideo('https://www.tiktok.com/@healthy/video/salmon-quinoa-bowl');
+                      setVideoDishHint('лососевий боул');
+                      handleParseVideo('https://www.tiktok.com/@healthy/video/salmon-quinoa-bowl', 'лососевий боул');
                     }}
-                    className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-amber-300"
+                    className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300 hover:text-white"
                   >
                     🥗 TikTok: Лососевий боул
                   </button>
                 </div>
               </div>
 
-              {/* Поле вводу посилання */}
-              <div>
-                <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1">
-                  Посилання на відео:
-                </label>
-                <input
-                  type="text"
-                  value={parserUrl}
-                  onChange={(e) => setParserUrl(e.target.value)}
-                  placeholder="https://www.tiktok.com/@..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
-                />
+              {/* Поле вводу посилання та уточнення страви */}
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1">
+                    Посилання на відео (TikTok / Reels / YouTube):
+                  </label>
+                  <input
+                    type="text"
+                    value={parserUrl}
+                    onChange={(e) => setParserUrl(e.target.value)}
+                    placeholder="https://www.tiktok.com/@..."
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Назва страви з відео (якщо коротке посилання):</span>
+                    <span className="text-[9.5px] text-zinc-500 font-normal">необов’язково</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={videoDishHint}
+                    onChange={(e) => setVideoDishHint(e.target.value)}
+                    placeholder="Наприклад: крепси з м'ясом, вівсянка, шаурма..."
+                    className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
+                  />
+                </div>
               </div>
 
               <button

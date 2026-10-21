@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseIngredientLine, parseRecipeFromText } from '../recipeParser';
+import { parseIngredientLine, parseRecipeFromText, parseSmartDish, parseRecipeFromUrl } from '../recipeParser';
 
 describe('Recipe Parser Service (1-Click TikTok / Reels / Web)', () => {
   it('коректно розпізнає грами, мілілітри та назви продуктів', () => {
@@ -45,5 +45,23 @@ describe('Recipe Parser Service (1-Click TikTok / Reels / Web)', () => {
     expect(parsed.macrosPerServing.calories).toBe(Math.round(parsed.totalMacros.calories / 2));
     expect(parsed.macrosPerServing.protein).toBe(Math.round((parsed.totalMacros.protein / 2) * 10) / 10);
     expect(parsed.instructions.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('розумно розкладає складену страву "тост з бананом" на реальні інгредієнти та КБЖВ', () => {
+    const parsed = parseSmartDish('тост з бананом', 210);
+    expect(parsed.title).toContain('Тости з бананом');
+    expect(parsed.totalWeightGrams).toBe(210);
+    // 210г тостів з бананом мають містити більше 300 ккал та понад 50г корисних вуглеводів
+    expect(parsed.totalMacros.calories).toBeGreaterThan(320);
+    expect(parsed.totalMacros.carbs).toBeGreaterThan(55);
+    expect(parsed.totalMacros.protein).toBeGreaterThan(9);
+    expect(parsed.ingredients).toHaveLength(3);
+  });
+
+  it('розпізнає TikTok-відео з крепсами з м’ясом за описом та URL', () => {
+    const parsed = parseRecipeFromUrl('https://vm.tiktok.com/ZM8123456/', 'крепси з м’ясом', 2);
+    expect(parsed.title).toContain('крепси з соковитим м’ясним фаршем');
+    expect(parsed.ingredients.some(i => i.name.includes('Фарш') || i.name.includes('м’яс'))).toBe(true);
+    expect(parsed.macrosPerServing.protein).toBeGreaterThan(20);
   });
 });

@@ -173,11 +173,12 @@ export const App: React.FC = () => {
           {/* Центральний Шеф-Хаб: Каталог 50 рецептів, AI Парсер соцмереж та Вільний текст */}
           <ChefHubModal
             isOpen={chefHubOpen}
+            targetDate={dailyLog.date}
             onClose={() => setChefHubOpen(false)}
             onAddDishToDay={(mealType, data) => {
               addFoodToMeal(mealType, {
                 ...data,
-                eaten: true,
+                eaten: false,
                 foodId: `chef-${Date.now()}`
               });
             }}
@@ -188,14 +189,14 @@ export const App: React.FC = () => {
             isOpen={modalOpen}
             mealType={targetMealType}
             onClose={() => setModalOpen(false)}
-            onAdd={(mealType, data) => addFoodToMeal(mealType, { ...data, eaten: true, foodId: `item-${Date.now()}` })}
+            onAdd={(mealType, data) => addFoodToMeal(mealType, { ...data, eaten: false, foodId: `item-${Date.now()}` })}
           />
 
           {/* Модалка ресторанної оцінки страв (Dining Out Estimator) */}
           <DiningOutEstimatorModal
             isOpen={diningModalOpen}
             onClose={() => setDiningModalOpen(false)}
-            onAddMeal={(mealType, data) => addFoodToMeal(mealType, { ...data, eaten: true, foodId: `dining-${Date.now()}` })}
+            onAddMeal={(mealType, data) => addFoodToMeal(mealType, { ...data, eaten: false, foodId: `dining-${Date.now()}` })}
           />
         </div>
       </div>
