@@ -15,6 +15,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
       <div className="rounded-[28px] py-2 px-4 flex items-center justify-between liquid-dock pointer-events-auto">
         {/* 1. Home (Головна) */}
         <button
+          id="tab-nav-home"
           type="button"
           onClick={() => setActiveTab('today')}
           className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all duration-200 ${
@@ -29,7 +30,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
 
         {/* 2. Log (Щоденник / Каструля) */}
         <button
-          id="tab-log"
+          id="tab-nav-log"
           type="button"
           onClick={() => setActiveTab('cookloss')}
           className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all duration-200 ${
@@ -44,6 +45,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
 
         {/* 3. Центральна матова бурштинова кнопка (+) точно як у макеті */}
         <button
+          id="tab-nav-quickadd"
           type="button"
           onClick={onQuickAdd}
           className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
@@ -59,6 +61,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
 
         {/* 4. Trends (Тренди / Покупки) */}
         <button
+          id="tab-nav-trends"
           type="button"
           onClick={() => setActiveTab('grocery')}
           className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all duration-200 ${

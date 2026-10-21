@@ -103,6 +103,7 @@ export const App: React.FC = () => {
             <div className="space-y-4 animate-fadeIn pb-24">
               <div className="flex bg-[#121814] p-1 rounded-2xl border border-white/10 shadow-lg">
                 <button
+                  id="tab-sub-trend"
                   type="button"
                   onClick={() => setTrendSubTab('trend')}
                   className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
@@ -115,6 +116,7 @@ export const App: React.FC = () => {
                   <span>Істинний тренд</span>
                 </button>
                 <button
+                  id="tab-sub-grocery"
                   type="button"
                   onClick={() => setTrendSubTab('grocery')}
                   className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${

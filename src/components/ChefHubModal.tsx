@@ -334,6 +334,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
           </div>
 
           <button
+            id="btn-close-chef-hub"
             type="button"
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-zinc-300 hover:text-white transition-all active:scale-95"
@@ -345,6 +346,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
         {/* 3 ГОЛОВНІ РЕЖИМИ ШЕФ-ХАБУ */}
         <div className="grid grid-cols-3 gap-1.5 p-2 bg-black/40 border-b border-white/10 shrink-0 text-xs">
           <button
+            id="tab-chef-catalog"
             type="button"
             onClick={() => setActiveTab('catalog')}
             className={`py-2 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all ${
@@ -358,6 +360,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
           </button>
 
           <button
+            id="tab-chef-parser"
             type="button"
             onClick={() => setActiveTab('ai_parser')}
             className={`py-2 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all ${
@@ -371,6 +374,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
           </button>
 
           <button
+            id="tab-chef-smart"
             type="button"
             onClick={() => setActiveTab('smart_text')}
             className={`py-2 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all ${
