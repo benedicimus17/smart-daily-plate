@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { X, Check, ChefHat, Sparkles, Scale, Clock } from 'lucide-react';
-import { MealEntry, MealType } from '../types/nutrition';
+import { X, Check, ChefHat, Sparkles, Scale, Clock, RefreshCw } from 'lucide-react';
+import { MealEntry, MealType, Macros } from '../types/nutrition';
+import { getNextSwapCandidate, SmartSwapResult } from '../services/smartSwapEngine';
+import { CHEF_CATALOG } from './ChefHubModal';
 
 interface DishDetailModalProps {
   isOpen: boolean;
@@ -10,6 +12,7 @@ interface DishDetailModalProps {
   onToggleEaten: (mealType: MealType, entryId: string) => void;
   onRemove: (mealType: MealType, entryId: string) => void;
   onUpdateTime?: (mealType: MealType, entryId: string, newTime: string) => void;
+  onSwapDish?: (mealType: MealType, entryId: string, newDish: { name: string; weightGrams: number; macros: Macros; recipeDetails?: string }) => void;
 }
 
 const MEAL_LABELS: Record<MealType, string> = {
@@ -318,12 +321,59 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
   onClose,
   onToggleEaten,
   onRemove,
-  onUpdateTime
+  onUpdateTime,
+  onSwapDish
 }) => {
   if (!isOpen || !entry || !mealType) return null;
 
   const [isEditingTime, setIsEditingTime] = useState(false);
   const [timeValue, setTimeValue] = useState(entry.timestamp || '08:30');
+  const [showSwapPanel, setShowSwapPanel] = useState(false);
+  const [excludedSwapIds, setExcludedSwapIds] = useState<string[]>([]);
+  const [currentSwapCandidate, setCurrentSwapCandidate] = useState<SmartSwapResult | null>(null);
+
+  const handleInitSmartSwap = () => {
+    const candidate = getNextSwapCandidate(
+      { name: entry.name, macros: entry.macros, category: mealType },
+      CHEF_CATALOG,
+      []
+    );
+    setCurrentSwapCandidate(candidate);
+    setExcludedSwapIds(candidate ? [candidate.candidate.id] : []);
+    setShowSwapPanel(true);
+  };
+
+  const handleNextSwap = () => {
+    let nextCandidate = getNextSwapCandidate(
+      { name: entry.name, macros: entry.macros, category: mealType },
+      CHEF_CATALOG,
+      excludedSwapIds
+    );
+    if (!nextCandidate) {
+      // Loop back if all options seen
+      nextCandidate = getNextSwapCandidate(
+        { name: entry.name, macros: entry.macros, category: mealType },
+        CHEF_CATALOG,
+        []
+      );
+      setExcludedSwapIds(nextCandidate ? [nextCandidate.candidate.id] : []);
+    } else {
+      setExcludedSwapIds(prev => [...prev, nextCandidate!.candidate.id]);
+    }
+    setCurrentSwapCandidate(nextCandidate);
+  };
+
+  const handleApplySwap = () => {
+    if (!currentSwapCandidate || !onSwapDish) return;
+    onSwapDish(mealType, entry.id, {
+      name: currentSwapCandidate.candidate.name,
+      weightGrams: currentSwapCandidate.candidate.weightGrams,
+      macros: currentSwapCandidate.candidate.macros,
+      recipeDetails: currentSwapCandidate.candidate.shortDesc
+    });
+    setShowSwapPanel(false);
+    onClose();
+  };
 
   // Визначаємо деталі страви за назвою
   const lowerName = entry.name.toLowerCase();
@@ -560,6 +610,86 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* КНОПКА ШІ-ЗАМІНИ СТРАВИ (SMART SWAP) */}
+          <div className="pt-2 border-t border-white/10 space-y-2">
+            {!showSwapPanel ? (
+              <button
+                type="button"
+                onClick={handleInitSmartSwap}
+                className="w-full py-2.5 rounded-2xl bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/40 text-amber-300 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm"
+              >
+                <RefreshCw className="w-4 h-4 stroke-[2.2] text-amber-400" />
+                <span>🔄 Smart Swap — Замінити страву за 2 секунди</span>
+              </button>
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-gradient-to-b from-amber-500/10 to-black/70 border border-amber-400/50 space-y-3 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <div className="text-[11px] font-black uppercase text-amber-300 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>ШІ-Кандидат на заміну:</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowSwapPanel(false)}
+                    className="text-[10px] text-zinc-400 hover:text-white"
+                  >
+                    Скасувати
+                  </button>
+                </div>
+
+                {currentSwapCandidate ? (
+                  <div className="space-y-2.5">
+                    <div className="p-2.5 rounded-xl bg-black/60 border border-white/10 flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg bg-black overflow-hidden shrink-0">
+                        <img
+                          src={currentSwapCandidate.candidate.photo}
+                          alt={currentSwapCandidate.candidate.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/dinner_steak_hd.jpg'; }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h5 className="text-xs font-bold text-white truncate">{currentSwapCandidate.candidate.name}</h5>
+                        <div className="text-[10.5px] text-zinc-300 flex items-center gap-2 mt-0.5">
+                          <span className="text-amber-300 font-black">{currentSwapCandidate.candidate.macros.calories} ккал</span>
+                          <span>•</span>
+                          <span className="text-emerald-400 font-bold">{currentSwapCandidate.candidate.macros.protein}г Б</span>
+                        </div>
+                        <p className="text-[9.5px] text-amber-300/90 font-medium mt-0.5 truncate">
+                          {currentSwapCandidate.matchReason}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={handleApplySwap}
+                        className="py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all"
+                      >
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        <span>Замінити в 1 клік</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleNextSwap}
+                        className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-zinc-200 font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all"
+                      >
+                        <RefreshCw className="w-3 h-3 text-amber-400" />
+                        <span>Замінити знов</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-zinc-400 text-center py-2">
+                    Немає інших кандидатів з подібним балансом.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Кнопки дій */}

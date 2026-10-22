@@ -14,7 +14,10 @@ import {
   Calendar,
   Clock,
   Scale,
-  ChefHat
+  ChefHat,
+  Lock,
+  Crown,
+  Globe
 } from 'lucide-react';
 import { MealType } from '../types/nutrition';
 import { parseRecipeFromUrl, parseSmartDish } from '../services/recipeParser';
@@ -33,13 +36,15 @@ export interface ChefDishItem {
   shortDesc: string;
   ingredients?: { name: string; grams: number }[];
   instructions?: string[];
+  tier?: 'free' | 'pro';
 }
 
-const CHEF_CATALOG: ChefDishItem[] = [
+export const CHEF_CATALOG: ChefDishItem[] = [
   // СНІДАНКИ
   {
     id: 'chef-b1',
     name: 'Сирники з рікоти та ванілі',
+    tier: 'pro',
     category: 'breakfast',
     categoryLabel: 'Сніданок',
     weightGrams: 200,
@@ -63,6 +68,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-b2',
     name: 'Омлет з авокадо та бейбі-шпинатом',
+    tier: 'free',
     category: 'breakfast',
     categoryLabel: 'Сніданок',
     weightGrams: 180,
@@ -85,6 +91,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-b3',
     name: 'Вівсяно-протеїнові панкейки з ягодами',
+    tier: 'pro',
     category: 'breakfast',
     categoryLabel: 'Сніданок',
     weightGrams: 220,
@@ -108,6 +115,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-b4',
     name: 'Тости з авокадо та яйцем пашот',
+    tier: 'free',
     category: 'breakfast',
     categoryLabel: 'Сніданок',
     weightGrams: 210,
@@ -131,6 +139,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-b5',
     name: 'Тости з бананом та арахісовою пастою',
+    tier: 'free',
     category: 'breakfast',
     categoryLabel: 'Сніданок',
     weightGrams: 210,
@@ -154,6 +163,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-l1',
     name: 'Куряче філе запечене з кіноа та броколі',
+    tier: 'free',
     category: 'lunch',
     categoryLabel: 'Обід',
     weightGrams: 220,
@@ -177,6 +187,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-l2',
     name: 'Боул із запеченим лососем та диким рисом',
+    tier: 'pro',
     category: 'lunch',
     categoryLabel: 'Обід',
     weightGrams: 260,
@@ -199,6 +210,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-l3',
     name: 'Паста з тигровими креветками у соусі',
+    tier: 'pro',
     category: 'lunch',
     categoryLabel: 'Обід',
     weightGrams: 280,
@@ -221,6 +233,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-l4',
     name: 'Теплий салат з телячою вирізкою гриль',
+    tier: 'pro',
     category: 'lunch',
     categoryLabel: 'Обід',
     weightGrams: 240,
@@ -243,6 +256,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-l5',
     name: 'Тонкі домашні крепси з соковитим м\'ясом',
+    tier: 'pro',
     category: 'lunch',
     categoryLabel: 'Обід',
     weightGrams: 250,
@@ -266,6 +280,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-s1',
     name: 'Протеїновий шейк (1 скуп ізоляту)',
+    tier: 'free',
     category: 'snack',
     categoryLabel: 'Перекус',
     weightGrams: 30,
@@ -285,6 +300,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-s2',
     name: 'Грецький йогурт 2% з лісовими ягодами',
+    tier: 'free',
     category: 'snack',
     categoryLabel: 'Перекус',
     weightGrams: 180,
@@ -305,6 +321,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-s3',
     name: 'Протеїновий чіа-пудинг на мигдалевому молоці',
+    tier: 'pro',
     category: 'snack',
     categoryLabel: 'Перекус',
     weightGrams: 190,
@@ -328,6 +345,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-d1',
     name: 'Gourmet Steak & Greens (Рибай зі спаржею)',
+    tier: 'pro',
     category: 'dinner',
     categoryLabel: 'Вечеря',
     weightGrams: 260,
@@ -351,6 +369,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-d2',
     name: 'Запечений сібас із цукіні на грилі',
+    tier: 'pro',
     category: 'dinner',
     categoryLabel: 'Вечеря',
     weightGrams: 280,
@@ -372,6 +391,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-d3',
     name: 'Стейк тунця у чорному кунжуті з авокадо',
+    tier: 'pro',
     category: 'dinner',
     categoryLabel: 'Вечеря',
     weightGrams: 250,
@@ -394,6 +414,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-s4',
     name: 'Мікс добірних горішків (мигдаль, фундук, волоські)',
+    tier: 'free',
     category: 'snack',
     categoryLabel: 'Перекус',
     weightGrams: 50,
@@ -411,6 +432,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-b6',
     name: 'Французький масляний круасан',
+    tier: 'pro',
     category: 'breakfast',
     categoryLabel: 'Сніданок',
     weightGrams: 80,
@@ -429,6 +451,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-l6',
     name: 'Грецький салат зі свіжими овочами та фетою',
+    tier: 'free',
     category: 'lunch',
     categoryLabel: 'Обід',
     weightGrams: 220,
@@ -450,6 +473,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-l7',
     name: 'Бургер Біг Мак із соковитою телятиною',
+    tier: 'pro',
     category: 'lunch',
     categoryLabel: 'Обід',
     weightGrams: 210,
@@ -467,6 +491,7 @@ const CHEF_CATALOG: ChefDishItem[] = [
   {
     id: 'chef-s5',
     name: 'Протеїновий снек-батончик (шоколад-арахіс)',
+    tier: 'pro',
     category: 'snack',
     categoryLabel: 'Перекус',
     weightGrams: 60,
@@ -512,6 +537,8 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   const [selectedDishPreview, setSelectedDishPreview] = useState<ChefDishItem | null>(null);
   const [previewTargetSlot, setPreviewTargetSlot] = useState<MealType>('breakfast');
   const [isPreviewAdded, setIsPreviewAdded] = useState(false);
+  const [proPaywallDish, setProPaywallDish] = useState<ChefDishItem | null>(null);
+  const [isProUser, setIsProUser] = useState<boolean>(false);
 
   // Стан для AI Парсера
   const [parserUrl, setParserUrl] = useState('https://www.tiktok.com/@chef/video/crepes-with-meat');
@@ -774,15 +801,24 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
               <div className="space-y-2.5">
                 {filteredCatalog.map((item) => {
                   const isAdded = addedDishId === item.id;
+                  const isLocked = item.tier === 'pro' && !isProUser;
 
                   return (
                     <div
                       key={item.id}
                       onClick={() => {
-                        setSelectedDishPreview(item);
-                        setPreviewTargetSlot(item.category);
+                        if (isLocked) {
+                          setProPaywallDish(item);
+                        } else {
+                          setSelectedDishPreview(item);
+                          setPreviewTargetSlot(item.category);
+                        }
                       }}
-                      className="p-2.5 rounded-2xl bg-black/40 border border-white/10 flex items-center gap-3 transition-all hover:border-amber-400/40 cursor-pointer active:scale-[0.99] group"
+                      className={`p-2.5 rounded-2xl bg-black/40 border transition-all cursor-pointer active:scale-[0.99] group flex items-center gap-3 ${
+                        isLocked
+                          ? 'border-amber-400/25 hover:border-amber-400/60 bg-gradient-to-r from-black/60 to-amber-950/10'
+                          : 'border-white/10 hover:border-amber-400/40'
+                      }`}
                     >
                       {/* Міні-фото */}
                       <div className="w-16 h-16 rounded-xl overflow-hidden bg-black shrink-0 relative">
@@ -797,6 +833,11 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                         <span className="absolute bottom-1 right-1 text-[8px] font-black bg-black/70 px-1 rounded text-amber-300">
                           {item.prepTime}
                         </span>
+                        {isLocked && (
+                          <div className="absolute inset-0 bg-black/35 backdrop-blur-[0.5px] flex items-center justify-center">
+                            <Lock className="w-4 h-4 text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.8)]" />
+                          </div>
+                        )}
                       </div>
 
                       {/* Текст страви */}
@@ -805,42 +846,69 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                           <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-amber-400/15 text-amber-300 border border-amber-400/30">
                             {item.categoryLabel}
                           </span>
-                          <span className="text-[10px] text-zinc-500 font-semibold">{item.weightGrams}г</span>
+                          {isLocked ? (
+                            <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-gradient-to-r from-amber-500/20 to-amber-400/30 text-amber-300 border border-amber-400/50 flex items-center gap-0.5">
+                              <Crown className="w-2.5 h-2.5" /> PRO
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-zinc-500 font-semibold">{item.weightGrams}г</span>
+                          )}
                         </div>
 
                         <h4 className="text-xs font-bold text-white truncate mt-0.5 group-hover:text-amber-300 transition-colors">
                           {item.name}
                         </h4>
 
-                        <div className="text-[10px] text-zinc-400 flex items-center gap-1.5 mt-0.5">
-                          <span className="text-amber-300 font-black">{item.macros.calories} ккал</span>
-                          <span>•</span>
-                          <span className="text-emerald-400">{item.macros.protein}г Б</span>
-                          <span>•</span>
-                          <span className="text-amber-400">{item.macros.fat}г Ж</span>
-                        </div>
+                        {isLocked ? (
+                          <div className="text-[10px] text-amber-300/80 font-bold flex items-center gap-1 mt-0.5">
+                            <Lock className="w-3 h-3 text-amber-400 shrink-0" />
+                            <span>PRO • КБЖВ та рецепт приховано</span>
+                          </div>
+                        ) : (
+                          <div className="text-[10px] text-zinc-400 flex items-center gap-1.5 mt-0.5">
+                            <span className="text-amber-300 font-black">{item.macros.calories} ккал</span>
+                            <span>•</span>
+                            <span className="text-emerald-400">{item.macros.protein}г Б</span>
+                            <span>•</span>
+                            <span className="text-amber-400">{item.macros.fat}г Ж</span>
+                          </div>
+                        )}
                       </div>
 
-                      {/* Кнопка швидкого додавання в розклад */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAddCatalogItem(item);
-                        }}
-                        className={`p-2.5 rounded-xl text-xs font-bold flex items-center justify-center transition-all shrink-0 active:scale-95 ${
-                          isAdded
-                            ? 'bg-emerald-500 text-zinc-950'
-                            : 'bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 shadow-md shadow-amber-400/20 hover:brightness-110'
-                        }`}
-                        title="Швидко додати в розклад"
-                      >
-                        {isAdded ? (
-                          <Check className="w-4 h-4 stroke-[3]" />
-                        ) : (
-                          <Plus className="w-4 h-4 stroke-[3]" />
-                        )}
-                      </button>
+                      {/* Кнопка швидкого додавання в розклад або замок PRO */}
+                      {isLocked ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProPaywallDish(item);
+                          }}
+                          className="p-2.5 rounded-xl bg-amber-400/10 hover:bg-amber-400/25 border border-amber-400/40 text-amber-300 flex items-center justify-center transition-all shrink-0 active:scale-95 shadow-sm"
+                          title="Ресторанна страва Шефа (PRO)"
+                        >
+                          <Lock className="w-4 h-4 stroke-[2.5]" />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddCatalogItem(item);
+                          }}
+                          className={`p-2.5 rounded-xl text-xs font-bold flex items-center justify-center transition-all shrink-0 active:scale-95 ${
+                            isAdded
+                              ? 'bg-emerald-500 text-zinc-950'
+                              : 'bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 shadow-md shadow-amber-400/20 hover:brightness-110'
+                          }`}
+                          title="Швидко додати в розклад"
+                        >
+                          {isAdded ? (
+                            <Check className="w-4 h-4 stroke-[3]" />
+                          ) : (
+                            <Plus className="w-4 h-4 stroke-[3]" />
+                          )}
+                        </button>
+                      )}
                     </div>
                   );
                 })}
@@ -1181,94 +1249,118 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                 </div>
               )}
 
-              {/* КБЖВ картки */}
-              <div className="grid grid-cols-4 gap-1.5">
-                <div className="p-2 rounded-xl bg-black/50 border border-white/5 text-center">
-                  <div className="text-[9px] uppercase font-bold text-zinc-400">Калорії</div>
-                  <div className="text-xs font-black text-amber-300 mt-0.5">{selectedDishPreview.macros.calories}</div>
-                  <div className="text-[8px] text-zinc-500 font-bold">ккал</div>
-                </div>
-                <div className="p-2 rounded-xl bg-black/50 border border-emerald-500/20 text-center">
-                  <div className="text-[9px] uppercase font-bold text-emerald-400">Білок</div>
-                  <div className="text-xs font-black text-emerald-300 mt-0.5">{selectedDishPreview.macros.protein}г</div>
-                  <div className="text-[8px] text-zinc-500 font-bold">{Math.round((selectedDishPreview.macros.protein * 4 / selectedDishPreview.macros.calories) * 100)}%</div>
-                </div>
-                <div className="p-2 rounded-xl bg-black/50 border border-amber-500/20 text-center">
-                  <div className="text-[9px] uppercase font-bold text-amber-400">Жири</div>
-                  <div className="text-xs font-black text-amber-300 mt-0.5">{selectedDishPreview.macros.fat}г</div>
-                  <div className="text-[8px] text-zinc-500 font-bold">{Math.round((selectedDishPreview.macros.fat * 9 / selectedDishPreview.macros.calories) * 100)}%</div>
-                </div>
-                <div className="p-2 rounded-xl bg-black/50 border border-sky-500/20 text-center">
-                  <div className="text-[9px] uppercase font-bold text-sky-400">Вуглеводи</div>
-                  <div className="text-xs font-black text-sky-300 mt-0.5">{selectedDishPreview.macros.carbs}г</div>
-                  <div className="text-[8px] text-zinc-500 font-bold">{Math.round((selectedDishPreview.macros.carbs * 4 / selectedDishPreview.macros.calories) * 100)}%</div>
-                </div>
-              </div>
-
-              {/* Склад та інгредієнти у грамах */}
-              {selectedDishPreview.ingredients && selectedDishPreview.ingredients.length > 0 && (
-                <div className="space-y-1.5">
-                  <div className="text-zinc-300 font-bold text-[11px] flex items-center gap-1.5">
-                    <ChefHat className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Склад страви (на {selectedDishPreview.weightGrams}г):</span>
+              {/* Якщо страва PRO і користувач на безкоштовному тарифі — показуємо PRO Замок */}
+              {selectedDishPreview.tier === 'pro' && !isProUser ? (
+                <div className="space-y-3.5 p-4 rounded-2xl bg-gradient-to-b from-amber-500/10 to-black/60 border border-amber-400/40 text-center animate-fadeIn">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-400/20 border border-amber-400/50 text-amber-300 flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+                    <Crown className="w-6 h-6 stroke-[2.4]" />
                   </div>
-                  <div className="space-y-1 bg-black/40 p-2.5 rounded-xl border border-white/5">
-                    {selectedDishPreview.ingredients.map((ing, idx) => (
-                      <div key={idx} className="flex justify-between items-center text-[11px] py-0.5 border-b border-white/5 last:border-0">
-                        <span className="text-zinc-200">{ing.name}</span>
-                        <span className="text-amber-400 font-mono font-bold shrink-0">{ing.grams}г</span>
+                  <div>
+                    <h3 className="text-sm font-black text-white tracking-tight uppercase">
+                      Ресторанна страва Шефа (PRO)
+                    </h3>
+                    <p className="text-xs text-zinc-300 mt-1 leading-relaxed">
+                      Точні макроси, розкладка інгредієнтів у грамах, облік Cook-Loss та покрокова шеф-інструкція доступні підписникам <strong>NUTRIQ PRO</strong>.
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-black/60 border border-white/10 text-[11px] text-zinc-400 flex items-center justify-center gap-2">
+                    <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>КБЖВ та секрети приготування надійно захищені</span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* КБЖВ картки */}
+                  <div className="grid grid-cols-4 gap-1.5">
+                    <div className="p-2 rounded-xl bg-black/50 border border-white/5 text-center">
+                      <div className="text-[9px] uppercase font-bold text-zinc-400">Калорії</div>
+                      <div className="text-xs font-black text-amber-300 mt-0.5">{selectedDishPreview.macros.calories}</div>
+                      <div className="text-[8px] text-zinc-500 font-bold">ккал</div>
+                    </div>
+                    <div className="p-2 rounded-xl bg-black/50 border border-emerald-500/20 text-center">
+                      <div className="text-[9px] uppercase font-bold text-emerald-400">Білок</div>
+                      <div className="text-xs font-black text-emerald-300 mt-0.5">{selectedDishPreview.macros.protein}г</div>
+                      <div className="text-[8px] text-zinc-500 font-bold">{Math.round((selectedDishPreview.macros.protein * 4 / selectedDishPreview.macros.calories) * 100)}%</div>
+                    </div>
+                    <div className="p-2 rounded-xl bg-black/50 border border-amber-500/20 text-center">
+                      <div className="text-[9px] uppercase font-bold text-amber-400">Жири</div>
+                      <div className="text-xs font-black text-amber-300 mt-0.5">{selectedDishPreview.macros.fat}г</div>
+                      <div className="text-[8px] text-zinc-500 font-bold">{Math.round((selectedDishPreview.macros.fat * 9 / selectedDishPreview.macros.calories) * 100)}%</div>
+                    </div>
+                    <div className="p-2 rounded-xl bg-black/50 border border-sky-500/20 text-center">
+                      <div className="text-[9px] uppercase font-bold text-sky-400">Вуглеводи</div>
+                      <div className="text-xs font-black text-sky-300 mt-0.5">{selectedDishPreview.macros.carbs}г</div>
+                      <div className="text-[8px] text-zinc-500 font-bold">{Math.round((selectedDishPreview.macros.carbs * 4 / selectedDishPreview.macros.calories) * 100)}%</div>
+                    </div>
+                  </div>
+
+                  {/* Склад та інгредієнти у грамах */}
+                  {selectedDishPreview.ingredients && selectedDishPreview.ingredients.length > 0 && (
+                    <div className="space-y-1.5">
+                      <div className="text-zinc-300 font-bold text-[11px] flex items-center gap-1.5">
+                        <ChefHat className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Склад страви (на {selectedDishPreview.weightGrams}г):</span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Покроковий рецепт */}
-              {selectedDishPreview.instructions && selectedDishPreview.instructions.length > 0 && (
-                <div className="space-y-1.5">
-                  <div className="text-zinc-300 font-bold text-[11px] flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Приготування:</span>
-                  </div>
-                  <div className="space-y-2 bg-black/40 p-2.5 rounded-xl border border-white/5">
-                    {selectedDishPreview.instructions.map((step, idx) => (
-                      <div key={idx} className="flex items-start gap-2 text-[11px] text-zinc-300 leading-relaxed">
-                        <span className="w-4 h-4 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-[9px] shrink-0 mt-0.5">
-                          {idx + 1}
-                        </span>
-                        <span>{step}</span>
+                      <div className="space-y-1 bg-black/40 p-2.5 rounded-xl border border-white/5">
+                        {selectedDishPreview.ingredients.map((ing, idx) => (
+                          <div key={idx} className="flex justify-between items-center text-[11px] py-0.5 border-b border-white/5 last:border-0">
+                            <span className="text-zinc-200">{ing.name}</span>
+                            <span className="text-amber-400 font-mono font-bold shrink-0">{ing.grams}г</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                    </div>
+                  )}
 
-              {/* Вибір прийому їжі для додавання */}
-              <div className="space-y-1.5 pt-1">
-                <label className="text-[11px] font-bold text-zinc-300 block">
-                  Призначити на прийом:
-                </label>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {(['breakfast', 'lunch', 'snack', 'dinner'] as MealType[]).map((slot) => {
-                    const labels = { breakfast: 'Сніданок', lunch: 'Обід', snack: 'Перекус', dinner: 'Вечеря' };
-                    const isSel = previewTargetSlot === slot;
-                    return (
-                      <button
-                        key={slot}
-                        type="button"
-                        onClick={() => setPreviewTargetSlot(slot)}
-                        className={`py-1.5 rounded-xl text-[10.5px] font-bold transition-all ${
-                          isSel
-                            ? 'bg-amber-400 text-zinc-950 font-black shadow-md shadow-amber-400/20'
-                            : 'bg-white/5 text-zinc-400 hover:text-white border border-white/5'
-                        }`}
-                      >
-                        {labels[slot]}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                  {/* Покроковий рецепт */}
+                  {selectedDishPreview.instructions && selectedDishPreview.instructions.length > 0 && (
+                    <div className="space-y-1.5">
+                      <div className="text-zinc-300 font-bold text-[11px] flex items-center gap-1.5">
+                        <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Приготування:</span>
+                      </div>
+                      <div className="space-y-2 bg-black/40 p-2.5 rounded-xl border border-white/5">
+                        {selectedDishPreview.instructions.map((step, idx) => (
+                          <div key={idx} className="flex items-start gap-2 text-[11px] text-zinc-300 leading-relaxed">
+                            <span className="w-4 h-4 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-[9px] shrink-0 mt-0.5">
+                              {idx + 1}
+                            </span>
+                            <span>{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Вибір прийому їжі для додавання */}
+                  <div className="space-y-1.5 pt-1">
+                    <label className="text-[11px] font-bold text-zinc-300 block">
+                      Призначити на прийом:
+                    </label>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {(['breakfast', 'lunch', 'snack', 'dinner'] as MealType[]).map((slot) => {
+                        const labels = { breakfast: 'Сніданок', lunch: 'Обід', snack: 'Перекус', dinner: 'Вечеря' };
+                        const isSel = previewTargetSlot === slot;
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            onClick={() => setPreviewTargetSlot(slot)}
+                            className={`py-1.5 rounded-xl text-[10.5px] font-bold transition-all ${
+                              isSel
+                                ? 'bg-amber-400 text-zinc-950 font-black shadow-md shadow-amber-400/20'
+                                : 'bg-white/5 text-zinc-400 hover:text-white border border-white/5'
+                            }`}
+                          >
+                            {labels[slot]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Нижня панель дій */}
@@ -1281,28 +1373,125 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                 Назад
               </button>
 
+              {selectedDishPreview.tier === 'pro' && !isProUser ? (
+                <div className="flex-1 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProUser(true);
+                    }}
+                    className="flex-1 py-2.5 rounded-xl font-black text-xs text-zinc-950 bg-gradient-to-r from-amber-400 to-amber-500 shadow-lg shadow-amber-400/25 hover:brightness-110 flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                  >
+                    <Crown className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Розблокувати PRO</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const dishTitle = selectedDishPreview.name;
+                      setSelectedDishPreview(null);
+                      setSmartInputText(dishTitle);
+                      setActiveTab('smart_text');
+                    }}
+                    className="py-2.5 px-3 rounded-xl font-bold text-xs bg-white/10 hover:bg-white/15 text-zinc-200 border border-white/15 flex items-center justify-center gap-1 active:scale-95 transition-all"
+                    title="Знайти в інтернеті та ввести безкоштовно через Вільний текст"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Ввести самому</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  id="btn-add-preview-dish"
+                  type="button"
+                  onClick={handleAddPreviewDish}
+                  className={`flex-1 py-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
+                    isPreviewAdded
+                      ? 'bg-emerald-500 text-zinc-950'
+                      : 'bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 shadow-md shadow-amber-400/20 hover:brightness-110'
+                  }`}
+                >
+                  {isPreviewAdded ? (
+                    <>
+                      <Check className="w-4 h-4 stroke-[3]" />
+                      <span>Додано в {previewTargetSlot === 'breakfast' ? 'Сніданок' : previewTargetSlot === 'lunch' ? 'Обід' : previewTargetSlot === 'snack' ? 'Перекус' : 'Вечерю'}!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4 stroke-[3]" />
+                      <span>Додати в {previewTargetSlot === 'breakfast' ? 'Сніданок' : previewTargetSlot === 'lunch' ? 'Обід' : previewTargetSlot === 'snack' ? 'Перекус' : 'Вечерю'}</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Швидке вікно блокування PRO при тапі на замок */}
+        {proPaywallDish && (
+          <div className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+            <div className="w-full max-w-sm rounded-3xl bg-[#121814] border border-amber-400/50 p-5 shadow-2xl space-y-4 relative overflow-hidden text-white">
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl pointer-events-none" />
+
               <button
-                id="btn-add-preview-dish"
                 type="button"
-                onClick={handleAddPreviewDish}
-                className={`flex-1 py-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
-                  isPreviewAdded
-                    ? 'bg-emerald-500 text-zinc-950'
-                    : 'bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 shadow-md shadow-amber-400/20 hover:brightness-110'
-                }`}
+                onClick={() => setProPaywallDish(null)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
               >
-                {isPreviewAdded ? (
-                  <>
-                    <Check className="w-4 h-4 stroke-[3]" />
-                    <span>Додано в {previewTargetSlot === 'breakfast' ? 'Сніданок' : previewTargetSlot === 'lunch' ? 'Обід' : previewTargetSlot === 'snack' ? 'Перекус' : 'Вечерю'}!</span>
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-4 h-4 stroke-[3]" />
-                    <span>Додати в {previewTargetSlot === 'breakfast' ? 'Сніданок' : previewTargetSlot === 'lunch' ? 'Обід' : previewTargetSlot === 'snack' ? 'Перекус' : 'Вечерю'}</span>
-                  </>
-                )}
+                <X className="w-4 h-4" />
               </button>
+
+              <div className="w-full h-36 rounded-2xl overflow-hidden relative border border-white/10">
+                <img src={proPaywallDish.photo} alt={proPaywallDish.name} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-amber-400/90 text-zinc-950 font-black text-[10px] flex items-center gap-1 shadow-md">
+                  <Crown className="w-3 h-3" />
+                  <span>NUTRIQ PRO РЕСТОРАН</span>
+                </div>
+                <div className="absolute bottom-2 left-3 right-3">
+                  <h3 className="text-sm font-bold text-white truncate">{proPaywallDish.name}</h3>
+                </div>
+              </div>
+
+              <div className="space-y-1.5 text-center">
+                <div className="text-xs font-black text-amber-300 uppercase tracking-wide flex items-center justify-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Ресторанне меню під замком</span>
+                </div>
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  Повний розрахунок точних грамів, КБЖВ, облік уварки Cook-Loss та шеф-інструкція доступні в підписці PRO.
+                </p>
+              </div>
+
+              <div className="space-y-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsProUser(true);
+                    setProPaywallDish(null);
+                  }}
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-400/25 active:scale-95 transition-all"
+                >
+                  <Crown className="w-4 h-4" />
+                  <span>Оформити NUTRIQ PRO (В 1 клік)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const dishName = proPaywallDish.name;
+                    setProPaywallDish(null);
+                    setSmartInputText(dishName);
+                    setActiveTab('smart_text');
+                  }}
+                  className="w-full py-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                >
+                  <Globe className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Знайти в інтернеті та ввести безкоштовно</span>
+                </button>
+              </div>
             </div>
           </div>
         )}

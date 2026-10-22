@@ -451,6 +451,15 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
             });
           }
         }}
+        onSwapDish={(mealType, entryId, newDish) => {
+          updateMealEntry(mealType, entryId, {
+            name: newDish.name,
+            weightGrams: newDish.weightGrams,
+            macros: newDish.macros,
+            recipeDetails: newDish.recipeDetails
+          });
+          setSelectedDish(null);
+        }}
       />
 
       {/* МОДАЛКА ШІ-БАЛАНСУВАЛЬНИКА */}
