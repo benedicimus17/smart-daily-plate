@@ -143,6 +143,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
 
         {/* Кнопка закриття */}
         <button
+          id="wizard-close-x-btn"
           type="button"
           onClick={onClose}
           className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-all active:scale-90"
