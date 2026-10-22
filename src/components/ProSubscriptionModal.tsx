@@ -185,6 +185,7 @@ export const ProSubscriptionModal: React.FC<ProSubscriptionModalProps> = ({
             {/* Кнопка активації */}
             <div className="space-y-2 pt-1">
               <button
+                id="btn-activate-pro-test"
                 type="button"
                 onClick={handleActivatePro}
                 disabled={isSubscribing}
