@@ -133,11 +133,11 @@ export const ProSubscriptionModal: React.FC<ProSubscriptionModalProps> = ({
             {/* 5 Переваг підписки */}
             <div className="space-y-2 py-1">
               {[
-                { icon: ChefHat, title: 'Каталог 50+ авторських страв', desc: 'Точні грами, макроси та покроковий рецепт' },
-                { icon: RefreshCw, title: 'ШІ-Заміна Smart Swap (2 сек)', desc: 'Миттєва ізокалорійна заміна набридлих страв' },
-                { icon: Scale, title: 'Облік уварки/ужарки (Cook-Loss)', desc: 'Авто-перерахунок сирої ваги в готову без похибок' },
-                { icon: TrendingUp, title: 'True Fat Trend (EMA аналітика)', desc: 'Спалювання чистого жиру без водної ваги' },
-                { icon: Sparkles, title: 'Weekly Flex Bank на вікенди', desc: 'Резерв калорій на вечері з друзями без зривів' }
+                { icon: ChefHat, title: 'Шеф-меню 50+ страв ресторану', desc: 'Стейки су-від, лосось, піца з точними грамами та білком' },
+                { icon: RefreshCw, title: 'Smart Swap: ШІ-Заміна за 2 сек', desc: 'Миттєва ізокалорійна заміна набридлих страв під вашу ціль' },
+                { icon: Sparkles, title: 'AI Відео-парсер із TikTok та Reels', desc: 'Розбір трендових відео-рецептів на інгредієнти та макроси' },
+                { icon: Scale, title: 'Калькулятор ресторанних олій', desc: 'Точний захист від прихованих жирів під час вечерь у закладах' },
+                { icon: TrendingUp, title: 'Weekly Flex Bank на вікенди', desc: 'Резерв калорій для вечірок і вина без зриву дієти' }
               ].map((feat, i) => {
                 const Icon = feat.icon;
                 return (
@@ -154,7 +154,7 @@ export const ProSubscriptionModal: React.FC<ProSubscriptionModalProps> = ({
               })}
             </div>
 
-            {/* Тарифні плани */}
+            {/* Тарифні плани (Європа / Іспанія) */}
             <div className="grid grid-cols-2 gap-2 pt-1">
               <button
                 type="button"
@@ -166,10 +166,10 @@ export const ProSubscriptionModal: React.FC<ProSubscriptionModalProps> = ({
                 }`}
               >
                 <div className="text-[9px] font-black uppercase text-amber-300 bg-amber-400/20 px-1.5 py-0.2 rounded-md inline-block mb-1">
-                  -50% ХІТ
+                  -50% ХІТ • 7 ДНІВ 0€
                 </div>
-                <div className="text-sm font-black text-white">99 грн<span className="text-[10px] text-zinc-400 font-normal">/міс</span></div>
-                <div className="text-[10px] text-zinc-400 mt-0.5">Річна підписка</div>
+                <div className="text-sm font-black text-white">€2.99<span className="text-[10px] text-zinc-400 font-normal">/міс</span></div>
+                <div className="text-[10px] text-zinc-400 mt-0.5">€35.99 / рік (~99 грн/міс)</div>
               </button>
 
               <button
@@ -184,8 +184,8 @@ export const ProSubscriptionModal: React.FC<ProSubscriptionModalProps> = ({
                 <div className="text-[9px] font-bold text-zinc-400 uppercase mb-1">
                   Гнучкий
                 </div>
-                <div className="text-sm font-black text-white">199 грн<span className="text-[10px] text-zinc-400 font-normal">/міс</span></div>
-                <div className="text-[10px] text-zinc-400 mt-0.5">Оплата щомісяця</div>
+                <div className="text-sm font-black text-white">€4.99<span className="text-[10px] text-zinc-400 font-normal">/міс</span></div>
+                <div className="text-[10px] text-zinc-400 mt-0.5">Оплата помісячно (~199 грн)</div>
               </button>
             </div>
 
@@ -199,7 +199,13 @@ export const ProSubscriptionModal: React.FC<ProSubscriptionModalProps> = ({
                 className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-400/30 active:scale-95 transition-all cursor-pointer"
               >
                 <Crown className="w-4 h-4 stroke-[2.5]" />
-                <span>{isSubscribing ? 'Підключення...' : 'Активувати NUTRIQ PRO (Тестовий режим)'}</span>
+                <span>
+                  {isSubscribing
+                    ? 'Підключення...'
+                    : selectedPlan === 'yearly'
+                    ? 'Спробувати 7 днів 0 € (далі €2.99/міс)'
+                    : 'Оформити підписку за €4.99 / міс'}
+                </span>
               </button>
 
               <button
