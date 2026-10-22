@@ -108,7 +108,10 @@ export const App: React.FC = () => {
 
           {/* 2. Вкладка "Log" (Щоденник страв, розклад дня, ШІ-Балансувальник та Каструля) */}
           {activeTab === 'cookloss' && (
-            <LogScreen onOpenQuickAdd={handleOpenAdd} />
+            <LogScreen
+              onOpenQuickAdd={handleOpenAdd}
+              onOpenProModal={() => setProModalOpen(true)}
+            />
           )}
 
           {/* 3. Вкладка "Trends" (Істинний жировий тренд та згрупований список покупок) */}

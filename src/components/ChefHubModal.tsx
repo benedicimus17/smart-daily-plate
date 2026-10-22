@@ -679,12 +679,15 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/85 backdrop-blur-md animate-fadeIn"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 animate-fadeIn">
+      {/* Окремий бекдроп для закриття тапом збоку */}
       <div
-        className="w-full max-w-sm rounded-[32px] bg-[#101612]/98 border border-white/10 text-white relative max-h-[92vh] flex flex-col shadow-[0_25px_60px_rgba(0,0,0,0.9)] overflow-hidden"
+        id="chef-hub-backdrop"
+        className="absolute inset-0 bg-black/85 backdrop-blur-md cursor-pointer"
+        onClick={onClose}
+      />
+      <div
+        className="w-full max-w-sm rounded-[32px] bg-[#101612]/98 border border-white/10 text-white relative z-10 max-h-[92vh] flex flex-col shadow-[0_25px_60px_rgba(0,0,0,0.9)] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ШАПКА ХАБУ */}
@@ -811,6 +814,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                   return (
                     <div
                       key={item.id}
+                      id={`chef-dish-${item.id}`}
                       onClick={() => {
                         if (isLocked) {
                           setProPaywallDish(item);
@@ -883,6 +887,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                       {/* Кнопка швидкого додавання в розклад або замок PRO */}
                       {isLocked ? (
                         <button
+                          id={`btn-chef-lock-${item.id}`}
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1440,8 +1445,17 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
 
         {/* Швидке вікно блокування PRO при тапі на замок */}
         {proPaywallDish && (
-          <div className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
-            <div className="w-full max-w-sm rounded-3xl bg-[#121814] border border-amber-400/50 p-5 shadow-2xl space-y-4 relative overflow-hidden text-white">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fadeIn">
+            {/* Окремий бекдроп для закриття тапом збоку */}
+            <div
+              id="chef-hub-locked-dish-backdrop"
+              className="absolute inset-0 bg-black/85 backdrop-blur-md cursor-pointer"
+              onClick={() => setProPaywallDish(null)}
+            />
+            <div
+              className="w-full max-w-sm rounded-3xl bg-[#121814] border border-amber-400/50 p-5 shadow-2xl space-y-4 relative z-10 overflow-hidden text-white"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl pointer-events-none" />
 
               <button

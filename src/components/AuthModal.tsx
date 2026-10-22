@@ -65,9 +65,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn select-none">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn select-none"
+      onClick={onClose}
+    >
       <div
         className="relative w-full max-w-sm rounded-[32px] overflow-hidden p-6 transition-all"
+        onClick={(e) => e.stopPropagation()}
         style={{
           background: 'linear-gradient(165deg, rgba(24,34,28,0.95) 0%, rgba(13,18,15,0.98) 100%)',
           boxShadow: '0 24px 60px rgba(0,0,0,0.85), inset 0 1px 1px rgba(255,255,255,0.18)',

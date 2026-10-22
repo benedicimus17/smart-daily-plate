@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, Check, ChefHat, Sparkles, Scale, Clock, RefreshCw } from 'lucide-react';
+import { X, Check, ChefHat, Sparkles, Scale, Clock, RefreshCw, Crown } from 'lucide-react';
 import { MealEntry, MealType, Macros } from '../types/nutrition';
 import { getNextSwapCandidate, SmartSwapResult } from '../services/smartSwapEngine';
 import { CHEF_CATALOG } from './ChefHubModal';
+import { useUserStore } from '../store/userStore';
 
 interface DishDetailModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface DishDetailModalProps {
   onRemove: (mealType: MealType, entryId: string) => void;
   onUpdateTime?: (mealType: MealType, entryId: string, newTime: string) => void;
   onSwapDish?: (mealType: MealType, entryId: string, newDish: { name: string; weightGrams: number; macros: Macros; recipeDetails?: string }) => void;
+  onOpenProModal?: () => void;
 }
 
 const MEAL_LABELS: Record<MealType, string> = {
@@ -322,9 +324,13 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
   onToggleEaten,
   onRemove,
   onUpdateTime,
-  onSwapDish
+  onSwapDish,
+  onOpenProModal
 }) => {
   if (!isOpen || !entry || !mealType) return null;
+
+  const { user } = useUserStore();
+  const isProUser = Boolean(user.isPro);
 
   const [isEditingTime, setIsEditingTime] = useState(false);
   const [timeValue, setTimeValue] = useState(entry.timestamp || '08:30');
@@ -461,12 +467,15 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn">
+      {/* Окремий бекдроп для закриття тапом збоку */}
       <div
-        className="w-full max-w-sm rounded-[32px] bg-[#121814] border border-white/10 text-white relative max-h-[92vh] overflow-y-auto shadow-[0_25px_60px_rgba(0,0,0,0.9)] overflow-hidden"
+        id="dish-detail-backdrop"
+        className="absolute inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
+        onClick={onClose}
+      />
+      <div
+        className="w-full max-w-sm rounded-[32px] bg-[#121814] border border-white/10 text-white relative z-10 max-h-[92vh] overflow-y-auto shadow-[0_25px_60px_rgba(0,0,0,0.9)] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Кнопка закриття */}
@@ -612,9 +621,28 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
             </div>
           </div>
 
-          {/* КНОПКА ШІ-ЗАМІНИ СТРАВИ (SMART SWAP) */}
+          {/* КНОПКА ШІ-ЗАМІНИ СТРАВИ (SMART SWAP) — PRO ФІЧА */}
           <div className="pt-2 border-t border-white/10 space-y-2">
-            {!showSwapPanel ? (
+            {!isProUser ? (
+              <button
+                id="btn-smart-swap-pro"
+                type="button"
+                onClick={() => {
+                  if (onOpenProModal) {
+                    onOpenProModal();
+                  }
+                }}
+                className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-amber-500/10 to-amber-950/25 hover:from-amber-500/20 hover:to-amber-950/35 border border-amber-400/40 text-amber-300 font-bold text-xs flex items-center justify-between transition-all active:scale-[0.98] shadow-sm cursor-pointer group"
+              >
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 text-amber-400 shrink-0 group-hover:rotate-45 transition-transform" />
+                  <span className="text-left">🔄 Smart Swap — Замінити страву</span>
+                </div>
+                <span className="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 flex items-center gap-1 shadow-md shrink-0">
+                  <Crown className="w-3 h-3 stroke-[2.5]" /> PRO
+                </span>
+              </button>
+            ) : !showSwapPanel ? (
               <button
                 type="button"
                 onClick={handleInitSmartSwap}

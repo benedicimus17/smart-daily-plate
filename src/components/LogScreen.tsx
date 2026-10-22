@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNutritionStore } from '../store/nutritionStore';
 import { MealType, MealEntry } from '../types/nutrition';
 import { SmartBalancerModal } from './SmartBalancerModal';
@@ -17,11 +17,14 @@ import {
   UtensilsCrossed,
   Trash2,
   ChevronRight as ChevronRightIcon,
-  Clock
+  Clock,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 
 interface LogScreenProps {
-  onOpenQuickAdd: (mealType: MealType) => void;
+  onOpenQuickAdd?: (mealType: MealType) => void;
+  onOpenProModal?: () => void;
 }
 
 const formatLocalDate = (d: Date): string => {
@@ -44,7 +47,7 @@ const CATEGORY_LABELS: Record<MealType, string> = {
   dinner: 'Вечеря'
 };
 
-export const LogScreen: React.FC<LogScreenProps> = () => {
+export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQuickAdd, onOpenProModal }) => {
   const {
     dailyLog,
     selectedDate,
@@ -66,9 +69,12 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
   // Стан редагування часу на картці
   const [editingTimeId, setEditingTimeId] = useState<string | null>(null);
 
-  // ШІ-Балансувальник: стан перебору
-  const [isOverLimit, setIsOverLimit] = useState(true);
-  const excessKcal = 240;
+  // ШІ-Балансувальник: ручне скидання при зміні дати
+  const [isManuallyBalanced, setIsManuallyBalanced] = useState(false);
+
+  useEffect(() => {
+    setIsManuallyBalanced(false);
+  }, [selectedDate]);
 
   // Календарні розрахунки
   const [weekOffset, setWeekOffset] = useState<number>(0);
@@ -98,7 +104,8 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
 
   // Обробка застосування балансувальника
   const handleApplyScale = (_mealType: string, _newGrams: number) => {
-    setIsOverLimit(false);
+    setIsManuallyBalanced(true);
+    setBalancerOpen(false);
   };
 
   const handleApplySwap = (_mealType: string, newDishName: string, newMacros: { calories: number; protein: number; fat: number; carbs: number }) => {
@@ -110,11 +117,13 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
       eaten: true,
       timestamp: '19:30'
     });
-    setIsOverLimit(false);
+    setIsManuallyBalanced(true);
+    setBalancerOpen(false);
   };
 
   const handleApplyFlexBank = (_excess: number) => {
-    setIsOverLimit(false);
+    setIsManuallyBalanced(true);
+    setBalancerOpen(false);
   };
 
   // Збираємо всі страви поточного дня та сортуємо їх ХРОНОЛОГІЧНО ЗА ЧАСОМ
@@ -130,6 +139,33 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
   });
 
   timelineEntries.sort((a, b) => a.timeMinutes - b.timeMinutes);
+
+  // 1. Повний динамічний розрахунок макросів ВСЬОГО меню на обраний день (як запланованих, так і з'їдених)
+  const dayPlannedMacros = timelineEntries.reduce(
+    (acc, item) => {
+      acc.calories += item.entry.macros.calories || 0;
+      acc.protein += item.entry.macros.protein || 0;
+      acc.fat += item.entry.macros.fat || 0;
+      acc.carbs += item.entry.macros.carbs || 0;
+      if (item.entry.eaten !== false) {
+        acc.eatenCalories += item.entry.macros.calories || 0;
+      } else {
+        acc.plannedCalories += item.entry.macros.calories || 0;
+      }
+      return acc;
+    },
+    { calories: 0, protein: 0, fat: 0, carbs: 0, eatenCalories: 0, plannedCalories: 0 }
+  );
+
+  const targetCalories = dailyLog.targets.calories || 2150;
+  const targetProtein = dailyLog.targets.protein || 180;
+  const targetFat = dailyLog.targets.fat || 80;
+  const targetCarbs = dailyLog.targets.carbs || 270;
+
+  // Динамічний надлишок (тільки якщо реальне перевищення цілі більше 50 ккал)
+  const calDelta = dayPlannedMacros.calories - targetCalories;
+  const isOverLimit = calDelta > 50 && !isManuallyBalanced;
+  const excessKcal = Math.max(0, calDelta);
 
   return (
     <div className="space-y-3.5 pb-28 animate-fadeIn select-none">
@@ -208,14 +244,107 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
         </div>
       </div>
 
-      {/* 2. КОМПАКТНА ШІ-ПЛАШКА БАЛАНСУВАННЯ */}
+      {/* 2. ГОЛОВНЕ ЗВЕДЕННЯ: ЗАГАЛЬНЕ МЕНЮ НА ОБРАНИЙ ДЕНЬ */}
+      <div
+        className="rounded-3xl p-4 relative overflow-hidden text-white border border-white/10 shadow-lg"
+        style={{
+          background: 'linear-gradient(165deg, rgba(20,29,23,0.96) 0%, rgba(12,17,14,0.99) 100%)',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.6)'
+        }}
+      >
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-400 block">
+              Загальне меню на день
+            </span>
+            <h3 className="text-sm font-black text-white flex items-center gap-1.5 mt-0.5">
+              <span>{dailyLog.date}</span>
+              <span className="text-[11px] font-medium text-zinc-400">• {timelineEntries.length} {timelineEntries.length === 1 ? 'страва' : timelineEntries.length < 5 ? 'страви' : 'страв'}</span>
+            </h3>
+          </div>
+
+          {/* Статус-бейдж балансу */}
+          {Math.abs(calDelta) <= 50 ? (
+            <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10.5px] font-extrabold flex items-center gap-1 shadow-sm">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>Баланс 100%</span>
+            </span>
+          ) : calDelta > 50 ? (
+            <span className="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10.5px] font-extrabold flex items-center gap-1 shadow-sm">
+              <AlertCircle className="w-3 h-3 text-rose-400" />
+              <span>+{calDelta} ккал понад норму</span>
+            </span>
+          ) : (
+            <span className="px-2.5 py-1 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 text-[10.5px] font-extrabold flex items-center gap-1 shadow-sm">
+              <span>Залишок: {Math.abs(calDelta)} ккал</span>
+            </span>
+          )}
+        </div>
+
+        {/* Велика плашка калоражу дня */}
+        <div className="pt-3 pb-1 flex items-baseline justify-between">
+          <div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-3xl font-black text-white tracking-tight font-mono">
+                {dayPlannedMacros.calories}
+              </span>
+              <span className="text-xs text-zinc-400 font-bold">
+                / {targetCalories} ккал
+              </span>
+            </div>
+            <div className="text-[11px] text-zinc-400 mt-0.5 flex items-center gap-2">
+              <span className="text-emerald-400 font-semibold">✓ З'їдено: {dayPlannedMacros.eatenCalories} ккал</span>
+              <span>•</span>
+              <span className="text-amber-300 font-semibold">Заплановано: {dayPlannedMacros.plannedCalories} ккал</span>
+            </div>
+          </div>
+
+          <div className="text-right">
+            <span className="text-xl font-black text-amber-400 font-mono">
+              {Math.min(100, Math.round((dayPlannedMacros.calories / (targetCalories || 1)) * 100))}%
+            </span>
+            <span className="text-[10px] text-zinc-400 block font-bold">від цілі</span>
+          </div>
+        </div>
+
+        {/* Прогрес-бар калорій */}
+        <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden my-2">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${
+              isOverLimit ? 'bg-gradient-to-r from-amber-400 to-rose-500' : 'bg-gradient-to-r from-amber-400 to-emerald-400'
+            }`}
+            style={{ width: `${Math.min(100, (dayPlannedMacros.calories / (targetCalories || 1)) * 100)}%` }}
+          />
+        </div>
+
+        {/* 3 шкали БЖУ для всього дня */}
+        <div className="grid grid-cols-3 gap-2 pt-1 text-center">
+          <div className="p-2 rounded-xl bg-black/40 border border-emerald-500/20">
+            <span className="text-[9.5px] uppercase font-bold text-emerald-400 block">Білок</span>
+            <span className="text-xs font-black text-white font-mono">{dayPlannedMacros.protein}г</span>
+            <span className="text-[9px] text-zinc-500 block">/ {targetProtein}г</span>
+          </div>
+          <div className="p-2 rounded-xl bg-black/40 border border-amber-500/20">
+            <span className="text-[9.5px] uppercase font-bold text-amber-400 block">Жири</span>
+            <span className="text-xs font-black text-white font-mono">{dayPlannedMacros.fat}г</span>
+            <span className="text-[9px] text-zinc-500 block">/ {targetFat}г</span>
+          </div>
+          <div className="p-2 rounded-xl bg-black/40 border border-sky-500/20">
+            <span className="text-[9.5px] uppercase font-bold text-sky-400 block">Вуглеводи</span>
+            <span className="text-xs font-black text-white font-mono">{dayPlannedMacros.carbs}г</span>
+            <span className="text-[9px] text-zinc-500 block">/ {targetCarbs}г</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. КОМПАКТНА ШІ-ПЛАШКА БАЛАНСУВАННЯ (З'являється ТІЛЬКИ при реальному перевищенні цілі) */}
       {isOverLimit && (
         <div className="p-2.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 flex items-center justify-between animate-fadeIn">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping shrink-0" />
             <div>
               <div className="text-[11px] font-bold text-rose-200">
-                Перевищення вечері +{excessKcal} ккал
+                Перевищення ліміту дня +{excessKcal} ккал
               </div>
               <div className="text-[9.5px] text-rose-300/80">
                 ШІ пропонує зменшити порцію або списати у Flex Bank
@@ -340,6 +469,7 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
 
                 {/* Рядок страви: Інтерактивний чекбокс + Текст + Деталі */}
                 <div
+                  id={`log-meal-row-${entry.id}`}
                   onClick={() => setSelectedDish({ mealType, entry })}
                   className="pt-2.5 flex items-center justify-between cursor-pointer group hover:bg-white/[0.02] px-1 rounded-xl transition-all"
                 >
@@ -460,6 +590,7 @@ export const LogScreen: React.FC<LogScreenProps> = () => {
           });
           setSelectedDish(null);
         }}
+        onOpenProModal={onOpenProModal}
       />
 
       {/* МОДАЛКА ШІ-БАЛАНСУВАЛЬНИКА */}

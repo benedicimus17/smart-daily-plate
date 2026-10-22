@@ -21,9 +21,13 @@ export const SmartBalancerModal: React.FC<SmartBalancerModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn select-none">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn select-none"
+      onClick={onClose}
+    >
       <div
         className="w-full max-w-sm rounded-[32px] p-5 relative overflow-hidden text-zinc-100"
+        onClick={(e) => e.stopPropagation()}
         style={{
           background: 'linear-gradient(165deg, rgba(22,32,26,0.96) 0%, rgba(12,17,14,0.98) 100%)',
           border: '1px solid rgba(255,255,255,0.14)',

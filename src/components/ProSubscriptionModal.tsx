@@ -40,9 +40,16 @@ export const ProSubscriptionModal: React.FC<ProSubscriptionModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn select-none">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fadeIn select-none">
+      {/* Окремий бекдроп для закриття тапом збоку */}
       <div
-        className="relative w-full max-w-sm rounded-[32px] overflow-hidden p-6 transition-all border border-amber-400/40 text-white shadow-[0_25px_60px_rgba(0,0,0,0.95)]"
+        id="pro-subscription-backdrop"
+        className="absolute inset-0 bg-black/85 backdrop-blur-md cursor-pointer"
+        onClick={onClose}
+      />
+      <div
+        className="relative z-10 w-full max-w-sm rounded-[32px] overflow-hidden p-6 transition-all border border-amber-400/40 text-white shadow-[0_25px_60px_rgba(0,0,0,0.95)]"
+        onClick={(e) => e.stopPropagation()}
         style={{
           background: 'linear-gradient(165deg, rgba(28,36,30,0.98) 0%, rgba(12,16,14,0.99) 100%)'
         }}

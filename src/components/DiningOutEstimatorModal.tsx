@@ -60,8 +60,14 @@ export const DiningOutEstimatorModal: React.FC<DiningOutEstimatorModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
-      <div className="bg-[#101612]/95 border border-[#233226] rounded-3xl w-full max-w-md p-6 relative shadow-[0_20px_50px_rgba(0,0,0,0.85)] max-h-[90vh] overflow-y-auto no-scrollbar">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn"
+      onClick={onClose}
+    >
+      <div
+        className="bg-[#101612]/95 border border-[#233226] rounded-3xl w-full max-w-md p-6 relative shadow-[0_20px_50px_rgba(0,0,0,0.85)] max-h-[90vh] overflow-y-auto no-scrollbar"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Заголовок */}
         <div className="flex items-center justify-between pb-3 border-b border-[#233226]">
           <div className="flex items-center gap-2.5">
