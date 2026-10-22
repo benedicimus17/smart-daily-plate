@@ -26,6 +26,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, minDuratio
 
   return (
     <div
+      id="splash-screen-overlay"
       onClick={handleDismiss}
       className={`fixed inset-0 z-50 flex items-center justify-center bg-[#0B0E0D] cursor-pointer transition-opacity duration-500 ease-out select-none overflow-hidden ${
         fading ? 'opacity-0 pointer-events-none' : 'opacity-100'

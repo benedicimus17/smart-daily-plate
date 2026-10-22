@@ -281,40 +281,73 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
           )}
         </div>
 
-        {/* Велика плашка калоражу дня */}
-        <div className="pt-3 pb-1 flex items-baseline justify-between">
-          <div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl font-black text-white tracking-tight font-mono">
-                {dayPlannedMacros.calories}
-              </span>
-              <span className="text-xs text-zinc-400 font-bold">
-                / {targetCalories} ккал
-              </span>
+        {/* ДВА ГОЛОВНІ ПОКАЗНИКИ: З'ЇДЕНО ЗАРАЗ ТА ПЛАН МЕНЮ НА ДЕНЬ */}
+        <div className="grid grid-cols-2 gap-2.5 pt-3 pb-1">
+          {/* 1. З'ЇДЕНО ЗАРАЗ (Смарагдова картка, моментально реагує на галочки) */}
+          <div className="p-2.5 rounded-2xl bg-black/45 border border-emerald-500/30 flex flex-col justify-between shadow-inner">
+            <div>
+              <div className="text-[10px] font-extrabold uppercase tracking-wide text-emerald-400 flex items-center gap-1">
+                <Check className="w-3 h-3 stroke-[3]" />
+                <span>З'їдено зараз</span>
+              </div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl font-black text-white font-mono tracking-tight">
+                  {dayPlannedMacros.eatenCalories}
+                </span>
+                <span className="text-[10px] text-zinc-400 font-bold">
+                  / {targetCalories}
+                </span>
+              </div>
             </div>
-            <div className="text-[11px] text-zinc-400 mt-0.5 flex items-center gap-2">
-              <span className="text-emerald-400 font-semibold">✓ З'їдено: {dayPlannedMacros.eatenCalories} ккал</span>
-              <span>•</span>
-              <span className="text-amber-300 font-semibold">Заплановано: {dayPlannedMacros.plannedCalories} ккал</span>
+
+            <div className="mt-2">
+              <div className="flex justify-between text-[9.5px] text-zinc-400 mb-1 font-semibold">
+                <span className="text-emerald-400">{Math.round((dayPlannedMacros.eatenCalories / (targetCalories || 1)) * 100)}%</span>
+                <span>факт</span>
+              </div>
+              <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min(100, (dayPlannedMacros.eatenCalories / (targetCalories || 1)) * 100)}%` }}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="text-right">
-            <span className="text-xl font-black text-amber-400 font-mono">
-              {Math.min(100, Math.round((dayPlannedMacros.calories / (targetCalories || 1)) * 100))}%
-            </span>
-            <span className="text-[10px] text-zinc-400 block font-bold">від цілі</span>
-          </div>
-        </div>
+          {/* 2. ВСЬОГО В МЕНЮ (Бурштинова картка: повний план на день) */}
+          <div className="p-2.5 rounded-2xl bg-black/45 border border-amber-400/30 flex flex-col justify-between shadow-inner">
+            <div>
+              <div className="text-[10px] font-extrabold uppercase tracking-wide text-amber-300 flex items-center gap-1">
+                <Sparkles className="w-3 h-3" />
+                <span>Меню на день</span>
+              </div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl font-black text-white font-mono tracking-tight">
+                  {dayPlannedMacros.calories}
+                </span>
+                <span className="text-[10px] text-zinc-400 font-bold">
+                  / {targetCalories}
+                </span>
+              </div>
+            </div>
 
-        {/* Прогрес-бар калорій */}
-        <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden my-2">
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${
-              isOverLimit ? 'bg-gradient-to-r from-amber-400 to-rose-500' : 'bg-gradient-to-r from-amber-400 to-emerald-400'
-            }`}
-            style={{ width: `${Math.min(100, (dayPlannedMacros.calories / (targetCalories || 1)) * 100)}%` }}
-          />
+            <div className="mt-2">
+              <div className="flex justify-between text-[9.5px] text-zinc-400 mb-1 font-semibold">
+                <span className="text-amber-300 font-bold truncate">
+                  {dayPlannedMacros.plannedCalories > 0 ? `Залишок: ${dayPlannedMacros.plannedCalories} ккал` : '✓ Все з\'їдено'}
+                </span>
+                <span>план</span>
+              </div>
+              <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    isOverLimit ? 'bg-gradient-to-r from-amber-400 to-rose-500' : 'bg-gradient-to-r from-amber-400 to-amber-500'
+                  }`}
+                  style={{ width: `${Math.min(100, (dayPlannedMacros.calories / (targetCalories || 1)) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* 3 шкали БЖУ для всього дня */}
