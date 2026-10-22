@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNutritionStore } from './store/nutritionStore';
+import { useUserStore } from './store/userStore';
 import { Header } from './components/Header';
 import { CalorieRings } from './components/CalorieRings';
 import { WeeklyBankWidget } from './components/WeeklyBankWidget';
@@ -18,9 +19,11 @@ import { MyPlanWizard } from './components/MyPlanWizard';
 import { NextMealSpotlight } from './components/NextMealSpotlight';
 import { WaterTracker } from './components/WaterTracker';
 import { LogScreen } from './components/LogScreen';
+import { ProSubscriptionModal } from './components/ProSubscriptionModal';
 
 export const App: React.FC = () => {
   const { dailyLog, weeklyBank, addFoodToMeal } = useNutritionStore();
+  const { user } = useUserStore();
   const [activeTab, setActiveTab] = useState<NavTab>('today');
   const [showSplash, setShowSplash] = useState(true);
   
@@ -28,11 +31,19 @@ export const App: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [chefHubOpen, setChefHubOpen] = useState(false);
   const [planWizardOpen, setPlanWizardOpen] = useState(false);
+  const [proModalOpen, setProModalOpen] = useState(false);
   const [pendingAddAfterWizard, setPendingAddAfterWizard] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [diningModalOpen, setDiningModalOpen] = useState(false);
   const [targetMealType, setTargetMealType] = useState<MealType>('lunch');
   const [trendSubTab, setTrendSubTab] = useState<'trend' | 'grocery'>('trend');
+
+  // Автоматичне відкриття візарда анкети для нового користувача
+  useEffect(() => {
+    if (!user.hasCompletedPlan) {
+      setPlanWizardOpen(true);
+    }
+  }, [user.hasCompletedPlan]);
 
   const handleOpenAdd = (mealType: MealType) => {
     setTargetMealType(mealType);
@@ -67,6 +78,8 @@ export const App: React.FC = () => {
               date={dailyLog.date}
               onOpenSplash={() => setShowSplash(true)}
               hideCalendarButton={activeTab === 'today'}
+              onOpenProModal={() => setProModalOpen(true)}
+              onResetTestUser={() => setPlanWizardOpen(true)}
             />
           )}
 
@@ -175,6 +188,7 @@ export const App: React.FC = () => {
             isOpen={chefHubOpen}
             targetDate={dailyLog.date}
             onClose={() => setChefHubOpen(false)}
+            onOpenProModal={() => setProModalOpen(true)}
             onAddDishToDay={(mealType, data) => {
               addFoodToMeal(mealType, {
                 ...data,
@@ -182,6 +196,12 @@ export const App: React.FC = () => {
                 foodId: `chef-${Date.now()}`
               });
             }}
+          />
+
+          {/* Розкішний Apple Dark Glass пейволл NUTRIQ PRO */}
+          <ProSubscriptionModal
+            isOpen={proModalOpen}
+            onClose={() => setProModalOpen(false)}
           />
 
           {/* Швидка модалка запису страв для окремих слотів */}

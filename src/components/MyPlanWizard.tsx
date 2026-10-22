@@ -36,6 +36,8 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
   const [heightCm, setHeightCm] = useState<number>(user.heightCm || 160);
   const [activityLevel, setActivityLevel] = useState<ActivityLevel>(user.activityLevel || 'moderate');
   const [pace, setPace] = useState<WeightLossPace>(user.pace || 'fast');
+  const [eatingRhythm, setEatingRhythm] = useState<'3_meals' | '5_meals'>(user.eatingRhythm || '3_meals');
+  const [takesProtein, setTakesProtein] = useState<boolean>(user.takesProtein || false);
 
   // Дані фінальної реєстрації
   const [email, setEmail] = useState(user.email || '');
@@ -71,21 +73,21 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
 
   const handleFinalRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) {
-      setRegError('Будь ласка, введіть вашу пошту для реєстрації');
-      return;
-    }
     setRegError('');
     setIsSubmitting(true);
 
     setTimeout(() => {
-      // 1. Зберігаємо план та реєструємо користувача
+      // 1. Зберігаємо план та реєструємо користувача (приймає будь-які слова / символи для тесту)
+      const inputStr = email.trim();
+      const effectiveEmail = inputStr || 'test.user@nutriq.app';
+      const effectiveName = inputStr || (gender === 'female' ? 'Анна' : 'Олексій');
+
       savePlanAndRegister(
-        { gender, age, weightKg, heightCm, activityLevel, goal, pace },
+        { gender, age, weightKg, heightCm, activityLevel, goal, pace, eatingRhythm, takesProtein },
         plan.targets,
         {
-          name: gender === 'female' ? 'Анна' : 'Олексій',
-          email: email.trim(),
+          name: effectiveName,
+          email: effectiveEmail,
           phone: phone.trim() || '+380501234567',
           password
         }
@@ -97,7 +99,27 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
       setIsSubmitting(false);
       onCompleted?.();
       onClose();
-    }, 500);
+    }, 400);
+  };
+
+  const handleGuestSkip = () => {
+    setIsSubmitting(true);
+    setTimeout(() => {
+      savePlanAndRegister(
+        { gender, age, weightKg, heightCm, activityLevel, goal, pace, eatingRhythm, takesProtein },
+        plan.targets,
+        {
+          name: 'Гість',
+          email: '',
+          phone: '',
+          password: ''
+        }
+      );
+      updateTargets(plan.targets);
+      setIsSubmitting(false);
+      onCompleted?.();
+      onClose();
+    }, 300);
   };
 
   return (
@@ -442,6 +464,37 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
               </button>
             </div>
 
+            {/* Добавки / Протеїн */}
+            <div className="pt-2 border-t border-white/5">
+              <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1.5">
+                Чи вживаєте протеїн або спортивні добавки?
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTakesProtein(true)}
+                  className={`p-2 rounded-xl border text-xs font-bold transition-all ${
+                    takesProtein
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-sm'
+                      : 'bg-black/30 text-zinc-400 border-white/10 hover:text-white'
+                  }`}
+                >
+                  Так (шейки / снеки)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTakesProtein(false)}
+                  className={`p-2 rounded-xl border text-xs font-bold transition-all ${
+                    !takesProtein
+                      ? 'bg-amber-400/20 text-amber-300 border-amber-400/50 shadow-sm'
+                      : 'bg-black/30 text-zinc-400 border-white/10 hover:text-white'
+                  }`}
+                >
+                  Ні, лише звичайна їжа
+                </button>
+              </div>
+            </div>
+
             <div className="flex gap-2 pt-2">
               <button
                 type="button"
@@ -451,7 +504,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                 <ArrowLeft className="w-4 h-4" />
               </button>
               <button
-                id="wizard-step2-next"
+                id="wizard-step4-next"
                 type="button"
                 onClick={handleNext}
                 className="flex-1 py-3 rounded-2xl font-bold text-xs text-zinc-950 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
@@ -467,44 +520,82 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           </div>
         )}
 
-        {/* КРОК 5: Темп схуднення + Розумна порада нутриціолога проти йо-йо */}
+        {/* КРОК 5: Ритм харчування + Темп схуднення + Розумна порада нутриціолога проти йо-йо */}
         {step === 5 && (
           <div className="space-y-4 animate-fadeIn">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                Крок 5 • Темп
+                Крок 5 • Ритм і темп
               </span>
               <h3 className="text-lg font-bold text-white tracking-tight mt-0.5">
-                Хочете схуднути швидко чи помалу?
+                Як вам зручніше харчуватися?
               </h3>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setPace('fast')}
-                className={`p-3 rounded-2xl border text-left transition-all ${
-                  pace === 'fast'
-                    ? 'bg-rose-500/20 border-rose-500/60 text-white shadow-sm'
-                    : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                }`}
-              >
-                <div className="font-bold text-xs text-rose-300">Швидко</div>
-                <div className="text-[10px] text-zinc-400 mt-1">Максимальний результат</div>
-              </button>
+            {/* Ритм прийомів їжі */}
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1.5">
+                Ритм прийомів їжі
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEatingRhythm('3_meals')}
+                  className={`p-2.5 rounded-2xl border text-left transition-all ${
+                    eatingRhythm === '3_meals'
+                      ? 'bg-amber-400/20 border-amber-400/60 text-white shadow-sm'
+                      : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
+                  }`}
+                >
+                  <div className="font-bold text-xs text-amber-300">3 прийоми</div>
+                  <div className="text-[10px] text-zinc-400 mt-0.5">Сніданок, обід, вечеря (Дзен)</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEatingRhythm('5_meals')}
+                  className={`p-2.5 rounded-2xl border text-left transition-all ${
+                    eatingRhythm === '5_meals'
+                      ? 'bg-emerald-500/20 border-emerald-500/60 text-white shadow-sm'
+                      : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
+                  }`}
+                >
+                  <div className="font-bold text-xs text-emerald-300">5 прийомів</div>
+                  <div className="text-[10px] text-zinc-400 mt-0.5">Дробове з перекусами</div>
+                </button>
+              </div>
+            </div>
 
-              <button
-                type="button"
-                onClick={() => setPace('steady')}
-                className={`p-3 rounded-2xl border text-left transition-all ${
-                  pace === 'steady'
-                    ? 'bg-amber-400/20 border-amber-400/60 text-white shadow-sm'
-                    : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                }`}
-              >
-                <div className="font-bold text-xs text-amber-300">Поступово</div>
-                <div className="text-[10px] text-zinc-400 mt-1">Без стресу та голоду</div>
-              </button>
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1.5">
+                Темп схуднення
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPace('fast')}
+                  className={`p-2.5 rounded-2xl border text-left transition-all ${
+                    pace === 'fast'
+                      ? 'bg-rose-500/20 border-rose-500/60 text-white shadow-sm'
+                      : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
+                  }`}
+                >
+                  <div className="font-bold text-xs text-rose-300">Швидко</div>
+                  <div className="text-[10px] text-zinc-400 mt-0.5">Максимальний темп</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPace('steady')}
+                  className={`p-2.5 rounded-2xl border text-left transition-all ${
+                    pace === 'steady'
+                      ? 'bg-amber-400/20 border-amber-400/60 text-white shadow-sm'
+                      : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
+                  }`}
+                >
+                  <div className="font-bold text-xs text-amber-300">Поступово</div>
+                  <div className="text-[10px] text-zinc-400 mt-0.5">Без стресу та зривів</div>
+                </button>
+              </div>
             </div>
 
             {/* ВЕРДИКТ КОМП'ЮТЕРА ТА ПОРАДА ПРОТИ ЙО-ЙО */}
@@ -544,7 +635,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                 <ArrowLeft className="w-4 h-4" />
               </button>
               <button
-                id="wizard-step2-next"
+                id="wizard-step5-next"
                 type="button"
                 onClick={handleNext}
                 className="flex-1 py-3 rounded-2xl font-bold text-xs text-zinc-950 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
@@ -614,10 +705,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
             <div className="pt-2 border-t border-white/10">
               <div className="mb-2.5">
                 <h4 className="text-xs font-bold text-white">
-                  Зареєструйтесь через пошту, щоб зберегти план
+                  Збережіть свій розрахунок
                 </h4>
                 <p className="text-[11px] text-zinc-400 mt-0.5">
-                  Це робиться один раз. Ваші розрахунки закріпляться за вашим акаунтом.
+                  Введіть Email (або будь-які тестові слова для перевірки), або зайдіть як гість.
                 </p>
               </div>
 
@@ -632,11 +723,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                   <Mail className="absolute left-3 w-4 h-4 text-zinc-500" />
                   <input
                     id="wizard-email-input"
-                    type="email"
-                    required
+                    type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Ваш Email (наприклад, user@gmail.com)"
+                    placeholder="Email або будь-які два слова для тесту"
                     className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400/60"
                   />
                 </div>
@@ -648,7 +738,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Створіть пароль або PIN-код"
+                    placeholder="Пароль або PIN (необов'язково для тесту)"
                     className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400/60"
                   />
                 </div>
@@ -660,7 +750,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Номер телефону (+380...)"
+                    placeholder="Телефон (необов'язково)"
                     className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400/60"
                   />
                 </div>
@@ -669,7 +759,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                   id="wizard-submit-btn"
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full mt-3 py-3 rounded-2xl font-bold text-xs tracking-wide text-zinc-950 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2"
+                  className="w-full mt-3 py-3 rounded-2xl font-bold text-xs tracking-wide text-zinc-950 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 cursor-pointer"
                   style={{
                     background: 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)',
                     boxShadow: '0 8px 22px rgba(245,158,11,0.35)'
@@ -683,6 +773,16 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                       <span>Зареєструватися та перейти до меню</span>
                     </>
                   )}
+                </button>
+
+                <button
+                  id="wizard-guest-btn"
+                  type="button"
+                  onClick={handleGuestSkip}
+                  disabled={isSubmitting}
+                  className="w-full py-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white font-bold text-xs transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Пропустити та зайти як гість</span>
                 </button>
               </form>
             </div>

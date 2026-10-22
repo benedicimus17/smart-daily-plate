@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, RotateCcw, Crown, Lock } from 'lucide-react';
 import { useNutritionStore } from '../store/nutritionStore';
 import { useUserStore } from '../store/userStore';
 
@@ -7,6 +7,8 @@ interface HeaderProps {
   date: string;
   onOpenSplash?: () => void;
   hideCalendarButton?: boolean;
+  onOpenProModal?: () => void;
+  onResetTestUser?: () => void;
 }
 
 const formatLocalDate = (d: Date): string => {
@@ -16,9 +18,14 @@ const formatLocalDate = (d: Date): string => {
   return `${y}-${m}-${day}`;
 };
 
-export const Header: React.FC<HeaderProps> = ({ onOpenSplash, hideCalendarButton }) => {
+export const Header: React.FC<HeaderProps> = ({
+  onOpenSplash,
+  hideCalendarButton,
+  onOpenProModal,
+  onResetTestUser
+}) => {
   const { selectedDate, setSelectedDate } = useNutritionStore();
-  const { user } = useUserStore();
+  const { user, resetToNewGuestUser } = useUserStore();
   // weekOffset: 0 - поточний тиждень, -1 - попередній тиждень, -2 - два тижні тому, etc.
   const [weekOffset, setWeekOffset] = useState<number>(0);
 
@@ -103,6 +110,47 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSplash, hideCalendarButton
         <p className="text-[13px] text-[#C5D1C8] font-medium tracking-tight leading-snug">
           Hello, {user.name || 'Alistair'}!
         </p>
+
+        {/* Панель швидкого тестування (Новий користувач + Статус FREE / PRO) */}
+        <div className="flex items-center gap-1.5 mt-1.5">
+          <button
+            id="btn-header-reset-test"
+            type="button"
+            onClick={() => {
+              resetToNewGuestUser();
+              onResetTestUser?.();
+            }}
+            className="px-2.5 py-1 rounded-full bg-white/[0.04] hover:bg-white/[0.09] border border-white/10 text-[10px] font-bold text-zinc-300 hover:text-white flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
+            title="Скинути стан користувача для повторного проходження анкети"
+          >
+            <RotateCcw className="w-3 h-3 text-amber-400" />
+            <span>Тест нового юзера</span>
+          </button>
+
+          <button
+            id="btn-header-pro-status"
+            type="button"
+            onClick={onOpenProModal}
+            className={`px-2.5 py-1 rounded-full border text-[10px] font-extrabold flex items-center gap-1 transition-all active:scale-95 cursor-pointer ${
+              user.isPro
+                ? 'bg-amber-400/20 border-amber-400/60 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
+                : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:text-amber-300 hover:border-amber-400/30'
+            }`}
+            title="Керування статусом підписки (FREE / PRO)"
+          >
+            {user.isPro ? (
+              <>
+                <Crown className="w-3 h-3 text-amber-400 stroke-[2.5]" />
+                <span>PRO</span>
+              </>
+            ) : (
+              <>
+                <Lock className="w-3 h-3 text-zinc-400" />
+                <span>FREE <span className="text-amber-400/90 font-bold">• PRO</span></span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Компактний випадаючий вибір днів тижня (з'являється лише при кліку на календар) */}

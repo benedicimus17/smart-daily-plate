@@ -24,6 +24,8 @@ export interface UserBodyMetrics {
   activityLevel: ActivityLevel;
   goal: NutritionGoal;
   pace: WeightLossPace;
+  eatingRhythm?: '3_meals' | '5_meals';
+  takesProtein?: boolean;
 }
 
 export interface UserProfile extends UserBodyMetrics {
@@ -37,4 +39,5 @@ export interface UserProfile extends UserBodyMetrics {
   pinCode?: string;
   registeredAt?: string;
   savedTargets?: MacroTargets;
+  isPro?: boolean;
 }

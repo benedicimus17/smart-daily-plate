@@ -22,6 +22,7 @@ import {
 import { MealType } from '../types/nutrition';
 import { parseRecipeFromUrl, parseSmartDish } from '../services/recipeParser';
 import { ParsedRecipe } from '../types/recipe';
+import { useUserStore } from '../store/userStore';
 
 export interface ChefDishItem {
   id: string;
@@ -514,6 +515,7 @@ interface ChefHubModalProps {
   onClose: () => void;
   onAddDishToDay: (mealType: MealType, data: { name: string; weightGrams: number; macros: { calories: number; protein: number; fat: number; carbs: number }; timestamp?: string }) => void;
   onSaveToRecipeBook?: (recipe: ParsedRecipe) => void;
+  onOpenProModal?: () => void;
 }
 
 export const ChefHubModal: React.FC<ChefHubModalProps> = ({
@@ -521,9 +523,13 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   targetDate,
   onClose,
   onAddDishToDay,
-  onSaveToRecipeBook
+  onSaveToRecipeBook,
+  onOpenProModal
 }) => {
   if (!isOpen) return null;
+
+  const { user, setProStatus } = useUserStore();
+  const isProUser = Boolean(user.isPro);
 
   // Режим роботи Шеф-Хабу: 1. Меню страв, 2. AI Парсер (TikTok/Reels), 3. Розумний текст
   const [activeTab, setActiveTab] = useState<'catalog' | 'ai_parser' | 'smart_text'>('catalog');
@@ -538,7 +544,6 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   const [previewTargetSlot, setPreviewTargetSlot] = useState<MealType>('breakfast');
   const [isPreviewAdded, setIsPreviewAdded] = useState(false);
   const [proPaywallDish, setProPaywallDish] = useState<ChefDishItem | null>(null);
-  const [isProUser, setIsProUser] = useState<boolean>(false);
 
   // Стан для AI Парсера
   const [parserUrl, setParserUrl] = useState('https://www.tiktok.com/@chef/video/crepes-with-meat');
@@ -1378,7 +1383,11 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      setIsProUser(true);
+                      if (onOpenProModal) {
+                        onOpenProModal();
+                      } else {
+                        setProStatus(true);
+                      }
                     }}
                     className="flex-1 py-2.5 rounded-xl font-black text-xs text-zinc-950 bg-gradient-to-r from-amber-400 to-amber-500 shadow-lg shadow-amber-400/25 hover:brightness-110 flex items-center justify-center gap-1.5 active:scale-95 transition-all"
                   >
@@ -1469,13 +1478,17 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    setIsProUser(true);
                     setProPaywallDish(null);
+                    if (onOpenProModal) {
+                      onOpenProModal();
+                    } else {
+                      setProStatus(true);
+                    }
                   }}
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-400/25 active:scale-95 transition-all"
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-400/25 active:scale-95 transition-all cursor-pointer"
                 >
-                  <Crown className="w-4 h-4" />
-                  <span>Оформити NUTRIQ PRO (В 1 клік)</span>
+                  <Crown className="w-4 h-4 stroke-[2.5]" />
+                  <span>Оформити NUTRIQ PRO (Переглянути тарифи)</span>
                 </button>
 
                 <button

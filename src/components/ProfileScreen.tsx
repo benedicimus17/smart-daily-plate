@@ -5,7 +5,6 @@ import { MyPlanWizard } from './MyPlanWizard';
 import { AuthModal } from './AuthModal';
 import {
   User,
-  ShieldCheck,
   Sparkles,
   Flame,
   Fingerprint,
@@ -22,15 +21,19 @@ import {
   ShoppingCart,
   Link2,
   TrendingUp,
-  KeyRound
+  KeyRound,
+  Crown,
+  RotateCcw
 } from 'lucide-react';
+import { ProSubscriptionModal } from './ProSubscriptionModal';
 
 export const ProfileScreen: React.FC = () => {
-  const { user, toggleFaceId, togglePinCode, logout } = useUserStore();
+  const { user, toggleFaceId, togglePinCode, resetToNewGuestUser, logout } = useUserStore();
   const { dailyLog } = useNutritionStore();
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [proModalOpen, setProModalOpen] = useState(false);
   const [pinInputOpen, setPinInputOpen] = useState(false);
   const [newPin, setNewPin] = useState(user.pinCode || '');
 
@@ -65,15 +68,19 @@ export const ProfileScreen: React.FC = () => {
                 <h3 className="text-base font-bold text-white tracking-tight">
                   {user.isRegistered ? user.name : 'Гість (локальний профіль)'}
                 </h3>
-                {user.isRegistered ? (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3" />
-                    <span>PRO-акаунт</span>
+                {user.isPro ? (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-sm">
+                    <Crown className="w-3 h-3 text-amber-400" />
+                    <span>NUTRIQ PRO</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300/90 border border-amber-500/25">
-                    Гість
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setProModalOpen(true)}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-zinc-300 hover:text-amber-300 border border-white/10 hover:border-amber-400/40 transition-colors cursor-pointer"
+                  >
+                    FREE (Отримати PRO)
+                  </button>
                 )}
               </div>
 
@@ -192,6 +199,31 @@ export const ProfileScreen: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* Кнопки керування тестуванням та підпискою */}
+        <div className="mt-3.5 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setProModalOpen(true)}
+            className="flex-1 py-2 px-3 rounded-xl bg-amber-400/15 hover:bg-amber-400/25 border border-amber-400/30 text-amber-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+          >
+            <Crown className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>{user.isPro ? 'Тариф PRO (Активно)' : 'Оформити PRO'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              resetToNewGuestUser();
+              setWizardOpen(true);
+            }}
+            className="py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+            title="Скинути профіль та пройти анкету наново"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+            <span>Тест анкети</span>
+          </button>
+        </div>
       </div>
 
       {/* 2. БЛОК «МІЙ ПЛАН» (ВИЗНАЧЕНИЙ ПЛАН І КНОПКА ПЕРЕРАХУНКУ) */}
@@ -407,6 +439,12 @@ export const ProfileScreen: React.FC = () => {
         onClose={() => setAuthModalOpen(false)}
         title="Створення профілю NUTRIQ"
         subtitle="Введіть пошту один раз, щоб зберегти свій персональний план харчування та щоденник."
+      />
+
+      {/* Модалка тарифів та переваг PRO */}
+      <ProSubscriptionModal
+        isOpen={proModalOpen}
+        onClose={() => setProModalOpen(false)}
       />
     </div>
   );

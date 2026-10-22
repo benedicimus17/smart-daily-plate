@@ -15,15 +15,18 @@ interface UserState {
   updateSavedTargets: (targets: MacroTargets) => void;
   toggleFaceId: (enabled: boolean) => void;
   togglePinCode: (enabled: boolean, pinCode?: string) => void;
+  setProStatus: (isPro: boolean) => void;
+  resetToNewGuestUser: () => void;
   logout: () => void;
 }
 
 const DEFAULT_USER: UserProfile = {
-  name: 'Alistair',
+  name: 'Гість',
   email: '',
   phone: '',
   isRegistered: false,
   hasCompletedPlan: false,
+  isPro: false,
   faceIdEnabled: false,
   pinCodeEnabled: false,
   gender: 'female',
@@ -33,6 +36,8 @@ const DEFAULT_USER: UserProfile = {
   activityLevel: 'moderate',
   goal: 'lose_weight',
   pace: 'fast',
+  eatingRhythm: '3_meals',
+  takesProtein: false,
   registeredAt: undefined
 };
 
@@ -59,11 +64,11 @@ export const useUserStore = create<UserState>()(
           user: {
             ...state.user,
             ...metrics,
-            name: account.name?.trim() || state.user.name,
+            name: account.name?.trim() || (account.email.trim() ? account.email.trim().split(' ')[0] : state.user.name),
             email: account.email.trim(),
             phone: account.phone?.trim() || state.user.phone,
             pinCode: account.pinCode || state.user.pinCode,
-            isRegistered: true,
+            isRegistered: Boolean(account.email && account.email.trim().length > 0),
             hasCompletedPlan: true,
             savedTargets: targets,
             registeredAt: new Date().toISOString()
@@ -107,6 +112,29 @@ export const useUserStore = create<UserState>()(
             pinCode: pinCode || state.user.pinCode
           }
         }));
+      },
+
+      setProStatus: (isPro) => {
+        set((state) => ({
+          user: {
+            ...state.user,
+            isPro
+          }
+        }));
+      },
+
+      resetToNewGuestUser: () => {
+        set({
+          user: {
+            ...DEFAULT_USER,
+            name: 'Гість',
+            email: '',
+            phone: '',
+            isRegistered: false,
+            hasCompletedPlan: false,
+            isPro: false
+          }
+        });
       },
 
       logout: () => {
