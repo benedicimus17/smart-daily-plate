@@ -17,6 +17,8 @@ interface UserState {
   togglePinCode: (enabled: boolean, pinCode?: string) => void;
   setProStatus: (isPro: boolean) => void;
   resetToNewGuestUser: () => void;
+  deleteAccountAndAllData: () => void;
+  exportUserData: () => string;
   logout: () => void;
 }
 
@@ -43,7 +45,7 @@ const DEFAULT_USER: UserProfile = {
 
 export const useUserStore = create<UserState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: DEFAULT_USER,
 
       registerUser: ({ name, email, phone }) => {
@@ -135,6 +137,39 @@ export const useUserStore = create<UserState>()(
             isPro: false
           }
         });
+      },
+
+      deleteAccountAndAllData: () => {
+        try {
+          localStorage.removeItem('nutriq-user-store-v2');
+          localStorage.removeItem('nutriq-storage-v1');
+          localStorage.removeItem('nutriq-grocery-storage-v1');
+        } catch {}
+        set({
+          user: DEFAULT_USER
+        });
+      },
+
+      exportUserData: (): string => {
+        const state = get();
+        let nutritionData: unknown = null;
+        let groceryData: unknown = null;
+        try {
+          const rawNutr = localStorage.getItem('nutriq-storage-v1');
+          if (rawNutr) nutritionData = JSON.parse(rawNutr);
+          const rawGroc = localStorage.getItem('nutriq-grocery-storage-v1');
+          if (rawGroc) groceryData = JSON.parse(rawGroc);
+        } catch {}
+
+        const exportObject = {
+          gdpr_compliance: 'REGULATION (EU) 2016/679 - ART. 20 DATA PORTABILITY',
+          export_date: new Date().toISOString(),
+          user_profile: state.user,
+          nutrition_records: nutritionData,
+          grocery_list: groceryData
+        };
+
+        return JSON.stringify(exportObject, null, 2);
       },
 
       logout: () => {

@@ -11,6 +11,7 @@ import {
   Sparkles,
   AlertTriangle
 } from 'lucide-react';
+import { LegalModal } from './LegalModal';
 
 interface MyPlanWizardProps {
   isOpen: boolean;
@@ -42,6 +43,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
   // Дані реєстрації
   const [email, setEmail] = useState(user.email || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
 
   if (!isOpen) return null;
 
@@ -695,6 +697,17 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                 >
                   <span>Пропустити та зайти як гість</span>
                 </button>
+
+                <p className="text-[10px] text-zinc-500 text-center leading-tight px-1 pt-1">
+                  Натискаючи кнопку, ви погоджуєтесь з{' '}
+                  <button
+                    type="button"
+                    onClick={() => setLegalOpen(true)}
+                    className="text-amber-400/90 underline hover:text-amber-300 cursor-pointer"
+                  >
+                    Умовами використання та Політикою конфіденційності (GDPR)
+                  </button>
+                </p>
               </form>
             </div>
           </div>
@@ -703,6 +716,12 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
 
       {/* Нижня зона відступу для безпечного перегляду на iPhone */}
       <div className="w-full max-w-md mx-auto py-1 shrink-0" />
+
+      {/* ЮРИДИЧНА МОДАЛКА (GDPR / TERMS) */}
+      <LegalModal
+        isOpen={legalOpen}
+        onClose={() => setLegalOpen(false)}
+      />
     </div>
   );
 };

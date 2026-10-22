@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useUserStore } from '../store/userStore';
 import { X, User, Mail, Phone, Lock, Fingerprint, ShieldCheck, Sparkles } from 'lucide-react';
+import { LegalModal } from './LegalModal';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [useBiometrics, setUseBiometrics] = useState(true);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
 
   if (!isOpen) return null;
 
@@ -216,6 +218,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <span>Зареєструватися та продовжити</span>
             )}
           </button>
+
+          <p className="text-[10px] text-zinc-500 text-center leading-tight px-1 pt-2">
+            Реєструючись, ви приймаєте{' '}
+            <button
+              type="button"
+              onClick={() => setLegalOpen(true)}
+              className="text-amber-400/90 underline hover:text-amber-300 cursor-pointer"
+            >
+              Умови використання та Політику конфіденційності (GDPR)
+            </button>
+          </p>
         </form>
 
         <div className="mt-3 text-center">
@@ -228,6 +241,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </div>
       </div>
+
+      <LegalModal
+        isOpen={legalOpen}
+        onClose={() => setLegalOpen(false)}
+      />
     </div>
   );
 };

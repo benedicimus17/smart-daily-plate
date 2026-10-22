@@ -5,7 +5,7 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-22T18:45:00",
+    "last_updated": "2026-10-22T20:45:00",
     "code_freeze_active": true,
     "current_sprint": "Stage 3.2: Analytics, True Fat Trend & Smart Grocery List (Queue #5)",
     "sprint_goal": "Проєктування Черги № 5 (Вкладка 'Trends' — Тренди ваги без водної похибки та Розумний кошик супермаркету) за стандартом Deep Dark Glassmorphism."
@@ -19,9 +19,9 @@
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-22T18:45:00",
-    "verified_by": "QA Auditor",
-    "report_artifact": "qa_report_stage3_9_zen_weight_grocery_and_clean_log.md",
+    "verified_at": "2026-10-22T20:45:00",
+    "verified_by": "QA Auditor & Security Engineer",
+    "report_artifact": "qa_report_stage4_0_security_compliance_and_gdpr.md",
     "tests_passed": "42/42",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
@@ -350,6 +350,11 @@
       "timestamp": "2026-10-22T18:45:00",
       "author": "CEO & Product Architect",
       "entry": "Реалізація Варіанту № 2 за директивою Власника (Людяний інтерфейс ваги, чистий список покупок та ліквідація ручної каструлі): 1) Ручний калькулятор зважування посуду (каструль) знято з першого плану Щоденника; збережено автоматичний фоновий розрахунок уварки/ужарки (Cook-Loss) у стравах, рецептах та списку покупок; на Щоденник встановлено акуратну плашку 'Їсте не вдома? Додати страву в ресторані (+приховані олії)'; 2) Вкладку Тренди переформатовано під просту зрозумілу мову: 'Моя вага (без води)' з бейджем 'Фільтр води', усунуто наукову термінологію (EMA a=0.1), додано просте психологічне пояснення стрибків набряків від солі/вуглеводів, адаптовано динамічні стовпчики 7-денного спаду жиру під персональну вагу користувача (userStore); 3) Список покупок отримав чітке маркування та категорії в таб-барі; 4) Проведено E2E аудит (42/42 vitest, 0 помилок збірки, скріншоти audit_stage3_9_01..03)."
+    },
+    {
+      "timestamp": "2026-10-22T20:45:00",
+      "author": "CEO & Security Architect",
+      "entry": "Повна реалізація системи безпеки, кіберзахисту та європейського юридичного комплаєнсу (Stage 4.0): 1) Створено LegalModal.tsx з Політикою конфіденційності (GDPR 2016/679) та Умовами використання (Medical Disclaimer, правила 7-денного тріалу); 2) Інтегровано обов'язкові згоди в онбординг (MyPlanWizard) та форму реєстрації (AuthModal); 3) У ProfileScreen додано повноцінний блок правової безпеки: перегляд Privacy Policy, Terms, 1-клік експорт даних (JSON, GDPR ст. 20) та безповоротне видалення акаунту/даних (Right to be Forgotten, GDPR ст. 17 / Apple Store 5.1.1); 4) Проведено аудит безпеки клієнтського коду (XSS-санітизація, local-first пісочниця, план серверного підпису токенів для захисту PRO від підробки в DevTools); 5) 42/42 vitest пройдено, збірка Vite успішна, E2E аудит зафіксовано у 4 скріншотах."
     }
   ]
 }

@@ -23,12 +23,26 @@ import {
   TrendingUp,
   KeyRound,
   Crown,
-  RotateCcw
+  RotateCcw,
+  ShieldCheck,
+  FileText,
+  Lock,
+  Trash2,
+  CheckCircle2
 } from 'lucide-react';
 import { ProSubscriptionModal } from './ProSubscriptionModal';
+import { LegalModal } from './LegalModal';
 
 export const ProfileScreen: React.FC = () => {
-  const { user, toggleFaceId, togglePinCode, resetToNewGuestUser, logout } = useUserStore();
+  const {
+    user,
+    toggleFaceId,
+    togglePinCode,
+    resetToNewGuestUser,
+    logout,
+    deleteAccountAndAllData,
+    exportUserData
+  } = useUserStore();
   const { dailyLog } = useNutritionStore();
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -36,10 +50,42 @@ export const ProfileScreen: React.FC = () => {
   const [proModalOpen, setProModalOpen] = useState(false);
   const [pinInputOpen, setPinInputOpen] = useState(false);
   const [newPin, setNewPin] = useState(user.pinCode || '');
+  const [legalModalOpen, setLegalModalOpen] = useState(false);
+  const [legalTab, setLegalTab] = useState<'privacy' | 'terms'>('privacy');
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [exportToast, setExportToast] = useState(false);
+  const [deletedToast, setDeletedToast] = useState(false);
 
   const handleSavePin = () => {
     togglePinCode(true, newPin);
     setPinInputOpen(false);
+  };
+
+  const handleOpenLegal = (tab: 'privacy' | 'terms') => {
+    setLegalTab(tab);
+    setLegalModalOpen(true);
+  };
+
+  const handleExportData = () => {
+    const jsonStr = exportUserData();
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nutriq_export_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setExportToast(true);
+    setTimeout(() => setExportToast(false), 2500);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteAccountAndAllData();
+    setConfirmDeleteOpen(false);
+    setDeletedToast(true);
+    setTimeout(() => setDeletedToast(false), 3000);
   };
 
   return (
@@ -426,6 +472,161 @@ export const ProfileScreen: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 4. ПРАВОВИЙ КОМПЛАЄНС ТА КОНФІДЕНЦІЙНІСТЬ (GDPR / EU) */}
+      <div
+        className="rounded-3xl p-5 relative overflow-hidden"
+        style={{
+          background: 'linear-gradient(165deg, rgba(20,28,23,0.85) 0%, rgba(12,16,14,0.92) 100%)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.45)'
+        }}
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <h4 className="text-xs font-black tracking-wider uppercase text-zinc-300">
+            Правова інформація та безпека (GDPR)
+          </h4>
+        </div>
+
+        <div className="space-y-2">
+          {/* Політика конфіденційності */}
+          <button
+            id="btn-open-privacy-policy"
+            type="button"
+            onClick={() => handleOpenLegal('privacy')}
+            className="w-full p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/15 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <Lock className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <span className="font-bold text-zinc-200 block text-xs">Політика конфіденційності</span>
+                <span className="text-[10px] text-zinc-400">Стандарт GDPR (EU 2016/679), захист даних</span>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-zinc-500" />
+          </button>
+
+          {/* Умови надання послуг */}
+          <button
+            id="btn-open-terms-of-service"
+            type="button"
+            onClick={() => handleOpenLegal('terms')}
+            className="w-full p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/15 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-amber-300">
+                <FileText className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <span className="font-bold text-zinc-200 block text-xs">Умови використання</span>
+                <span className="text-[10px] text-zinc-400">Медичний дисклеймер, правила тріалу та PRO</span>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-zinc-500" />
+          </button>
+
+          {/* Експорт моїх даних (GDPR Art. 20) */}
+          <button
+            id="btn-export-user-data"
+            type="button"
+            onClick={handleExportData}
+            className="w-full p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-emerald-500/30 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                <Download className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <span className="font-bold text-zinc-200 block text-xs">Експорт моїх даних (JSON)</span>
+                <span className="text-[10px] text-zinc-400">Завантажити копію щоденника та профілю</span>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
+              Завантажити
+            </span>
+          </button>
+
+          {/* Видалити всі дані (Right to be Forgotten) */}
+          <button
+            id="btn-delete-all-data"
+            type="button"
+            onClick={() => setConfirmDeleteOpen(true)}
+            className="w-full p-3 rounded-2xl bg-rose-500/[0.04] hover:bg-rose-500/[0.08] border border-rose-500/15 hover:border-rose-500/30 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+                <Trash2 className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <span className="font-bold text-rose-300 block text-xs">Видалити акаунт та всі дані</span>
+                <span className="text-[10px] text-zinc-500">Право бути забутим (GDPR ст. 17)</span>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">
+              Стерти
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* ДІАЛОГ ПІДТВЕРДЖЕННЯ ВИДАЛЕННЯ ДАНИХ (GDPR) */}
+      {confirmDeleteOpen && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-sm rounded-[32px] p-6 bg-[#161c18] border border-rose-500/40 text-white shadow-2xl space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div className="text-center space-y-1">
+              <h3 className="text-base font-black text-white">Видалити акаунт та всі дані?</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Це безповоротно видалить ваш персональний план, історію ваги, збережені страви та покупки з пристрою відповідно до ст. 17 GDPR.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmDeleteOpen(false)}
+                className="py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold text-zinc-300 cursor-pointer"
+              >
+                Скасувати
+              </button>
+              <button
+                id="btn-confirm-delete-action"
+                type="button"
+                onClick={handleConfirmDelete}
+                className="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-black text-white shadow-lg shadow-rose-600/30 cursor-pointer"
+              >
+                Так, видалити все
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Тости сповіщень */}
+      {exportToast && (
+        <div className="fixed bottom-24 inset-x-4 max-w-sm mx-auto z-50 p-3 rounded-2xl bg-emerald-500 text-zinc-950 font-bold text-xs flex items-center justify-center gap-2 shadow-2xl animate-fadeIn">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>Файл персональних даних (JSON) завантажено!</span>
+        </div>
+      )}
+
+      {deletedToast && (
+        <div className="fixed bottom-24 inset-x-4 max-w-sm mx-auto z-50 p-3 rounded-2xl bg-rose-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-2xl animate-fadeIn">
+          <Trash2 className="w-4 h-4" />
+          <span>Всі дані та акаунт безповоротно видалено з пристрою.</span>
+        </div>
+      )}
+
+      {/* ЮРИДИЧНА МОДАЛКА (GDPR / TERMS) */}
+      <LegalModal
+        isOpen={legalModalOpen}
+        onClose={() => setLegalModalOpen(false)}
+        initialTab={legalTab}
+      />
 
       {/* Модалка візарда "Мій План" */}
       <MyPlanWizard
