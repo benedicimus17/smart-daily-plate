@@ -3,7 +3,6 @@ import { useNutritionStore } from '../store/nutritionStore';
 import { useUserStore } from '../store/userStore';
 import { MealType, MealEntry } from '../types/nutrition';
 import { SmartBalancerModal } from './SmartBalancerModal';
-import { CookLossCalculator } from './CookLossCalculator';
 import { DiningOutEstimatorModal } from './DiningOutEstimatorModal';
 import { QuickAddModal } from './QuickAddModal';
 import { DishDetailModal } from './DishDetailModal';
@@ -13,7 +12,6 @@ import {
   ChevronRight,
   Plus,
   Check,
-  CookingPot,
   Sparkles,
   UtensilsCrossed,
   Trash2,
@@ -62,7 +60,6 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
   } = useNutritionStore();
 
   const [balancerOpen, setBalancerOpen] = useState(false);
-  const [cookLossOpen, setCookLossOpen] = useState(false);
   const [diningOpen, setDiningOpen] = useState(false);
   const [quickAddConfig, setQuickAddConfig] = useState<{ mealType: MealType; initialTime?: string } | null>(null);
 
@@ -424,24 +421,16 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
         </div>
       )}
 
-      {/* 3. КНОПКИ ШВИДКИХ ІНСТРУМЕНТІВ ШЕФА */}
-      <div className="grid grid-cols-2 gap-2">
+      {/* 3. ШВИДКИЙ ІНСТРУМЕНТ: РЕСТОРАН ТА ПРИХОВАНІ ОЛІЇ */}
+      <div>
         <button
-          type="button"
-          onClick={() => setCookLossOpen(true)}
-          className="p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 flex items-center justify-center gap-2 text-xs font-bold text-zinc-200 hover:text-amber-300 transition-all active:scale-95"
-        >
-          <CookingPot className="w-4 h-4 text-amber-400" />
-          <span>Уварка (Cook-Loss)</span>
-        </button>
-
-        <button
+          id="btn-open-dining"
           type="button"
           onClick={() => setDiningOpen(true)}
-          className="p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 flex items-center justify-center gap-2 text-xs font-bold text-zinc-200 hover:text-amber-300 transition-all active:scale-95"
+          className="w-full p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-emerald-400/40 flex items-center justify-center gap-2 text-xs font-bold text-zinc-200 hover:text-emerald-300 transition-all active:scale-95 shadow-sm"
         >
           <UtensilsCrossed className="w-4 h-4 text-emerald-400" />
-          <span>В ресторані (+олії)</span>
+          <span>Їсте не вдома? Додати страву в ресторані (+приховані олії)</span>
         </button>
       </div>
 
@@ -659,21 +648,6 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
         onApplyFlexBank={handleApplyFlexBank}
         excessCalories={excessKcal}
       />
-
-      {/* МОДАЛКА КАСТРУЛІ (COOK-LOSS) З НАДІЙНИМ ЗАКРИТТЯМ */}
-      {cookLossOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn"
-          onClick={() => setCookLossOpen(false)}
-        >
-          <div
-            className="w-full max-w-sm rounded-[30px] p-4 bg-[#121814] border border-white/10 relative max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(0,0,0,0.85)]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <CookLossCalculator onClose={() => setCookLossOpen(false)} />
-          </div>
-        </div>
-      )}
 
       {/* МОДАЛКА В РЕСТОРАНІ */}
       <DiningOutEstimatorModal

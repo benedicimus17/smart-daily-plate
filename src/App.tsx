@@ -14,7 +14,7 @@ import { ProfileScreen } from './components/ProfileScreen';
 import { AuthModal } from './components/AuthModal';
 import { SplashScreen } from './components/SplashScreen';
 import { MealType } from './types/nutrition';
-import { TrendingUp, ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Scale } from 'lucide-react';
 import { MyPlanWizard } from './components/MyPlanWizard';
 import { NextMealSpotlight } from './components/NextMealSpotlight';
 import { WaterTracker } from './components/WaterTracker';
@@ -137,26 +137,26 @@ export const App: React.FC = () => {
                   id="tab-sub-trend"
                   type="button"
                   onClick={() => setTrendSubTab('trend')}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                     trendSubTab === 'trend'
                       ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40 shadow-sm'
                       : 'text-zinc-400 hover:text-white'
                   }`}
                 >
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span>Істинний тренд</span>
+                  <Scale className="w-4 h-4 text-amber-400" />
+                  <span>Моя вага (без води)</span>
                 </button>
                 <button
                   id="tab-sub-grocery"
                   type="button"
                   onClick={() => setTrendSubTab('grocery')}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                     trendSubTab === 'grocery'
                       ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40 shadow-sm'
                       : 'text-zinc-400 hover:text-white'
                   }`}
                 >
-                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <ShoppingBag className="w-4 h-4 text-emerald-400" />
                   <span>Список покупок</span>
                 </button>
               </div>
