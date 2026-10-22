@@ -4,15 +4,12 @@ import { useNutritionStore } from '../store/nutritionStore';
 import { calculatePersonalPlan } from '../math/planCalculator';
 import { Gender, ActivityLevel, NutritionGoal, WeightLossPace } from '../types/user';
 import {
-  Sparkles,
-  ArrowRight,
   ArrowLeft,
-  AlertTriangle,
-  Mail,
-  Lock,
-  Phone,
+  X,
   CheckCircle2,
-  X
+  Mail,
+  Sparkles,
+  AlertTriangle
 } from 'lucide-react';
 
 interface MyPlanWizardProps {
@@ -25,88 +22,113 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
   const { user, savePlanAndRegister } = useUserStore();
   const { updateTargets } = useNutritionStore();
 
-  const [step, setStep] = useState<number>(1);
-  const totalSteps = 6;
+  // Номер поточного питання: 1..9
+  const [questionIndex, setQuestionIndex] = useState<number>(1);
 
-  // Кроки форми
+  // Параметри
   const [goal, setGoal] = useState<NutritionGoal>(user.goal || 'lose_weight');
   const [gender, setGender] = useState<Gender>(user.gender || 'female');
-  const [age, setAge] = useState<number>(user.age || 29);
-  const [weightKg, setWeightKg] = useState<number>(user.weightKg || 70);
-  const [heightCm, setHeightCm] = useState<number>(user.heightCm || 160);
-  const [activityLevel, setActivityLevel] = useState<ActivityLevel>(user.activityLevel || 'moderate');
-  const [pace, setPace] = useState<WeightLossPace>(user.pace || 'fast');
-  const [eatingRhythm, setEatingRhythm] = useState<'3_meals' | '5_meals'>(user.eatingRhythm || '3_meals');
-  const [takesProtein, setTakesProtein] = useState<boolean>(user.takesProtein || false);
+  
+  // Числові значення у вигляді рядків для вільного вводу без затискання при backspace
+  const [ageInput, setAgeInput] = useState<string>(String(user.age || (user.gender === 'male' ? 30 : 25)));
+  const [weightInput, setWeightInput] = useState<string>(String(user.weightKg || (user.gender === 'male' ? 82 : 57)));
+  const [heightInput, setHeightInput] = useState<string>(String(user.heightCm || (user.gender === 'male' ? 180 : 162)));
 
-  // Дані фінальної реєстрації
+  const [activityLevel, setActivityLevel] = useState<ActivityLevel>(user.activityLevel || 'light');
+  const [takesProtein, setTakesProtein] = useState<boolean>(user.takesProtein || false);
+  const [eatingRhythm, setEatingRhythm] = useState<'3_meals' | '5_meals'>(user.eatingRhythm || '3_meals');
+  const [pace, setPace] = useState<WeightLossPace>(user.pace || 'steady');
+
+  // Дані реєстрації
   const [email, setEmail] = useState(user.email || '');
-  const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState(user.phone || '');
-  const [regError, setRegError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  // Детермінований розрахунок
+  // Парсинг числових значень із захистом від NaN
+  const parsedAge = Math.max(14, Math.min(99, parseInt(ageInput, 10) || 25));
+  const parsedWeight = Math.max(35, Math.min(250, parseFloat(weightInput) || 60));
+  const parsedHeight = Math.max(120, Math.min(240, parseFloat(heightInput) || 165));
+
+  // Розрахунок плану
   const plan = calculatePersonalPlan({
     gender,
-    age,
-    weightKg,
-    heightCm,
+    age: parsedAge,
+    weightKg: parsedWeight,
+    heightCm: parsedHeight,
     activityLevel,
     goal,
     pace
   });
 
-  const handleNext = () => {
-    if (step < totalSteps) {
-      setStep((prev) => prev + 1);
+  const handleBack = () => {
+    if (questionIndex > 1) {
+      setQuestionIndex((prev) => prev - 1);
     }
   };
 
-  const handleBack = () => {
-    if (step > 1) {
-      setStep((prev) => prev - 1);
-    }
+  const handleNext = () => {
+    setQuestionIndex((prev) => prev + 1);
+  };
+
+  // 1-тап вибір для категорій (миттєвий авто-перехід)
+  const selectAndAdvance = <T,>(setter: (val: T) => void, val: T) => {
+    setter(val);
+    setQuestionIndex((prev) => prev + 1);
   };
 
   const handleFinalRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    setRegError('');
     setIsSubmitting(true);
 
     setTimeout(() => {
-      // 1. Зберігаємо план та реєструємо користувача (приймає будь-які слова / символи для тесту)
       const inputStr = email.trim();
       const effectiveEmail = inputStr || 'test.user@nutriq.app';
       const effectiveName = inputStr || (gender === 'female' ? 'Анна' : 'Олексій');
 
       savePlanAndRegister(
-        { gender, age, weightKg, heightCm, activityLevel, goal, pace, eatingRhythm, takesProtein },
+        {
+          gender,
+          age: parsedAge,
+          weightKg: parsedWeight,
+          heightCm: parsedHeight,
+          activityLevel,
+          goal,
+          pace,
+          eatingRhythm,
+          takesProtein
+        },
         plan.targets,
         {
           name: effectiveName,
           email: effectiveEmail,
-          phone: phone.trim() || '+380501234567',
-          password
+          phone: user.phone || '+380501234567',
+          password: ''
         }
       );
 
-      // 2. Оновлюємо цілі в щоденнику головного екрана
       updateTargets(plan.targets);
-
       setIsSubmitting(false);
       onCompleted?.();
       onClose();
-    }, 400);
+    }, 350);
   };
 
   const handleGuestSkip = () => {
     setIsSubmitting(true);
     setTimeout(() => {
       savePlanAndRegister(
-        { gender, age, weightKg, heightCm, activityLevel, goal, pace, eatingRhythm, takesProtein },
+        {
+          gender,
+          age: parsedAge,
+          weightKg: parsedWeight,
+          heightCm: parsedHeight,
+          activityLevel,
+          goal,
+          pace,
+          eatingRhythm,
+          takesProtein
+        },
         plan.targets,
         {
           name: 'Гість',
@@ -119,557 +141,470 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
       setIsSubmitting(false);
       onCompleted?.();
       onClose();
-    }, 300);
+    }, 250);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/85 backdrop-blur-lg animate-fadeIn select-none overflow-y-auto">
-      <div
-        className="relative w-full max-w-sm rounded-[32px] overflow-hidden p-5 my-auto transition-all"
-        style={{
-          background: 'linear-gradient(165deg, rgba(22,32,26,0.96) 0%, rgba(11,16,13,0.98) 100%)',
-          boxShadow: '0 24px 60px rgba(0,0,0,0.85), inset 0 1px 1px rgba(255,255,255,0.18)',
-          border: '1px solid rgba(255,255,255,0.14)'
-        }}
-      >
-        {/* Фонове золоте світіння */}
-        <div
-          className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none"
-          style={{
-            background: 'radial-gradient(circle, rgba(245,180,56,0.18) 0%, transparent 70%)',
-            filter: 'blur(30px)'
-          }}
-        />
+    <div className="fixed inset-0 z-50 bg-[#090D0B] text-zinc-100 flex flex-col justify-between p-4 sm:p-6 overflow-y-auto animate-fadeIn select-none">
+      {/* Фонове атмосферне світіння */}
+      <div className="fixed top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-        {/* Кнопка закриття */}
+      {/* Верхня панель: Навігація назад та Закриття */}
+      <div className="w-full max-w-md mx-auto flex items-center justify-between pt-2 pb-4 shrink-0 relative z-10">
+        {questionIndex > 1 ? (
+          <button
+            type="button"
+            onClick={handleBack}
+            className="w-10 h-10 rounded-full bg-white/[0.05] hover:bg-white/10 border border-white/10 flex items-center justify-center text-zinc-300 hover:text-white transition-all active:scale-90 cursor-pointer"
+            title="Назад"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        ) : (
+          <div className="w-10 h-10" />
+        )}
+
         <button
           id="wizard-close-x-btn"
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-all active:scale-90"
+          className="w-10 h-10 rounded-full bg-white/[0.05] hover:bg-white/10 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-all active:scale-90 cursor-pointer"
+          title="Закрити"
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="w-5 h-5" />
         </button>
+      </div>
 
-        {/* Прогрес-бар */}
-        <div className="flex items-center gap-1.5 mb-4 pr-8">
-          {Array.from({ length: totalSteps }).map((_, i) => (
-            <div
-              key={i}
-              className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                i + 1 <= step ? 'bg-amber-400' : 'bg-white/10'
-              }`}
-            />
-          ))}
-          <span className="text-[10px] font-bold text-amber-400/90 pl-1">
-            {step}/{totalSteps}
-          </span>
-        </div>
-
-        {/* КРОК 1: Ціль */}
-        {step === 1 && (
-          <div className="space-y-4 animate-fadeIn">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                Крок 1 • Мета
-              </span>
-              <h3 className="text-lg font-bold text-white tracking-tight mt-0.5">
-                Чого саме ви хочете досягти?
-              </h3>
-              <p className="text-xs text-zinc-400 mt-1">
-                Комп'ютер підбере індивідуальний калораж та БЖУ під вашу ціль
+      {/* Центральна зона контенту з окремими питаннями */}
+      <div className="w-full max-w-md mx-auto my-auto py-2 relative z-10 flex flex-col justify-center">
+        {/* ======================================================== */}
+        {/* ПИТАННЯ 1: Ціль (1-тап автоперехід) */}
+        {/* ======================================================== */}
+        {questionIndex === 1 && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="text-center space-y-1.5">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Чого ви прагнете досягти?
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-400">
+                Оберіть головний вектор для розрахунку вашого раціону
               </p>
             </div>
 
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => setGoal('lose_weight')}
-                className={`w-full p-3 rounded-2xl border text-left transition-all ${
-                  goal === 'lose_weight'
-                    ? 'bg-amber-400/20 border-amber-400/60 text-white shadow-sm'
-                    : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                }`}
-              >
-                <div className="font-bold text-sm text-amber-300">Схуднути</div>
-                <div className="text-[11px] text-zinc-400 mt-0.5">Спалити зайвий жир без повернення ваги</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setGoal('recomp')}
-                className={`w-full p-3 rounded-2xl border text-left transition-all ${
-                  goal === 'recomp'
-                    ? 'bg-emerald-500/20 border-emerald-500/60 text-white shadow-sm'
-                    : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                }`}
-              >
-                <div className="font-bold text-sm text-emerald-300">Рельєф і тонус</div>
-                <div className="text-[11px] text-zinc-400 mt-0.5">Підсушити тіло та зберегти пружні м’язи</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setGoal('maintain')}
-                className={`w-full p-3 rounded-2xl border text-left transition-all ${
-                  goal === 'maintain'
-                    ? 'bg-indigo-500/20 border-indigo-500/60 text-white shadow-sm'
-                    : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                }`}
-              >
-                <div className="font-bold text-sm text-indigo-300">Підтримка ваги</div>
-                <div className="text-[11px] text-zinc-400 mt-0.5">Їсти в балансі та зафіксувати поточну форму</div>
-              </button>
+            <div className="space-y-3 pt-2">
+              {[
+                {
+                  id: 'lose_weight',
+                  title: 'Схуднути',
+                  desc: 'Спалити зайвий підшкірний жир без повернення ваги',
+                  color: 'border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/10'
+                },
+                {
+                  id: 'recomp',
+                  title: 'Рельєф і тонус',
+                  desc: 'Підсушити тіло та зберегти пружну м’язову форму',
+                  color: 'border-emerald-400/40 hover:border-emerald-400 hover:bg-emerald-400/10'
+                },
+                {
+                  id: 'maintain',
+                  title: 'Підтримка ваги',
+                  desc: 'Їсти в балансі та зафіксувати поточну форму',
+                  color: 'border-indigo-400/40 hover:border-indigo-400 hover:bg-indigo-400/10'
+                },
+                {
+                  id: 'gain',
+                  title: 'Набір маси',
+                  desc: 'Збільшити об’єм сухої м’язової маси',
+                  color: 'border-amber-500/40 hover:border-amber-500 hover:bg-amber-500/10'
+                }
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  id={`goal-${item.id}`}
+                  type="button"
+                  onClick={() => selectAndAdvance<NutritionGoal>(setGoal, item.id as NutritionGoal)}
+                  className={`w-full p-4 rounded-2xl bg-black/40 border text-left transition-all active:scale-[0.98] cursor-pointer shadow-lg ${item.color} ${
+                    goal === item.id ? 'ring-2 ring-amber-400/80 bg-white/[0.04]' : ''
+                  }`}
+                >
+                  <div className="text-base font-bold text-white">{item.title}</div>
+                  <div className="text-xs text-zinc-400 mt-0.5">{item.desc}</div>
+                </button>
+              ))}
             </div>
-
-            <button
-              id="wizard-step1-next"
-              type="button"
-              onClick={handleNext}
-              className="w-full mt-4 py-3 rounded-2xl font-bold text-xs text-zinc-950 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-              style={{
-                background: 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)',
-                boxShadow: '0 6px 18px rgba(245,158,11,0.35)'
-              }}
-            >
-              <span>Далі</span>
-              <ArrowRight className="w-4 h-4 text-zinc-950" />
-            </button>
           </div>
         )}
 
-        {/* КРОК 2: Стать та Вік */}
-        {step === 2 && (
-          <div className="space-y-4 animate-fadeIn">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                Крок 2 • Фізіологія
-              </span>
-              <h3 className="text-lg font-bold text-white tracking-tight mt-0.5">
-                Ваша стать та вік
-              </h3>
-              <p className="text-xs text-zinc-400 mt-1">
-                Для точного розрахунку базового метаболізму (BMR)
+        {/* ======================================================== */}
+        {/* ПИТАННЯ 2: Стать (1-тап автоперехід) */}
+        {/* ======================================================== */}
+        {questionIndex === 2 && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="text-center space-y-1.5">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Ваша стать
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-400">
+                Для коректного підрахунку базового метаболізму
               </p>
             </div>
 
-            <div>
-              <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-2">
-                Стать
-              </label>
-              <div className="grid grid-cols-2 gap-2 bg-black/40 p-1.5 rounded-2xl border border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setGender('female')}
-                  className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    gender === 'female'
-                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/50 shadow-sm'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  Жінка
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setGender('male')}
-                  className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    gender === 'male'
-                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/50 shadow-sm'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  Чоловік
-                </button>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                id="gender-female"
+                type="button"
+                onClick={() => selectAndAdvance<Gender>(setGender, 'female')}
+                className={`py-8 px-4 rounded-3xl bg-black/40 border text-center transition-all active:scale-[0.98] cursor-pointer shadow-lg hover:border-amber-400/80 hover:bg-amber-400/10 ${
+                  gender === 'female' ? 'border-amber-400 ring-2 ring-amber-400/80 bg-white/[0.04]' : 'border-white/10'
+                }`}
+              >
+                <div className="text-3xl mb-2">🌸</div>
+                <div className="text-lg font-bold text-white">Жінка</div>
+              </button>
+
+              <button
+                id="gender-male"
+                type="button"
+                onClick={() => selectAndAdvance<Gender>(setGender, 'male')}
+                className={`py-8 px-4 rounded-3xl bg-black/40 border text-center transition-all active:scale-[0.98] cursor-pointer shadow-lg hover:border-amber-400/80 hover:bg-amber-400/10 ${
+                  gender === 'male' ? 'border-amber-400 ring-2 ring-amber-400/80 bg-white/[0.04]' : 'border-white/10'
+                }`}
+              >
+                <div className="text-3xl mb-2">⚡</div>
+                <div className="text-lg font-bold text-white">Чоловік</div>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* ПИТАННЯ 3: Вік (Вільний цифровий ввід без затискання) */}
+        {/* ======================================================== */}
+        {questionIndex === 3 && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="text-center space-y-1.5">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Скільки вам повних років?
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-400">
+                Введіть число цифрами
+              </p>
+            </div>
+
+            <div className="pt-4 flex flex-col items-center">
+              <div className="relative w-44">
+                <input
+                  id="wizard-age-input"
+                  type="text"
+                  inputMode="numeric"
+                  value={ageInput}
+                  onChange={(e) => {
+                    const clean = e.target.value.replace(/[^0-9]/g, '');
+                    setAgeInput(clean);
+                  }}
+                  placeholder="25"
+                  className="w-full py-4 text-center text-4xl sm:text-5xl font-extrabold text-amber-300 bg-black/50 border-2 border-amber-400/50 rounded-3xl focus:outline-none focus:border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.2)]"
+                  autoFocus
+                />
+                <span className="block text-center text-xs font-semibold text-zinc-400 mt-2">
+                  років
+                </span>
               </div>
             </div>
 
-            <div>
-              <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
-                Вік (років)
-              </label>
-              <input
-                type="number"
-                min="14"
-                max="95"
-                value={age}
-                onChange={(e) => setAge(Math.max(14, Number(e.target.value)))}
-                className="w-full px-4 py-2.5 rounded-2xl bg-black/40 border border-white/10 text-base font-bold text-white text-center focus:outline-none focus:border-amber-400/50"
-              />
-            </div>
-
-            <div className="flex gap-2 pt-2">
+            <div className="pt-4">
               <button
-                type="button"
-                onClick={handleBack}
-                className="py-3 px-4 rounded-2xl border border-white/10 text-zinc-300 text-xs font-bold hover:bg-white/5 active:scale-95"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <button
-                id="wizard-step2-next"
+                id="wizard-age-next"
                 type="button"
                 onClick={handleNext}
-                className="flex-1 py-3 rounded-2xl font-bold text-xs text-zinc-950 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                style={{
-                  background: 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)',
-                  boxShadow: '0 6px 18px rgba(245,158,11,0.35)'
-                }}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-sm tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-amber-400/25 active:scale-[0.98] transition-all cursor-pointer"
               >
-                <span>Далі</span>
-                <ArrowRight className="w-4 h-4 text-zinc-950" />
+                <span>Продовжити</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* КРОК 3: Зріст та Вага */}
-        {step === 3 && (
-          <div className="space-y-4 animate-fadeIn">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                Крок 3 • Параметри тіла
-              </span>
-              <h3 className="text-lg font-bold text-white tracking-tight mt-0.5">
-                Скільки ви важите і який зріст?
-              </h3>
-              <p className="text-xs text-zinc-400 mt-1">
-                Наприклад: 70 кг та 160 см
+        {/* ======================================================== */}
+        {/* ПИТАННЯ 4: Вага та Зріст (Вільний цифровий ввід) */}
+        {/* ======================================================== */}
+        {questionIndex === 4 && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="text-center space-y-1.5">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Ваша вага та зріст
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-400">
+                Введіть точні значення для формули Міффліна-Сан Жеора
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="flex flex-col items-center">
+                <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block mb-2">
                   Вага (кг)
                 </label>
                 <input
-                  type="number"
-                  min="35"
-                  max="220"
-                  value={weightKg}
-                  onChange={(e) => setWeightKg(Math.max(35, Number(e.target.value)))}
-                  className="w-full px-4 py-3 rounded-2xl bg-black/40 border border-white/10 text-lg font-black text-amber-300 text-center focus:outline-none focus:border-amber-400/50"
+                  id="wizard-weight-input"
+                  type="text"
+                  inputMode="decimal"
+                  value={weightInput}
+                  onChange={(e) => {
+                    const clean = e.target.value.replace(/[^0-9.]/g, '');
+                    setWeightInput(clean);
+                  }}
+                  placeholder="57"
+                  className="w-full py-4 text-center text-3xl sm:text-4xl font-extrabold text-amber-300 bg-black/50 border-2 border-amber-400/40 rounded-3xl focus:outline-none focus:border-amber-400 shadow-md"
                 />
               </div>
 
-              <div>
-                <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+              <div className="flex flex-col items-center">
+                <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block mb-2">
                   Зріст (см)
                 </label>
                 <input
-                  type="number"
-                  min="120"
-                  max="230"
-                  value={heightCm}
-                  onChange={(e) => setHeightCm(Math.max(120, Number(e.target.value)))}
-                  className="w-full px-4 py-3 rounded-2xl bg-black/40 border border-white/10 text-lg font-black text-white text-center focus:outline-none focus:border-amber-400/50"
+                  id="wizard-height-input"
+                  type="text"
+                  inputMode="numeric"
+                  value={heightInput}
+                  onChange={(e) => {
+                    const clean = e.target.value.replace(/[^0-9]/g, '');
+                    setHeightInput(clean);
+                  }}
+                  placeholder="162"
+                  className="w-full py-4 text-center text-3xl sm:text-4xl font-extrabold text-white bg-black/50 border-2 border-white/20 rounded-3xl focus:outline-none focus:border-amber-400 shadow-md"
                 />
               </div>
             </div>
 
-            <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 text-xs text-zinc-300">
-              💡 Базовий метаболізм (BMR): <strong className="text-amber-300">{plan.bmr} ккал</strong> — стільки тіло спалює у спокої щодня.
+            <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-xs text-zinc-300 text-center">
+              💡 Базовий метаболізм (BMR): <strong className="text-amber-300 font-bold">{plan.bmr} ккал</strong> — щоденні мінімальні енерговитрати у спокої.
             </div>
 
-            <div className="flex gap-2 pt-2">
+            <div className="pt-2">
               <button
-                type="button"
-                onClick={handleBack}
-                className="py-3 px-4 rounded-2xl border border-white/10 text-zinc-300 text-xs font-bold hover:bg-white/5 active:scale-95"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <button
-                id="wizard-step2-next"
+                id="wizard-body-next"
                 type="button"
                 onClick={handleNext}
-                className="flex-1 py-3 rounded-2xl font-bold text-xs text-zinc-950 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                style={{
-                  background: 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)',
-                  boxShadow: '0 6px 18px rgba(245,158,11,0.35)'
-                }}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-sm tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-amber-400/25 active:scale-[0.98] transition-all cursor-pointer"
               >
-                <span>Далі</span>
-                <ArrowRight className="w-4 h-4 text-zinc-950" />
+                <span>Продовжити</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* КРОК 4: Активність та кроки */}
-        {step === 4 && (
-          <div className="space-y-4 animate-fadeIn">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                Крок 4 • Рух
-              </span>
-              <h3 className="text-lg font-bold text-white tracking-tight mt-0.5">
+        {/* ======================================================== */}
+        {/* ПИТАННЯ 5: Рівень активності (1-тап автоперехід) */}
+        {/* ======================================================== */}
+        {questionIndex === 5 && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="text-center space-y-1.5">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                 Скільки ви рухаєтесь щодня?
-              </h3>
-              <p className="text-xs text-zinc-400 mt-1">
-                Займаєтесь спортом? Скільки приблизно ходите?
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-400">
+                Займаєтесь спортом? Скільки приблизно ходите пішки?
               </p>
             </div>
 
-            <div className="space-y-2 text-xs">
-              <button
-                type="button"
-                onClick={() => setActivityLevel('sedentary')}
-                className={`w-full p-2.5 rounded-2xl border text-left transition-all ${
-                  activityLevel === 'sedentary'
-                    ? 'bg-amber-400/20 border-amber-400/60 text-white shadow-sm'
-                    : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                }`}
-              >
-                <div className="font-bold text-zinc-200">Малорухливий</div>
-                <div className="text-[11px] text-zinc-500">Сидяча робота, до 5 000 кроків, без спорту</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActivityLevel('light')}
-                className={`w-full p-2.5 rounded-2xl border text-left transition-all ${
-                  activityLevel === 'light'
-                    ? 'bg-amber-400/20 border-amber-400/60 text-white shadow-sm'
-                    : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                }`}
-              >
-                <div className="font-bold text-zinc-200">Легка активність</div>
-                <div className="text-[11px] text-zinc-500">6 000–8 000 кроків або 1-2 тренування на тиждень</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActivityLevel('moderate')}
-                className={`w-full p-2.5 rounded-2xl border text-left transition-all ${
-                  activityLevel === 'moderate'
-                    ? 'bg-amber-400/20 border-amber-400/60 text-white shadow-sm'
-                    : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                }`}
-              >
-                <div className="font-bold text-amber-300">Помірна активність</div>
-                <div className="text-[11px] text-zinc-400">9 000–12 000 кроків або 3-4 тренування (оптимально)</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActivityLevel('high')}
-                className={`w-full p-2.5 rounded-2xl border text-left transition-all ${
-                  activityLevel === 'high'
-                    ? 'bg-amber-400/20 border-amber-400/60 text-white shadow-sm'
-                    : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                }`}
-              >
-                <div className="font-bold text-zinc-200">Висока активність</div>
-                <div className="text-[11px] text-zinc-500">12 000+ кроків, важкі щоденні навантаження</div>
-              </button>
-            </div>
-
-            {/* Добавки / Протеїн */}
-            <div className="pt-2 border-t border-white/5">
-              <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1.5">
-                Чи вживаєте протеїн або спортивні добавки?
-              </label>
-              <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2.5 pt-1">
+              {[
+                {
+                  id: 'sedentary',
+                  title: 'Малорухливий спосіб',
+                  desc: 'Сидяча робота, до 5 000 кроків, без регулярного спорту'
+                },
+                {
+                  id: 'light',
+                  title: 'Легка активність',
+                  desc: '6 000–8 000 кроків або 1–2 легкі тренування на тиждень'
+                },
+                {
+                  id: 'moderate',
+                  title: 'Помірна активність',
+                  desc: '9 000–12 000 кроків або 3–4 тренування (оптимально)'
+                },
+                {
+                  id: 'high',
+                  title: 'Висока активність',
+                  desc: '12 000+ кроків, щоденні важкі фізичні навантаження'
+                }
+              ].map((item) => (
                 <button
+                  key={item.id}
+                  id={`activity-${item.id}`}
                   type="button"
-                  onClick={() => setTakesProtein(true)}
-                  className={`p-2 rounded-xl border text-xs font-bold transition-all ${
-                    takesProtein
-                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-sm'
-                      : 'bg-black/30 text-zinc-400 border-white/10 hover:text-white'
+                  onClick={() => selectAndAdvance<ActivityLevel>(setActivityLevel, item.id as ActivityLevel)}
+                  className={`w-full p-3.5 rounded-2xl bg-black/40 border text-left transition-all active:scale-[0.98] cursor-pointer shadow-lg hover:border-amber-400 hover:bg-amber-400/10 ${
+                    activityLevel === item.id ? 'border-amber-400 ring-2 ring-amber-400/70 bg-white/[0.04]' : 'border-white/10'
                   }`}
                 >
-                  Так (шейки / снеки)
+                  <div className="text-sm font-bold text-white">{item.title}</div>
+                  <div className="text-xs text-zinc-400 mt-0.5">{item.desc}</div>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setTakesProtein(false)}
-                  className={`p-2 rounded-xl border text-xs font-bold transition-all ${
-                    !takesProtein
-                      ? 'bg-amber-400/20 text-amber-300 border-amber-400/50 shadow-sm'
-                      : 'bg-black/30 text-zinc-400 border-white/10 hover:text-white'
-                  }`}
-                >
-                  Ні, лише звичайна їжа
-                </button>
-              </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* ПИТАННЯ 6: Спортивне харчування / Протеїн (1-тап автоперехід) */}
+        {/* ======================================================== */}
+        {questionIndex === 6 && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="text-center space-y-1.5">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Чи вживаєте ви протеїн?
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-400">
+                Спортивні шейки, протеїнові батончики або інші добавки
+              </p>
             </div>
 
-            <div className="flex gap-2 pt-2">
+            <div className="grid grid-cols-2 gap-3 pt-2">
               <button
+                id="protein-yes"
                 type="button"
-                onClick={handleBack}
-                className="py-3 px-4 rounded-2xl border border-white/10 text-zinc-300 text-xs font-bold hover:bg-white/5 active:scale-95"
+                onClick={() => selectAndAdvance<boolean>(setTakesProtein, true)}
+                className={`py-8 px-4 rounded-3xl bg-black/40 border text-center transition-all active:scale-[0.98] cursor-pointer shadow-lg hover:border-emerald-400/80 hover:bg-emerald-400/10 ${
+                  takesProtein ? 'border-emerald-400 ring-2 ring-emerald-400/80 bg-white/[0.04]' : 'border-white/10'
+                }`}
               >
-                <ArrowLeft className="w-4 h-4" />
+                <div className="text-3xl mb-2">🥤</div>
+                <div className="text-base font-bold text-white">Так</div>
+                <div className="text-xs text-zinc-400 mt-1">Шейки або батончики</div>
               </button>
+
               <button
-                id="wizard-step4-next"
+                id="protein-no"
                 type="button"
-                onClick={handleNext}
-                className="flex-1 py-3 rounded-2xl font-bold text-xs text-zinc-950 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                style={{
-                  background: 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)',
-                  boxShadow: '0 6px 18px rgba(245,158,11,0.35)'
-                }}
+                onClick={() => selectAndAdvance<boolean>(setTakesProtein, false)}
+                className={`py-8 px-4 rounded-3xl bg-black/40 border text-center transition-all active:scale-[0.98] cursor-pointer shadow-lg hover:border-amber-400/80 hover:bg-amber-400/10 ${
+                  !takesProtein ? 'border-amber-400 ring-2 ring-amber-400/80 bg-white/[0.04]' : 'border-white/10'
+                }`}
               >
-                <span>Далі</span>
-                <ArrowRight className="w-4 h-4 text-zinc-950" />
+                <div className="text-3xl mb-2">🥗</div>
+                <div className="text-base font-bold text-white">Ні</div>
+                <div className="text-xs text-zinc-400 mt-1">Лише звичайна їжа</div>
               </button>
             </div>
           </div>
         )}
 
-        {/* КРОК 5: Ритм харчування + Темп схуднення + Розумна порада нутриціолога проти йо-йо */}
-        {step === 5 && (
-          <div className="space-y-4 animate-fadeIn">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                Крок 5 • Ритм і темп
-              </span>
-              <h3 className="text-lg font-bold text-white tracking-tight mt-0.5">
-                Як вам зручніше харчуватися?
-              </h3>
-            </div>
-
-            {/* Ритм прийомів їжі */}
-            <div>
-              <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1.5">
-                Ритм прийомів їжі
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setEatingRhythm('3_meals')}
-                  className={`p-2.5 rounded-2xl border text-left transition-all ${
-                    eatingRhythm === '3_meals'
-                      ? 'bg-amber-400/20 border-amber-400/60 text-white shadow-sm'
-                      : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                  }`}
-                >
-                  <div className="font-bold text-xs text-amber-300">3 прийоми</div>
-                  <div className="text-[10px] text-zinc-400 mt-0.5">Сніданок, обід, вечеря (Дзен)</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEatingRhythm('5_meals')}
-                  className={`p-2.5 rounded-2xl border text-left transition-all ${
-                    eatingRhythm === '5_meals'
-                      ? 'bg-emerald-500/20 border-emerald-500/60 text-white shadow-sm'
-                      : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                  }`}
-                >
-                  <div className="font-bold text-xs text-emerald-300">5 прийомів</div>
-                  <div className="text-[10px] text-zinc-400 mt-0.5">Дробове з перекусами</div>
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1.5">
-                Темп схуднення
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPace('fast')}
-                  className={`p-2.5 rounded-2xl border text-left transition-all ${
-                    pace === 'fast'
-                      ? 'bg-rose-500/20 border-rose-500/60 text-white shadow-sm'
-                      : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                  }`}
-                >
-                  <div className="font-bold text-xs text-rose-300">Швидко</div>
-                  <div className="text-[10px] text-zinc-400 mt-0.5">Максимальний темп</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPace('steady')}
-                  className={`p-2.5 rounded-2xl border text-left transition-all ${
-                    pace === 'steady'
-                      ? 'bg-amber-400/20 border-amber-400/60 text-white shadow-sm'
-                      : 'bg-black/30 border-white/10 text-zinc-400 hover:border-white/20'
-                  }`}
-                >
-                  <div className="font-bold text-xs text-amber-300">Поступово</div>
-                  <div className="text-[10px] text-zinc-400 mt-0.5">Без стресу та зривів</div>
-                </button>
-              </div>
-            </div>
-
-            {/* ВЕРДИКТ КОМП'ЮТЕРА ТА ПОРАДА ПРОТИ ЙО-ЙО */}
-            <div
-              className={`p-3.5 rounded-2xl border ${
-                pace === 'fast'
-                  ? 'bg-rose-500/15 border-rose-500/40 text-rose-200'
-                  : 'bg-amber-500/15 border-amber-500/40 text-amber-200'
-              }`}
-            >
-              <div className="flex items-center gap-1.5 font-bold text-xs text-white mb-1">
-                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>{plan.nutritionistAdvice.title}</span>
-              </div>
-              <p className="text-[11.5px] leading-relaxed text-zinc-200">
-                {plan.nutritionistAdvice.message}
+        {/* ======================================================== */}
+        {/* ПИТАННЯ 7: Ритм харчування (1-тап автоперехід) */}
+        {/* ======================================================== */}
+        {questionIndex === 7 && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="text-center space-y-1.5">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Який ритм їжі вам зручніший?
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-400">
+                Система розподілить калораж по прийомах протягом доби
               </p>
             </div>
 
-            <div className="p-3 rounded-2xl bg-black/40 border border-white/10 text-xs text-zinc-300 space-y-1">
-              <div className="flex justify-between">
-                <span className="text-zinc-400">Витрати тіла (TDEE):</span>
-                <span className="font-bold text-white">~{plan.maintenanceCalories} ккал</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-400">Рекомендований ліміт:</span>
-                <span className="font-extrabold text-amber-300">{plan.targetCalories} ккал</span>
-              </div>
-            </div>
-
-            <div className="flex gap-2 pt-2">
+            <div className="space-y-3 pt-2">
               <button
+                id="rhythm-3meals"
                 type="button"
-                onClick={handleBack}
-                className="py-3 px-4 rounded-2xl border border-white/10 text-zinc-300 text-xs font-bold hover:bg-white/5 active:scale-95"
+                onClick={() => selectAndAdvance<'3_meals' | '5_meals'>(setEatingRhythm, '3_meals')}
+                className={`w-full p-4 rounded-2xl bg-black/40 border text-left transition-all active:scale-[0.98] cursor-pointer shadow-lg hover:border-amber-400 hover:bg-amber-400/10 ${
+                  eatingRhythm === '3_meals' ? 'border-amber-400 ring-2 ring-amber-400/70 bg-white/[0.04]' : 'border-white/10'
+                }`}
               >
-                <ArrowLeft className="w-4 h-4" />
+                <div className="text-base font-bold text-amber-300">🍽️ 3 прийоми на день</div>
+                <div className="text-xs text-zinc-300 mt-1">
+                  Сніданок, ситний обід та легка вечеря (Дзен-формат без перекусів)
+                </div>
               </button>
+
               <button
-                id="wizard-step5-next"
+                id="rhythm-5meals"
                 type="button"
-                onClick={handleNext}
-                className="flex-1 py-3 rounded-2xl font-bold text-xs text-zinc-950 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                style={{
-                  background: 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)',
-                  boxShadow: '0 6px 18px rgba(245,158,11,0.35)'
-                }}
+                onClick={() => selectAndAdvance<'3_meals' | '5_meals'>(setEatingRhythm, '5_meals')}
+                className={`w-full p-4 rounded-2xl bg-black/40 border text-left transition-all active:scale-[0.98] cursor-pointer shadow-lg hover:border-emerald-400 hover:bg-emerald-400/10 ${
+                  eatingRhythm === '5_meals' ? 'border-emerald-400 ring-2 ring-emerald-400/70 bg-white/[0.04]' : 'border-white/10'
+                }`}
               >
-                <span>Переглянути розрахунок</span>
-                <ArrowRight className="w-4 h-4 text-zinc-950" />
+                <div className="text-base font-bold text-emerald-300">🍱 5 дробових прийомів</div>
+                <div className="text-xs text-zinc-300 mt-1">
+                  Сніданок, перший перекус, обід, полуденок та вечеря кожні 3–3.5 години
+                </div>
               </button>
             </div>
           </div>
         )}
 
-        {/* КРОК 6: 4 КОЛОНКИ + ОБОВ'ЯЗКОВА РЕЄСТРАЦІЯ (GATE) */}
-        {step === 6 && (
-          <div className="space-y-4 animate-fadeIn">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                  Ваш персональний розрахунок готовий
-                </span>
+        {/* ======================================================== */}
+        {/* ПИТАННЯ 8: Темп (1-тап автоперехід) */}
+        {/* ======================================================== */}
+        {questionIndex === 8 && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="text-center space-y-1.5">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Оберіть темп досягнення цілі
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-400">
+                Швидкість зміни маси тіла
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <button
+                id="pace-steady"
+                type="button"
+                onClick={() => selectAndAdvance<WeightLossPace>(setPace, 'steady')}
+                className={`w-full p-4 rounded-2xl bg-black/40 border text-left transition-all active:scale-[0.98] cursor-pointer shadow-lg hover:border-amber-400 hover:bg-amber-400/10 ${
+                  pace === 'steady' ? 'border-amber-400 ring-2 ring-amber-400/70 bg-white/[0.04]' : 'border-white/10'
+                }`}
+              >
+                <div className="text-base font-bold text-amber-300">🌿 Поступово (Золотий стандарт)</div>
+                <div className="text-xs text-zinc-300 mt-1">
+                  Комфортний збалансований дефіцит без голоду, зривів та стресу для нервової системи.
+                </div>
+              </button>
+
+              <button
+                id="pace-fast"
+                type="button"
+                onClick={() => selectAndAdvance<WeightLossPace>(setPace, 'fast')}
+                className={`w-full p-4 rounded-2xl bg-black/40 border text-left transition-all active:scale-[0.98] cursor-pointer shadow-lg hover:border-rose-400 hover:bg-rose-400/10 ${
+                  pace === 'fast' ? 'border-rose-400 ring-2 ring-rose-400/70 bg-white/[0.04]' : 'border-white/10'
+                }`}
+              >
+                <div className="text-base font-bold text-rose-300">⚡ Швидко (Максимальний темп)</div>
+                <div className="text-xs text-zinc-300 mt-1">
+                  Максимально допустимий здоровий дефіцит калорій для якнайшвидшого результату.
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* ПИТАННЯ 9: Персональний розрахунок + Шлюз реєстрації */}
+        {/* ======================================================== */}
+        {questionIndex === 9 && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="text-center space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-xs font-bold mb-1">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Ваш персональний розрахунок готовий</span>
               </div>
-              <h3 className="text-lg font-bold text-white tracking-tight mt-0.5">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                 Твій ліміт — {plan.targetCalories} ккал
-              </h3>
+              </h2>
+              <p className="text-xs text-zinc-400">
+                Витрати тіла (TDEE): ~{plan.maintenanceCalories} ккал
+              </p>
             </div>
 
-            {/* 4 КОЛОНКИ БЖУ */}
-            <div className="grid grid-cols-4 gap-1.5 text-center">
-              <div className="p-2 rounded-2xl bg-black/50 border border-amber-400/40 flex flex-col items-center">
+            {/* 4 КОЛОНКИ МАКРОСІВ */}
+            <div className="grid grid-cols-4 gap-2 text-center pt-1">
+              <div className="p-2.5 rounded-2xl bg-black/50 border border-amber-400/50 flex flex-col items-center shadow-lg">
                 <span className="text-[9.5px] font-bold text-amber-300 uppercase">Калорії</span>
                 <span className="text-base font-extrabold text-white mt-1">
                   {plan.targets.calories}
@@ -677,7 +612,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                 <span className="text-[9px] text-zinc-400">ккал</span>
               </div>
 
-              <div className="p-2 rounded-2xl bg-black/50 border border-emerald-400/40 flex flex-col items-center">
+              <div className="p-2.5 rounded-2xl bg-black/50 border border-emerald-400/50 flex flex-col items-center shadow-lg">
                 <span className="text-[9.5px] font-bold text-emerald-300 uppercase">Протеїн</span>
                 <span className="text-base font-extrabold text-white mt-1">
                   {plan.targets.protein}
@@ -685,7 +620,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                 <span className="text-[9px] text-zinc-400">грам</span>
               </div>
 
-              <div className="p-2 rounded-2xl bg-black/50 border border-amber-500/40 flex flex-col items-center">
+              <div className="p-2.5 rounded-2xl bg-black/50 border border-amber-500/50 flex flex-col items-center shadow-lg">
                 <span className="text-[9.5px] font-bold text-amber-400 uppercase">Жири</span>
                 <span className="text-base font-extrabold text-white mt-1">
                   {plan.targets.fat}
@@ -693,7 +628,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                 <span className="text-[9px] text-zinc-400">грам</span>
               </div>
 
-              <div className="p-2 rounded-2xl bg-black/50 border border-indigo-400/40 flex flex-col items-center">
+              <div className="p-2.5 rounded-2xl bg-black/50 border border-indigo-400/50 flex flex-col items-center shadow-lg">
                 <span className="text-[9.5px] font-bold text-indigo-300 uppercase">Вуглеводи</span>
                 <span className="text-base font-extrabold text-white mt-1">
                   {plan.targets.carbs}
@@ -702,22 +637,29 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
               </div>
             </div>
 
-            {/* ШЛЮЗ РЕЄСТРАЦІЇ: "Зафіксуйте свій план та перейдіть до меню" */}
-            <div className="pt-2 border-t border-white/10">
-              <div className="mb-2.5">
-                <h4 className="text-xs font-bold text-white">
-                  Збережіть свій розрахунок
-                </h4>
-                <p className="text-[11px] text-zinc-400 mt-0.5">
-                  Введіть Email (або будь-які тестові слова для перевірки), або зайдіть як гість.
+            {/* Порада нутриціолога проти йо-йо лише коли обрано "Швидко" */}
+            {pace === 'fast' && (
+              <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-200">
+                <div className="flex items-center gap-1.5 font-bold mb-1">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>Порада нутриціолога проти йо-йо ефекту</span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-zinc-300">
+                  {plan.nutritionistAdvice.message}
                 </p>
               </div>
+            )}
 
-              {regError && (
-                <div className="mb-2 p-2 rounded-xl bg-rose-500/15 border border-rose-500/30 text-[11px] text-rose-300 text-center">
-                  {regError}
-                </div>
-              )}
+            {/* Форма збереження розрахунків */}
+            <div className="pt-2 border-t border-white/10 space-y-2.5">
+              <div className="text-center">
+                <h3 className="text-sm font-bold text-white">
+                  Зберегти результат
+                </h3>
+                <p className="text-[11px] text-zinc-400 mt-0.5">
+                  Введіть пошту (або будь-які тестові слова для перевірки) чи зайдіть як гість
+                </p>
+              </div>
 
               <form onSubmit={handleFinalRegister} className="space-y-2">
                 <div className="relative flex items-center">
@@ -728,31 +670,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email або будь-які два слова для тесту"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400/60"
-                  />
-                </div>
-
-                <div className="relative flex items-center">
-                  <Lock className="absolute left-3 w-4 h-4 text-zinc-500" />
-                  <input
-                    id="wizard-password-input"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Пароль або PIN (необов'язково для тесту)"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400/60"
-                  />
-                </div>
-
-                <div className="relative flex items-center">
-                  <Phone className="absolute left-3 w-4 h-4 text-zinc-500" />
-                  <input
-                    id="wizard-phone-input"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Телефон (необов'язково)"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400/60"
+                    className="w-full pl-9 pr-3.5 py-3 rounded-2xl bg-black/50 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400/60"
                   />
                 </div>
 
@@ -760,20 +678,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                   id="wizard-submit-btn"
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full mt-3 py-3 rounded-2xl font-bold text-xs tracking-wide text-zinc-950 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 cursor-pointer"
-                  style={{
-                    background: 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)',
-                    boxShadow: '0 8px 22px rgba(245,158,11,0.35)'
-                  }}
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs tracking-wide shadow-lg shadow-amber-400/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {isSubmitting ? (
-                    <span>Збереження плану...</span>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-4 h-4 text-zinc-950 stroke-[2.5]" />
-                      <span>Зареєструватися та перейти до меню</span>
-                    </>
-                  )}
+                  <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+                  <span>{isSubmitting ? 'Збереження...' : 'Зберегти розрахунок та перейти до меню'}</span>
                 </button>
 
                 <button
@@ -790,6 +698,9 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           </div>
         )}
       </div>
+
+      {/* Нижня зона відступу для безпечного перегляду на iPhone */}
+      <div className="w-full max-w-md mx-auto py-1 shrink-0" />
     </div>
   );
 };
