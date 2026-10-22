@@ -20,7 +20,7 @@ interface MyPlanWizardProps {
 
 export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onCompleted }) => {
   const { user, savePlanAndRegister } = useUserStore();
-  const { updateTargets } = useNutritionStore();
+  const { updateTargets, generateMenuForTargets } = useNutritionStore();
 
   // Номер поточного питання: 1..9
   const [questionIndex, setQuestionIndex] = useState<number>(1);
@@ -107,6 +107,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
         }
       );
 
+      generateMenuForTargets(plan.targets, eatingRhythm);
       updateTargets(plan.targets);
       setIsSubmitting(false);
       onCompleted?.();
@@ -137,6 +138,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           password: ''
         }
       );
+      generateMenuForTargets(plan.targets, eatingRhythm);
       updateTargets(plan.targets);
       setIsSubmitting(false);
       onCompleted?.();

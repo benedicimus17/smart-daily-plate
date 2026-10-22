@@ -4,6 +4,7 @@ import { DailyLog, Macros, MealType, MealEntry } from '../types/nutrition';
 import { WeeklyFlexBank } from '../types/weeklyFlex';
 import { ParsedRecipe } from '../types/recipe';
 import { CookLossDish } from '../types/cookLoss';
+import { generateDailyMealsForTargets } from '../services/menuGenerator';
 
 export interface NutritionState {
   currentDate: string;
@@ -22,6 +23,7 @@ export interface NutritionState {
   moveMealEntry: (fromMealType: MealType, toMealType: MealType, entryId: string, newTimestamp?: string) => void;
   toggleMealEaten: (mealType: MealType, entryId: string) => void;
   updateTargets: (targets: Partial<DailyLog['targets']>) => void;
+  generateMenuForTargets: (targets: DailyLog['targets'], eatingRhythm?: '3_meals' | '5_meals', options?: { markPastAsEaten?: boolean }) => void;
   quickAddCalories: (mealType: MealType, calories: number, note?: string) => void;
 
   // Дії рецептів
@@ -646,6 +648,26 @@ export const useNutritionStore = create<NutritionState>()(
           const updatedLog = {
             ...dailyLog,
             targets: { ...dailyLog.targets, ...newTargets }
+          };
+          set({
+            dailyLog: updatedLog,
+            historyLogs: {
+              ...historyLogs,
+              [selectedDate]: updatedLog
+            }
+          });
+        },
+
+        generateMenuForTargets: (targets, eatingRhythm = '3_meals', options = {}) => {
+          const { selectedDate, historyLogs, dailyLog } = get();
+          const mergedTargets = { ...dailyLog.targets, ...targets };
+          const newMeals = generateDailyMealsForTargets(mergedTargets, eatingRhythm, options);
+          const updatedLog: DailyLog = {
+            ...dailyLog,
+            date: selectedDate,
+            targets: mergedTargets,
+            meals: newMeals,
+            totals: calculateTotals(newMeals)
           };
           set({
             dailyLog: updatedLog,

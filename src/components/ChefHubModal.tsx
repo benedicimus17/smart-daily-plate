@@ -276,6 +276,52 @@ export const CHEF_CATALOG: ChefDishItem[] = [
       'Підрум\'янити на пательні по 1 хвилині з кожного боку.'
     ]
   },
+  {
+    id: 'chef-l6',
+    name: 'Піца Маргарита зі свіжим базиліком (Pizza Margherita)',
+    tier: 'free',
+    category: 'lunch',
+    categoryLabel: 'Обід',
+    weightGrams: 260,
+    macros: { calories: 540, protein: 24, fat: 18, carbs: 68 },
+    photo: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=500&q=80',
+    prepTime: '15 хв',
+    shortDesc: 'Класична італійська піца: тонке хрустке тісто, соковитий томатний соус San Marzano та ніжна моцарела',
+    ingredients: [
+      { name: 'Тонке італійське тісто для піци', grams: 130 },
+      { name: 'Сир моцарела Fior di Latte', grams: 70 },
+      { name: 'Томатний соус San Marzano', grams: 50 },
+      { name: 'Свіжий зелений базилік та крапля олії', grams: 10 }
+    ],
+    instructions: [
+      'Розкачати тісто на пергаменті, змастити томатним соусом.',
+      'Викласти скибочки моцарели.',
+      'Випікати в розігрітій духовці (240-250°C) 7-9 хвилин.',
+      'Перед подачею покласти свіжий базилік.'
+    ]
+  },
+  {
+    id: 'chef-d4',
+    name: 'Піца 4 Сири на тонкому тісті (Quattro Formaggi PRO)',
+    tier: 'pro',
+    category: 'dinner',
+    categoryLabel: 'Вечеря',
+    weightGrams: 270,
+    macros: { calories: 620, protein: 29, fat: 26, carbs: 66 },
+    photo: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80',
+    prepTime: '18 хв',
+    shortDesc: 'Ресторанна авторська піца: моцарела, благородна горгонзола, пармезан, едем та волоські горіхи',
+    ingredients: [
+      { name: 'Хрустка основа для піци', grams: 120 },
+      { name: '4 види сиру (моцарела, горгонзола, пармезан, едем)', grams: 130 },
+      { name: 'Подрібнені волоські горіхи', grams: 20 }
+    ],
+    instructions: [
+      'Покрити тонке тісто асорті благородних сирів.',
+      'Запікати до утворення рум\'яної золотистої скоринки.',
+      'Посипати горішками перед подачею.'
+    ]
+  },
 
   // ПЕРЕКУСИ
   {
@@ -559,23 +605,57 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   const [smartTime, setSmartTime] = useState('08:30');
   const [smartCalculated, setSmartCalculated] = useState<{ calories: number; protein: number; fat: number; carbs: number } | null>(null);
 
-  // Фільтрація каталогу
+  // Фільтрація каталогу з підтримкою української, англійської мов та транслітерації
   const filteredCatalog = CHEF_CATALOG.filter((item) => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) {
       return selectedFilter === 'all' || item.category === selectedFilter;
     }
 
+    // Словник транслітерації та англійських синонімів
+    const translitKeywords: Record<string, string> = {
+      'pizza': 'піц',
+      'pitsa': 'піц',
+      'steak': 'стейк',
+      'steyk': 'стейк',
+      'salad': 'салат',
+      'salat': 'салат',
+      'burger': 'бургер',
+      'big mac': 'бургер',
+      'pasta': 'паст',
+      'salmon': 'лосос',
+      'tuna': 'тунець',
+      'chicken': 'курк',
+      'turkey': 'індич',
+      'omelet': 'омлет',
+      'egg': 'яйц',
+      'soup': 'суп',
+      'syrnyky': 'сирник',
+      'croissant': 'круас',
+      'snack': 'снек',
+      'nuts': 'горіх'
+    };
+
+    let mappedUkrainianStem = '';
+    for (const [eng, ua] of Object.entries(translitKeywords)) {
+      if (q.includes(eng)) {
+        mappedUkrainianStem = ua;
+        break;
+      }
+    }
+
     const matchesSearch =
       item.name.toLowerCase().includes(q) ||
       item.shortDesc.toLowerCase().includes(q) ||
       item.categoryLabel.toLowerCase().includes(q) ||
+      (mappedUkrainianStem && (item.name.toLowerCase().includes(mappedUkrainianStem) || item.shortDesc.toLowerCase().includes(mappedUkrainianStem))) ||
+      (q.includes('піц') && item.name.toLowerCase().includes('піц')) ||
       (q.includes('снек') && (item.category === 'snack' || item.name.toLowerCase().includes('снек'))) ||
       (q.includes('горіх') && (item.name.toLowerCase().includes('горіх') || item.shortDesc.toLowerCase().includes('горіх') || item.name.toLowerCase().includes('мигдал'))) ||
       (q.includes('салат') && (item.name.toLowerCase().includes('салат') || item.shortDesc.toLowerCase().includes('салат'))) ||
       (q.includes('бургер') || q.includes('мак') || q.includes('біг') ? item.name.toLowerCase().includes('бургер') || item.name.toLowerCase().includes('мак') : false) ||
       (q.includes('круас') && item.name.toLowerCase().includes('круас')) ||
-      (item.ingredients && item.ingredients.some(ing => ing.name.toLowerCase().includes(q)));
+      (item.ingredients && item.ingredients.some(ing => ing.name.toLowerCase().includes(q) || (mappedUkrainianStem && ing.name.toLowerCase().includes(mappedUkrainianStem))));
 
     return matchesSearch;
   });
@@ -773,10 +853,11 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
               <div className="relative">
                 <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
+                  id="chef-catalog-search-input"
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Пошук страви (сирники, лосось, стейк...)"
+                  placeholder="Пошук страви (сирники, pizza, стейк...)"
                   className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
                 />
               </div>
@@ -1488,8 +1569,9 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                 </p>
               </div>
 
-              <div className="space-y-2 pt-1">
+              <div className="pt-1">
                 <button
+                  id="btn-chef-pro-subscribe"
                   type="button"
                   onClick={() => {
                     setProPaywallDish(null);
@@ -1499,24 +1581,10 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                       setProStatus(true);
                     }
                   }}
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-400/25 active:scale-95 transition-all cursor-pointer"
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-400/25 active:scale-95 transition-all cursor-pointer"
                 >
                   <Crown className="w-4 h-4 stroke-[2.5]" />
-                  <span>Оформити NUTRIQ PRO (Переглянути тарифи)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const dishName = proPaywallDish.name;
-                    setProPaywallDish(null);
-                    setSmartInputText(dishName);
-                    setActiveTab('smart_text');
-                  }}
-                  className="w-full py-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all"
-                >
-                  <Globe className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Знайти в інтернеті та ввести безкоштовно</span>
+                  <span>Оформити NUTRIQ PRO</span>
                 </button>
               </div>
             </div>

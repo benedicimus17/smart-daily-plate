@@ -25,7 +25,13 @@ export const App: React.FC = () => {
   const { dailyLog, weeklyBank, addFoodToMeal } = useNutritionStore();
   const { user } = useUserStore();
   const [activeTab, setActiveTab] = useState<NavTab>('today');
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    try {
+      return !sessionStorage.getItem('nutriq_splash_shown');
+    } catch {
+      return false;
+    }
+  });
   
   // Керування модалками
   const [modalOpen, setModalOpen] = useState(false);
@@ -64,7 +70,16 @@ export const App: React.FC = () => {
 
   return (
     <>
-      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      {showSplash && (
+        <SplashScreen
+          onFinish={() => {
+            try {
+              sessionStorage.setItem('nutriq_splash_shown', '1');
+            } catch {}
+            setShowSplash(false);
+          }}
+        />
+      )}
       
       <div className="min-h-screen bg-slate-moss text-zinc-100 flex justify-center selection:bg-amber-400/20 selection:text-amber-300 relative overflow-x-hidden">
         {/* М'яке атмосферне фонове світіння (NUTRIQ Zen Glow) */}

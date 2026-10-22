@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNutritionStore } from '../store/nutritionStore';
+import { useUserStore } from '../store/userStore';
 import { MealType, MealEntry } from '../types/nutrition';
 import { SmartBalancerModal } from './SmartBalancerModal';
 import { CookLossCalculator } from './CookLossCalculator';
@@ -48,6 +49,7 @@ const CATEGORY_LABELS: Record<MealType, string> = {
 };
 
 export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQuickAdd, onOpenProModal }) => {
+  const { user } = useUserStore();
   const {
     dailyLog,
     selectedDate,
@@ -55,7 +57,8 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
     removeFoodFromMeal,
     addFoodToMeal,
     toggleMealEaten,
-    updateMealEntry
+    updateMealEntry,
+    generateMenuForTargets
   } = useNutritionStore();
 
   const [balancerOpen, setBalancerOpen] = useState(false);
@@ -368,6 +371,27 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
             <span className="text-[9px] text-zinc-500 block">/ {targetCarbs}г</span>
           </div>
         </div>
+
+        {/* Кнопка ШІ-підгонки раціону під цільовий ліміт та протеїн (при відхиленні понад 50 ккал) */}
+        {Math.abs(calDelta) > 50 && (
+          <div className="pt-2.5">
+            <button
+              id="btn-auto-align-menu"
+              type="button"
+              onClick={() => {
+                generateMenuForTargets(dailyLog.targets, user.eatingRhythm || '3_meals');
+              }}
+              className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-amber-400/20 via-emerald-400/20 to-amber-400/20 hover:from-amber-400/30 hover:to-emerald-400/30 border border-amber-400/50 hover:border-amber-400 text-amber-300 font-extrabold text-[11px] flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>
+                {calDelta < 0
+                  ? `Недобір: ${Math.abs(calDelta)} ккал • Авто-заповнити меню під ${targetCalories} ккал`
+                  : `Перебір: +${calDelta} ккал • Авто-збалансувати меню під ${targetCalories} ккал`}
+              </span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 3. КОМПАКТНА ШІ-ПЛАШКА БАЛАНСУВАННЯ (З'являється ТІЛЬКИ при реальному перевищенні цілі) */}
