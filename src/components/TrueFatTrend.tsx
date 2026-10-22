@@ -2,9 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { TrendingDown, Info, Plus, Sparkles, Scale, CheckCircle2 } from 'lucide-react';
 import { calculateTrueFatTrend, WeightEntry } from '../math/trueFatTrend';
 import { useUserStore } from '../store/userStore';
+import { useTranslation } from '../store/languageStore';
 
 export const TrueFatTrend: React.FC = () => {
   const { user } = useUserStore();
+  const { t } = useTranslation();
   const baseline = user?.weightKg && user.weightKg > 30 ? user.weightKg : 74;
 
   // Генеруємо 7-денну реалістичну історію на базі ваги користувача
@@ -55,13 +57,13 @@ export const TrueFatTrend: React.FC = () => {
               <Scale className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-black text-white tracking-tight">Моя вага</h2>
-              <p className="text-xs text-zinc-400">Справжній прогрес без стрибків води та солі</p>
+              <h2 className="text-base font-black text-white tracking-tight">{t('my_weight_title')}</h2>
+              <p className="text-xs text-zinc-400">{t('my_weight_subtitle')}</p>
             </div>
           </div>
           <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Фільтр води
+            {t('water_filter')}
           </span>
         </div>
 
@@ -69,7 +71,7 @@ export const TrueFatTrend: React.FC = () => {
         <div className="p-3.5 rounded-2xl bg-black/40 border border-white/10 flex gap-2.5 items-start text-xs text-zinc-300">
           <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
           <p className="leading-relaxed text-[11.5px]">
-            <strong className="text-white font-bold">Чому щоденні ваги показують неправду?</strong> Після солоної вечері, вуглеводів або тренування вага може підскочити на 1–2 кг. Це звичайна затримка води, а не жир. Додаток автоматично згладжує ці набряки і показує ваш <strong className="text-emerald-400">реально спалений жир</strong>.
+            <strong className="text-white font-bold">{t('why_scale_lies')}</strong> {t('scale_lies_desc')}
           </p>
         </div>
 
@@ -78,28 +80,28 @@ export const TrueFatTrend: React.FC = () => {
           {/* Щоденні ваги */}
           <div className="p-3.5 rounded-2xl bg-black/50 border border-white/10">
             <span className="text-[10.5px] text-zinc-400 font-bold uppercase tracking-wider block">
-              На вагах сьогодні
+              {t('scale_today')}
             </span>
             <div className="text-2xl font-black text-white mt-0.5">
               {latest.rawWeightKg} <span className="text-xs font-semibold text-zinc-500">кг</span>
             </div>
             <div className="text-[10.5px] font-semibold text-amber-300/90 mt-1">
               {latest.waterRetentionDeltaKg > 0
-                ? `+${latest.waterRetentionDeltaKg} кг води/набряку`
-                : 'Нормальний баланс води'}
+                ? `+${latest.waterRetentionDeltaKg} кг ${t('water_retention')}`
+                : t('normal_water')}
             </div>
           </div>
 
           {/* Справжня вага (без водної похибки) */}
           <div className="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30">
             <span className="text-[10.5px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
-              <TrendingDown className="w-3.5 h-3.5" /> Справжній жир
+              <TrendingDown className="w-3.5 h-3.5" /> {t('real_fat')}
             </span>
             <div className="text-2xl font-black text-emerald-400 mt-0.5">
               {latest.emaWeightKg} <span className="text-xs font-semibold text-emerald-500/70">кг</span>
             </div>
             <div className="text-[10.5px] text-zinc-300 font-semibold mt-1">
-              {weeklyDelta <= 0 ? `${weeklyDelta} кг за тиждень` : `+${weeklyDelta} кг за тиждень`}
+              {weeklyDelta <= 0 ? `${weeklyDelta} кг` : `+${weeklyDelta} кг`}
             </div>
           </div>
         </div>
@@ -107,9 +109,9 @@ export const TrueFatTrend: React.FC = () => {
         {/* 4. ДИНАМІКА СПРАВЖНЬОЇ ВАГИ ЗА 7 ДНІВ */}
         <div className="mt-4 pt-3.5 border-t border-white/10">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-zinc-300">Динаміка справжньої ваги за 7 днів</span>
+            <span className="text-xs font-bold text-zinc-300">{t('trend_7days')}</span>
             <span className="text-[10px] text-emerald-400 font-extrabold flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> Стабільний спад
+              <Sparkles className="w-3 h-3" /> {t('stable_drop')}
             </span>
           </div>
 
@@ -157,7 +159,7 @@ export const TrueFatTrend: React.FC = () => {
             className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 text-xs font-black flex items-center gap-1.5 shadow-md shadow-amber-400/20 active:scale-95 transition-all"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
-            <span>Записати вагу</span>
+            <span>{t('record_weight')}</span>
           </button>
         </form>
 

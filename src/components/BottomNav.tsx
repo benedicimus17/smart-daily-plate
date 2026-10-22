@@ -1,5 +1,6 @@
 import React from 'react';
 import { Home, ClipboardList, Plus, BarChart3, User } from 'lucide-react';
+import { useTranslation } from '../store/languageStore';
 
 export type NavTab = 'today' | 'cookloss' | 'grocery' | 'profile';
 
@@ -10,6 +11,8 @@ interface BottomNavProps {
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, onQuickAdd }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="fixed bottom-0 inset-x-0 mx-auto max-w-md px-4 pointer-events-none z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <div className="rounded-[28px] py-2 px-4 flex items-center justify-between liquid-dock pointer-events-auto">
@@ -25,7 +28,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
           }`}
         >
           <Home className={`w-5 h-5 mb-0.5 ${activeTab === 'today' ? 'fill-[#F5B041]/25 stroke-[#F5B041]' : ''}`} />
-          <span className="text-[10px] tracking-tight">Home</span>
+          <span className="text-[10px] tracking-tight">{t('nav_home', 'Home')}</span>
         </button>
 
         {/* 2. Log (Щоденник / Каструля) */}
@@ -40,7 +43,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
           }`}
         >
           <ClipboardList className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px] tracking-tight">Log</span>
+          <span className="text-[10px] tracking-tight">{t('nav_log', 'Log')}</span>
         </button>
 
         {/* 3. Центральна матова бурштинова кнопка (+) точно як у макеті */}
@@ -48,7 +51,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
           id="tab-nav-quickadd"
           type="button"
           onClick={onQuickAdd}
-          className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+          className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
           style={{
             background: 'radial-gradient(circle at 50% 30%, rgba(245,176,65,0.42) 0%, rgba(180,115,28,0.28) 100%)',
             border: '1px solid rgba(253,224,71,0.45)',
@@ -71,7 +74,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
           }`}
         >
           <BarChart3 className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px] tracking-tight">Trends</span>
+          <span className="text-[10px] tracking-tight">{t('nav_trends', 'Trends')}</span>
         </button>
 
         {/* 5. Profile (Профіль / Мій План) */}
@@ -86,7 +89,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, o
           }`}
         >
           <User className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px] tracking-tight">Profile</span>
+          <span className="text-[10px] tracking-tight">{t('nav_profile', 'Profile')}</span>
         </button>
       </div>
     </div>

@@ -32,8 +32,11 @@ import {
 } from 'lucide-react';
 import { ProSubscriptionModal } from './ProSubscriptionModal';
 import { LegalModal } from './LegalModal';
+import { LanguageSelectorModal } from './LanguageSelectorModal';
+import { useTranslation } from '../store/languageStore';
 
 export const ProfileScreen: React.FC = () => {
+  const { currentOption, t } = useTranslation();
   const {
     user,
     toggleFaceId,
@@ -52,6 +55,7 @@ export const ProfileScreen: React.FC = () => {
   const [newPin, setNewPin] = useState(user.pinCode || '');
   const [legalModalOpen, setLegalModalOpen] = useState(false);
   const [legalTab, setLegalTab] = useState<'privacy' | 'terms'>('privacy');
+  const [languageModalOpen, setLanguageModalOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [exportToast, setExportToast] = useState(false);
   const [deletedToast, setDeletedToast] = useState(false);
@@ -351,15 +355,24 @@ export const ProfileScreen: React.FC = () => {
         </span>
 
         <div className="space-y-2 text-xs">
-          <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
+          <button
+            id="btn-open-language-selector"
+            type="button"
+            onClick={() => setLanguageModalOpen(true)}
+            className="w-full p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/5 hover:border-amber-400/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer"
+          >
             <div className="flex items-center gap-2.5">
               <Globe className="w-4 h-4 text-amber-400" />
-              <span className="font-semibold text-zinc-200">Мова інтерфейсу</span>
+              <span className="font-semibold text-zinc-200">{t('interface_lang')}</span>
             </div>
-            <span className="font-bold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
-              Українська (UA)
-            </span>
-          </div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-amber-300 bg-amber-400/10 px-2.5 py-1 rounded-xl border border-amber-400/30 flex items-center gap-1.5 shadow-sm text-xs">
+                <span>{currentOption.flag}</span>
+                <span>{currentOption.nativeName}</span>
+              </span>
+              <ChevronRight className="w-4 h-4 text-zinc-500" />
+            </div>
+          </button>
 
           <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -646,6 +659,11 @@ export const ProfileScreen: React.FC = () => {
       <ProSubscriptionModal
         isOpen={proModalOpen}
         onClose={() => setProModalOpen(false)}
+      />
+      {/* Модалка вибору мови */}
+      <LanguageSelectorModal
+        isOpen={languageModalOpen}
+        onClose={() => setLanguageModalOpen(false)}
       />
     </div>
   );

@@ -20,8 +20,10 @@ import { NextMealSpotlight } from './components/NextMealSpotlight';
 import { WaterTracker } from './components/WaterTracker';
 import { LogScreen } from './components/LogScreen';
 import { ProSubscriptionModal } from './components/ProSubscriptionModal';
+import { useTranslation } from './store/languageStore';
 
 export const App: React.FC = () => {
+  const { t } = useTranslation();
   const { dailyLog, weeklyBank, addFoodToMeal } = useNutritionStore();
   const { user } = useUserStore();
   const [activeTab, setActiveTab] = useState<NavTab>('today');
@@ -144,7 +146,7 @@ export const App: React.FC = () => {
                   }`}
                 >
                   <Scale className="w-4 h-4 text-amber-400" />
-                  <span>Моя вага (без води)</span>
+                  <span>{t('nav_weight', 'Моя вага (без води)')}</span>
                 </button>
                 <button
                   id="tab-sub-grocery"
@@ -157,7 +159,7 @@ export const App: React.FC = () => {
                   }`}
                 >
                   <ShoppingBag className="w-4 h-4 text-emerald-400" />
-                  <span>Список покупок</span>
+                  <span>{t('nav_groceries', 'Список покупок')}</span>
                 </button>
               </div>
 
