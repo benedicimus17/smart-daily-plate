@@ -5,6 +5,7 @@ import { WeeklyFlexBank } from '../types/weeklyFlex';
 import { ParsedRecipe } from '../types/recipe';
 import { CookLossDish } from '../types/cookLoss';
 import { generateDailyMealsForTargets } from '../services/menuGenerator';
+import { generateSevenDayDogfoodingData } from '../services/dogfoodingSeeder';
 
 export interface NutritionState {
   currentDate: string;
@@ -32,6 +33,9 @@ export interface NutritionState {
 
   // Дії каструлі (Cook-Loss)
   saveCookLossDish: (dish: CookLossDish) => void;
+
+  // 7-Day Dogfooding Mode & Стійкість (Stage 5.5)
+  seedSevenDayDogfoodingData: () => void;
 }
 
 const DEFAULT_TARGETS = {
@@ -694,6 +698,20 @@ export const useNutritionStore = create<NutritionState>()(
           set(state => ({
             savedCookLossDishes: [dish, ...state.savedCookLossDishes.filter(d => d.id !== dish.id)]
           }));
+        },
+
+        seedSevenDayDogfoodingData: () => {
+          const { dailyLog } = get();
+          const seed = generateSevenDayDogfoodingData(dailyLog.targets);
+          const todayStr = getTodayDateStr();
+          const activeLog = seed.historyLogs[todayStr] || seed.historyLogs[seed.dates[0]];
+
+          set({
+            historyLogs: seed.historyLogs,
+            weeklyBank: seed.weeklyBank,
+            dailyLog: activeLog,
+            selectedDate: todayStr
+          });
         }
       };
     },

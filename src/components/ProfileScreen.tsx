@@ -46,7 +46,7 @@ export const ProfileScreen: React.FC = () => {
     deleteAccountAndAllData,
     exportUserData
   } = useUserStore();
-  const { dailyLog } = useNutritionStore();
+  const { dailyLog, historyLogs, seedSevenDayDogfoodingData } = useNutritionStore();
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -59,6 +59,7 @@ export const ProfileScreen: React.FC = () => {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [exportToast, setExportToast] = useState(false);
   const [deletedToast, setDeletedToast] = useState(false);
+  const [dogfoodingToast, setDogfoodingToast] = useState(false);
 
   const handleSavePin = () => {
     togglePinCode(true, newPin);
@@ -591,6 +592,57 @@ export const ProfileScreen: React.FC = () => {
         </div>
       </div>
 
+      {/* 5. DOGFOODING ТА СТРЕС-ТЕСТ СТІЙКОСТІ (Stage 5.5) */}
+      <div
+        className="rounded-3xl p-5 relative overflow-hidden"
+        style={{
+          background: 'linear-gradient(165deg, rgba(20,28,23,0.85) 0%, rgba(12,16,14,0.92) 100%)',
+          border: '1px solid rgba(245,176,65,0.25)',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.45)'
+        }}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <h4 className="text-xs font-black tracking-wider uppercase text-amber-300">
+              7-Day Personal Dogfooding Mode
+            </h4>
+          </div>
+          <span className="text-[9.5px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+            Stage 5.5
+          </span>
+        </div>
+
+        <p className="text-[11px] text-zinc-300 mb-3 leading-relaxed">
+          Тестування тижневого використання застосунку реальним користувачем: повне заповнення розкладу (Пн–Нд), облік Cook-Loss, водний баланс та автоматичний перерахунок Weekly Flex Bank.
+        </p>
+
+        <div className="grid grid-cols-2 gap-2 mb-3 text-[11px]">
+          <div className="p-2.5 rounded-2xl bg-black/40 border border-white/5">
+            <span className="text-zinc-500 block text-[10px] font-bold">Сховище:</span>
+            <span className="text-zinc-200 font-bold truncate block">LocalStorage v6</span>
+          </div>
+          <div className="p-2.5 rounded-2xl bg-black/40 border border-white/5">
+            <span className="text-zinc-500 block text-[10px] font-bold">Днів в історії:</span>
+            <span className="text-amber-400 font-black block">{Object.keys(historyLogs).length} активних</span>
+          </div>
+        </div>
+
+        <button
+          id="btn-seed-dogfooding-7days"
+          type="button"
+          onClick={() => {
+            seedSevenDayDogfoodingData();
+            setDogfoodingToast(true);
+            setTimeout(() => setDogfoodingToast(false), 2500);
+          }}
+          className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-400/20 active:scale-[0.98] transition-all cursor-pointer"
+        >
+          <Sparkles className="w-4 h-4 text-zinc-950 stroke-[2.5]" />
+          <span>Заповнити 7 днів реальним раціоном (Пн–Нд)</span>
+        </button>
+      </div>
+
       {/* ДІАЛОГ ПІДТВЕРДЖЕННЯ ВИДАЛЕННЯ ДАНИХ (GDPR) */}
       {confirmDeleteOpen && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
@@ -637,6 +689,13 @@ export const ProfileScreen: React.FC = () => {
         <div className="fixed bottom-24 inset-x-4 max-w-sm mx-auto z-50 p-3 rounded-2xl bg-rose-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-2xl animate-fadeIn">
           <Trash2 className="w-4 h-4" />
           <span>Всі дані та акаунт безповоротно видалено з пристрою.</span>
+        </div>
+      )}
+
+      {dogfoodingToast && (
+        <div className="fixed bottom-24 inset-x-4 max-w-sm mx-auto z-50 p-3 rounded-2xl bg-emerald-500 text-zinc-950 font-bold text-xs flex items-center justify-center gap-2 shadow-2xl animate-fadeIn">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>7-денний раціон Dogfooding успішно збережено в сховище!</span>
         </div>
       )}
 

@@ -5,10 +5,10 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-23T08:28:00",
+    "last_updated": "2026-10-24T00:05:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 5.4: Live Camera Barcode Scanner & Open Food Facts Global API",
-    "sprint_goal": "Впровадження живого сканера штрих-кодів у Шеф-Хаб: інтерактивний видошукач камери, підключення Open Food Facts v2 API (3+ млн товарів), нульова затримка офлайн-пресетів Mercadona/Hacendado, України та світу, динамічний слайдер порцій та додавання у щоденник."
+    "current_sprint": "Stage 5.5: 7-Day Personal Dogfooding Mode & Data Persistence Audit",
+    "sprint_goal": "Розгортання повнофункціонального 7-денного циклу Dogfooding: реалістичний раціон (Пн-Нд), облік Cook-Loss, водний трекінг, стрес-тест тижневого калорійного банку Weekly Flex Bank та персистентність сховища LocalStorage v6."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
@@ -19,10 +19,10 @@
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-23T08:28:00",
+    "verified_at": "2026-10-24T00:05:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage5_4_live_camera_barcode_scanner.md",
-    "tests_passed": "72/72",
+    "report_artifact": "qa_report_stage5_5_7day_dogfooding_persistence.md",
+    "tests_passed": "77/77",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -195,10 +195,10 @@
     },
     {
       "feature": "7-Day Personal Dogfooding Mode",
-      "status": "PENDING_AUDIT",
-      "automated_tests": "PENDING",
-      "ui_verified": false,
-      "notes": "Перевірка стійкості збереження історії за тиждень у LocalStorage"
+      "status": "DONE",
+      "automated_tests": "PASSED (src/services/__tests__/dogfoodingPersistence.test.ts - 77/77 passed)",
+      "ui_verified": true,
+      "notes": "Повноцінний 7-денний режим dogfooding (dogfoodingSeeder.ts): генерація реалістичного раціону на повний тиждень (Пн–Нд) з урахуванням Cook-Loss уварки, води (1800-2500 мл), статусів з'їденого/запланованого та динамічного калібрування Weekly Flex Bank (+350 ккал резерв). Впроваджено 1-тап кнопку в ProfileScreen. Перевірено стійкість у LocalStorage (nutriq-studio-storage-v6), E2E аудит у браузері 390x844 пройдено з 0 помилок."
     }
   ],
   "qa_verification_gate": {
@@ -415,6 +415,11 @@
       "timestamp": "2026-10-23T08:28:00",
       "author": "CEO & QA Auditor",
       "entry": "Затвердження та розгортання Черги № 5.4 (Live Camera Barcode Scanner & Open Food Facts Global API): 1) Створено openFoodFactsService.ts з підтримкою live Open Food Facts API v2 (3+ млн штрих-кодів світу) та офлайн-базою для 0 мс доступу до топ-товарів Mercadona/Hacendado, України та Європи; 2) У Шеф-Хабі (ChefHubModal.tsx) інтегровано 4-й режим 'Штрих-код' із темним скляним видошукачем камери, неоновим скануючим променем, швидкими кнопками-пресетами та полем введення EAN; 3) Реалізовано динамічний калькулятор порцій (50г, 100г, 150г, 200г) з автоматичним перерахунком КБЖВ та вибором цільового прийому їжі; 4) Додано 13 нових юніт-тестів (72/72 тестів Vitest успішно пройдено, чиста збірка Vite за 2.7с); 5) Проведено E2E аудит у реальному браузері agent-browser (390x844), зафіксовано скріншот audit_stage5_4_barcode_scanner.png, 0 помилок у консолі."
+    },
+    {
+      "timestamp": "2026-10-24T00:05:00",
+      "author": "CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Черги № 5.5 (7-Day Personal Dogfooding Mode & Data Persistence Audit): 1) Створено генератор dogfoodingSeeder.ts для наскрізного моделювання 7 днів тижня (Пн–Нд) з реальними стравами, ресторанними чеками, Cook-Loss та водним балансом; 2) Інтегровано seedSevenDayDogfoodingData в nutritionStore.ts та преміальну картку керування в ProfileScreen.tsx з миттєвим індикатором кількості активних днів; 3) Написано 5 юніт-тестів для перевірки стійкості історії, тижневого банку Flex Bank та JSON-серіалізації (77/77 тестів Vitest пройдено, збірка Vite без помилок); 4) Проведено E2E аудит у реальному браузері agent-browser (390x844): заповнення раціону з Профілю -> перехід у Щоденник -> перегляд субботи та неділі зі збереженням страв (audit_stage5_5_dogfooding_7days.png), 0 помилок у консолі."
     }
   ]
 }
