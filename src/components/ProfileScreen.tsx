@@ -34,6 +34,7 @@ import { ProSubscriptionModal } from './ProSubscriptionModal';
 import { LegalModal } from './LegalModal';
 import { LanguageSelectorModal } from './LanguageSelectorModal';
 import { useTranslation } from '../store/languageStore';
+import { PwaInstallBanner } from './PwaInstallBanner';
 
 export const ProfileScreen: React.FC = () => {
   const { currentOption, t } = useTranslation();
@@ -95,6 +96,9 @@ export const ProfileScreen: React.FC = () => {
 
   return (
     <div className="space-y-4 pb-28 animate-fadeIn select-none">
+      {/* 0. PWA-СТАТУС ТА ВСТАНОВЛЕННЯ (Stage 6.1) */}
+      <PwaInstallBanner />
+
       {/* 1. БЛОК АКАУНТА ТА БЕЗПЕКИ */}
       <div
         className="rounded-3xl p-5 relative overflow-hidden transition-all"

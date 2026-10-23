@@ -5,24 +5,24 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-24T00:15:00",
+    "last_updated": "2026-10-24T00:25:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 6.0: TikTok/Reels Video AI Backend (Edge Function / Whisper API)",
-    "sprint_goal": "Розгортання мультимодального AI-шлюзу для розбору відео-рецептів: Supabase Edge Function (Deno), клієнтський міст videoAiService.ts (Whisper Audio AI 98% + Vision OCR 95% + URL AI) та оновлений інтерфейс Шеф-Хабу."
+    "current_sprint": "Stage 6.1: PWA Native Installation & Offline Service Worker Final Tuning",
+    "sprint_goal": "Повне впровадження нативного досвіду встановлення PWA (двофакторний детектор standalone, нативний банер у ProfileScreen, 3-кроковий візуальний гайд для iOS Safari, розширений Web App Manifest із категоріями та 3 системними шорткатами: Шеф-Хаб (+), Сканер штрих-коду, Щоденник) та обробник URL-шорткатів у додатку."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
     "styling": "Tailwind CSS (Dark Glassmorphism Luxury theme)",
     "state_management": "Zustand (NutritionStore with LocalStorage persistence) + Supabase Cloud Sync + Stripe Billing",
-    "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone)",
+    "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone, App Shortcuts & Custom Install Banner)",
     "production_deployment": "https://smart-daily-plate.vercel.app"
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-24T00:15:00",
+    "verified_at": "2026-10-24T00:25:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage6_0_whisper_ai_backend.md",
-    "tests_passed": "85/85",
+    "report_artifact": "qa_report_stage6_1_pwa_native_installation.md",
+    "tests_passed": "92/92",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -425,6 +425,11 @@
       "timestamp": "2026-10-24T00:15:00",
       "author": "CEO & QA Auditor",
       "entry": "Затвердження та розгортання Черги № 6.0 (TikTok/Reels Video AI Backend & Whisper API Gateway): 1) Створено бекенд-сервіс supabase/functions/parse-video-recipe/index.ts для мультимодальної обробки відео; 2) Створено клієнтський міст videoAiService.ts із підтримкою Whisper Audio AI, Vision OCR та авто-перемиканням на локальну онтологію без падінь; 3) Оновлено AI Імпорт у Шеф-Хабі (ChefHubModal.tsx) з вибором 3 режимів: URL посилання, Whisper транскрипція мови шефа та OCR кадрів; 4) Написано 8 юніт-тестів для перевірки всіх платформ (TikTok, Reels, Shorts), Whisper-розпізнавання та Cook-Loss метаданих (85/85 тестів Vitest успішно пройдено, збірка Vite 2.60с); 5) Проведено E2E аудит через agent-browser (390x844): розпізнавання аудіо рецепта -> генерація КБЖВ -> кнопки додавання (audit_stage6_0_whisper_ai_parser.png), 0 помилок у консолі."
+    },
+    {
+      "timestamp": "2026-10-24T00:25:00",
+      "author": "CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Черги № 6.1 (PWA Native Installation & Offline Service Worker Final Tuning): 1) Створено сервіс pwaService.ts з двофакторним детектуванням standalone-режиму (iOS Safari WebKit + Chromium), перехопленням beforeinstallprompt та аналізатором URL-шорткатів; 2) Створено PwaInstallBanner.tsx у ProfileScreen з живим бейджем середовища, 1-клік встановленням та 3-кроковим візуальним модальним гайдом для iOS Safari; 3) У vite.config.ts Web App Manifest розширено категоріями та 3 системними ярликами (Шеф-Хаб +, Сканер штрих-коду, Щоденник); 4) В App.tsx інтегровано слухач дій запуску для миттєвого відкриття відповідних модальних вікон; 5) Додано 7 юніт-тестів (92/92 vitest пройдено, збірка Vite 2.64с); 6) Проведено E2E аудит через agent-browser (390x844): банер на екрані Профілю + візуальний гайд iOS Safari (audit_stage6_1_pwa_install.png, audit_stage6_1_pwa_modal.png), 0 помилок консолі."
     }
   ]
 }

@@ -21,6 +21,7 @@ import { WaterTracker } from './components/WaterTracker';
 import { LogScreen } from './components/LogScreen';
 import { ProSubscriptionModal } from './components/ProSubscriptionModal';
 import { useTranslation } from './store/languageStore';
+import { parsePwaActionFromUrl } from './services/pwaService';
 
 export const App: React.FC = () => {
   const { t } = useTranslation();
@@ -52,6 +53,22 @@ export const App: React.FC = () => {
       setPlanWizardOpen(true);
     }
   }, [user.hasCompletedPlan]);
+
+  // Підтримка PWA Shortcuts та URL Actions (Stage 6.1)
+  useEffect(() => {
+    const { action, tab } = parsePwaActionFromUrl();
+    if (action === 'quickadd') {
+      setChefHubOpen(true);
+    } else if (action === 'barcode') {
+      setChefHubOpen(true);
+    } else if (tab === 'cookloss') {
+      setActiveTab('cookloss');
+    } else if (tab === 'grocery') {
+      setActiveTab('grocery');
+    } else if (tab === 'profile') {
+      setActiveTab('profile');
+    }
+  }, []);
 
   const handleOpenAdd = (mealType: MealType) => {
     setTargetMealType(mealType);

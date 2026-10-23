@@ -35,6 +35,30 @@ export default defineConfig({
         orientation: 'portrait-primary',
         start_url: '/?v=6',
         scope: '/',
+        categories: ['health', 'fitness', 'lifestyle', 'food'],
+        shortcuts: [
+          {
+            name: 'Шеф-Хаб (+)',
+            short_name: 'Шеф-Хаб',
+            description: 'Швидке додавання страви у щоденник',
+            url: '/?action=quickadd',
+            icons: [{ src: 'pwa-192x192-v6.png?v=6', sizes: '192x192' }]
+          },
+          {
+            name: 'Сканер штрих-коду',
+            short_name: 'Сканер',
+            description: 'Зчитування штрих-кодів Mercadona та Open Food Facts',
+            url: '/?action=barcode',
+            icons: [{ src: 'pwa-192x192-v6.png?v=6', sizes: '192x192' }]
+          },
+          {
+            name: 'Щоденник харчування',
+            short_name: 'Щоденник',
+            description: 'Перегляд меню та розкладу дня',
+            url: '/?tab=cookloss',
+            icons: [{ src: 'pwa-192x192-v6.png?v=6', sizes: '192x192' }]
+          }
+        ],
         icons: [
           {
             src: 'pwa-192x192-v6.png?v=6',
