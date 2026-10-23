@@ -5,24 +5,24 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-24T00:25:00",
+    "last_updated": "2026-10-24T00:47:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 6.1: PWA Native Installation & Offline Service Worker Final Tuning",
-    "sprint_goal": "Повне впровадження нативного досвіду встановлення PWA (двофакторний детектор standalone, нативний банер у ProfileScreen, 3-кроковий візуальний гайд для iOS Safari, розширений Web App Manifest із категоріями та 3 системними шорткатами: Шеф-Хаб (+), Сканер штрих-коду, Щоденник) та обробник URL-шорткатів у додатку."
+    "current_sprint": "Stage 6.2: Smart Reminders & Web Push Notifications",
+    "sprint_goal": "Повна інтеграція системи розумних нагадувань: сервіс notificationService.ts з плануванням прийомів їжі (сніданок 08:30, обід 13:30, вечеря 19:00), інтервальне нагадування про воду, вечірній чек-ін Flex Bank (20:30), модальне вікно NotificationSettingsModal у Профілі та плаваючий In-App Toast Alert у додатку."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
     "styling": "Tailwind CSS (Dark Glassmorphism Luxury theme)",
     "state_management": "Zustand (NutritionStore with LocalStorage persistence) + Supabase Cloud Sync + Stripe Billing",
-    "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone, App Shortcuts & Custom Install Banner)",
+    "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone, App Shortcuts, Web Push Notifications)",
     "production_deployment": "https://smart-daily-plate.vercel.app"
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-24T00:25:00",
+    "verified_at": "2026-10-24T00:47:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage6_1_pwa_native_installation.md",
-    "tests_passed": "92/92",
+    "report_artifact": "qa_report_stage6_2_smart_reminders_web_push.md",
+    "tests_passed": "103/103",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -206,6 +206,13 @@
       "automated_tests": "PASSED (src/services/__tests__/pwaService.test.ts - 92/92 passed)",
       "ui_verified": true,
       "notes": "Повна детермінована реалізація нативного встановлення PWA (pwaService.ts): двофакторне детектування Standalone-режиму (iOS Safari WebKit + Chromium display-mode), адаптивний банер PwaInstallBanner.tsx у Профілі з живим статусом та 3-кроковим візуальним модальним гайдом для користувачів iPhone / iOS Safari, системні Web App Manifest ярлики (Шеф-Хаб +, Сканер штрих-коду, Щоденник) та автоматичний перехід при старті через URL параметри. Верифіковано в agent-browser (390x844), 0 помилок."
+    },
+    {
+      "feature": "Smart Reminders & Web Push Notifications",
+      "status": "DONE",
+      "automated_tests": "PASSED (src/services/__tests__/notificationService.test.ts - 103/103 passed)",
+      "ui_verified": true,
+      "notes": "Повна інтеграція системи розумних нагадувань (notificationService.ts): 1) Web Notifications API + Service Worker showNotification + розпізнавання дозволів; 2) Інтервальне нагадування про склянку води (кожні 1.5-3 год з розрахунком залишку мл до норми); 3) Розклад прийомів їжі (Сніданок 08:30, Обід 13:30, Вечеря 19:00) з індивідуальними селекторами часу; 4) Вечірній чек-ін Flex Bank (20:30) з підсумком збереженого резерву калорій; 5) Преміальне модальне вікно NotificationSettingsModal у Профілі та плаваючий In-App Alert Toast в App.tsx. Верифіковано через agent-browser (390x844), 0 помилок."
     }
   ],
   "qa_verification_gate": {
@@ -437,6 +444,11 @@
       "timestamp": "2026-10-24T00:25:00",
       "author": "CEO & QA Auditor",
       "entry": "Затвердження та розгортання Черги № 6.1 (PWA Native Installation & Offline Service Worker Final Tuning): 1) Створено сервіс pwaService.ts з двофакторним детектуванням standalone-режиму (iOS Safari WebKit + Chromium), перехопленням beforeinstallprompt та аналізатором URL-шорткатів; 2) Створено PwaInstallBanner.tsx у ProfileScreen з живим бейджем середовища, 1-клік встановленням та 3-кроковим візуальним модальним гайдом для iOS Safari; 3) У vite.config.ts Web App Manifest розширено категоріями та 3 системними ярликами (Шеф-Хаб +, Сканер штрих-коду, Щоденник); 4) В App.tsx інтегровано слухач дій запуску для миттєвого відкриття відповідних модальних вікон; 5) Додано 7 юніт-тестів (92/92 vitest пройдено, збірка Vite 2.64с); 6) Проведено E2E аудит через agent-browser (390x844): банер на екрані Профілю + візуальний гайд iOS Safari (audit_stage6_1_pwa_install.png, audit_stage6_1_pwa_modal.png), 0 помилок консолі."
+    },
+    {
+      "timestamp": "2026-10-24T00:47:00",
+      "author": "CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Черги № 6.2 (Smart Reminders & Web Push Notifications): 1) Створено сервіс notificationService.ts з перевіркою дозволів Web Notifications API, інтеграцією Service Worker showNotification, розкладом прийомів їжі (сніданок 08:30, обід 13:30, вечеря 19:00), інтервалом води (1.5-3 год) та вечірнім чек-іном Flex Bank (20:30); 2) Створено NotificationSettingsModal.tsx у темному скляному стилі з перемикачами, вибором часу та кнопкою тестового сповіщення; 3) В App.tsx додано слухач nutriq-inapp-alert з плаваючим верхнім тостом для 100% доставки сповіщень у будь-якому середовищі; 4) Додано 11 юніт-тестів (103/103 vitest пройдено, збірка Vite 3.21с); 5) Проведено E2E аудит у реальному браузері agent-browser (390x844): відкрито модалку налаштувань, активовано сповіщення, протестовано In-App тост (audit_stage6_2_notifications_modal.png), 0 помилок консолі."
     }
   ]
 }

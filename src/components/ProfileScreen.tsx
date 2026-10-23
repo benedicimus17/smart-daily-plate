@@ -28,11 +28,13 @@ import {
   FileText,
   Lock,
   Trash2,
-  CheckCircle2
+  CheckCircle2,
+  Bell
 } from 'lucide-react';
 import { ProSubscriptionModal } from './ProSubscriptionModal';
 import { LegalModal } from './LegalModal';
 import { LanguageSelectorModal } from './LanguageSelectorModal';
+import { NotificationSettingsModal } from './NotificationSettingsModal';
 import { useTranslation } from '../store/languageStore';
 import { PwaInstallBanner } from './PwaInstallBanner';
 
@@ -57,6 +59,7 @@ export const ProfileScreen: React.FC = () => {
   const [legalModalOpen, setLegalModalOpen] = useState(false);
   const [legalTab, setLegalTab] = useState<'privacy' | 'terms'>('privacy');
   const [languageModalOpen, setLanguageModalOpen] = useState(false);
+  const [notificationModalOpen, setNotificationModalOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [exportToast, setExportToast] = useState(false);
   const [deletedToast, setDeletedToast] = useState(false);
@@ -380,6 +383,24 @@ export const ProfileScreen: React.FC = () => {
               <span className="font-bold text-amber-300 bg-amber-400/10 px-2.5 py-1 rounded-xl border border-amber-400/30 flex items-center gap-1.5 shadow-sm text-xs">
                 <span>{currentOption.flag}</span>
                 <span>{currentOption.nativeName}</span>
+              </span>
+              <ChevronRight className="w-4 h-4 text-zinc-500" />
+            </div>
+          </button>
+
+          <button
+            id="btn-open-notification-settings"
+            type="button"
+            onClick={() => setNotificationModalOpen(true)}
+            className="w-full p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/5 hover:border-amber-400/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <Bell className="w-4 h-4 text-amber-400" />
+              <span className="font-semibold text-zinc-200">Розумні нагадування (Web Push)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-lg border border-amber-400/20">
+                Вода • Їжа • Flex Bank
               </span>
               <ChevronRight className="w-4 h-4 text-zinc-500" />
             </div>
@@ -733,6 +754,16 @@ export const ProfileScreen: React.FC = () => {
       <LanguageSelectorModal
         isOpen={languageModalOpen}
         onClose={() => setLanguageModalOpen(false)}
+      />
+
+      {/* Модалка розумних нагадувань */}
+      <NotificationSettingsModal
+        isOpen={notificationModalOpen}
+        onClose={() => setNotificationModalOpen(false)}
+        currentWaterMl={dailyLog.waterMl}
+        targetWaterMl={Math.round((user.weightKg || 70) * 30)}
+        flexBankKcal={350}
+        remainingTodayKcal={Math.max(0, dailyLog.targets.calories - dailyLog.totals.calories)}
       />
     </div>
   );

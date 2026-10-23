@@ -14,7 +14,7 @@ import { ProfileScreen } from './components/ProfileScreen';
 import { AuthModal } from './components/AuthModal';
 import { SplashScreen } from './components/SplashScreen';
 import { MealType } from './types/nutrition';
-import { ShoppingBag, Scale } from 'lucide-react';
+import { ShoppingBag, Scale, Bell } from 'lucide-react';
 import { MyPlanWizard } from './components/MyPlanWizard';
 import { NextMealSpotlight } from './components/NextMealSpotlight';
 import { WaterTracker } from './components/WaterTracker';
@@ -46,6 +46,19 @@ export const App: React.FC = () => {
   const [diningModalOpen, setDiningModalOpen] = useState(false);
   const [targetMealType, setTargetMealType] = useState<MealType>('lunch');
   const [trendSubTab, setTrendSubTab] = useState<'trend' | 'grocery'>('trend');
+  const [inAppAlert, setInAppAlert] = useState<{ title: string; body: string } | null>(null);
+
+  // Слухач In-App сповіщень та системних алертів (Stage 6.2)
+  useEffect(() => {
+    const handleAlert = (e: any) => {
+      if (e.detail) {
+        setInAppAlert({ title: e.detail.title, body: e.detail.body });
+        setTimeout(() => setInAppAlert(null), 4000);
+      }
+    };
+    window.addEventListener('nutriq-inapp-alert', handleAlert);
+    return () => window.removeEventListener('nutriq-inapp-alert', handleAlert);
+  }, []);
 
   // Автоматичне відкриття візарда анкети для нового користувача
   useEffect(() => {
@@ -98,6 +111,23 @@ export const App: React.FC = () => {
             setShowSplash(false);
           }}
         />
+      )}
+
+      {/* Floating In-App Push Alert Toast */}
+      {inAppAlert && (
+        <div
+          id="nutriq-inapp-alert-toast"
+          onClick={() => setInAppAlert(null)}
+          className="fixed top-4 inset-x-4 max-w-sm mx-auto z-50 p-3.5 rounded-2xl bg-zinc-900/95 backdrop-blur-xl border border-amber-400/50 shadow-2xl flex items-start gap-3 animate-fadeIn cursor-pointer"
+        >
+          <div className="w-8 h-8 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0 mt-0.5">
+            <Bell className="w-4 h-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h5 className="text-xs font-bold text-white tracking-tight leading-snug">{inAppAlert.title}</h5>
+            <p className="text-[11px] text-zinc-300 mt-0.5 leading-tight">{inAppAlert.body}</p>
+          </div>
+        </div>
       )}
       
       <div className="min-h-screen bg-slate-moss text-zinc-100 flex justify-center selection:bg-amber-400/20 selection:text-amber-300 relative overflow-x-hidden">
