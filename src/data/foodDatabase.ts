@@ -37,6 +37,14 @@ export const COMMON_FOODS: FoodItem[] = [
   { id: 'dumplings_varenyky', name: 'Вареники з картоплею', per100g: { calories: 190, protein: 6.0, fat: 4.0, carbs: 32.0 } },
   { id: 'syrniki_dish', name: 'Сирники ніжні домашні', per100g: { calories: 195, protein: 14.5, fat: 6.5, carbs: 19.5 } },
 
+  // Європейські та національні культові страви (Іспанія, Франція, Італія)
+  { id: 'tortilla_espanola', name: 'Іспанська тортилья з картоплею (Tortilla de patatas)', per100g: { calories: 155, protein: 5.5, fat: 9.8, carbs: 11.2 } },
+  { id: 'jamon_iberico', name: 'Хамон Іберіко / Серрано (Jamón Ibérico)', per100g: { calories: 241, protein: 31.0, fat: 13.0, carbs: 0 } },
+  { id: 'gazpacho_andaluz', name: 'Гаспачо андалузький традиційний (Gazpacho)', per100g: { calories: 46, protein: 0.8, fat: 2.6, carbs: 4.8 } },
+  { id: 'baguette_tradition', name: 'Французький багет (Baguette tradition)', per100g: { calories: 289, protein: 8.5, fat: 1.2, carbs: 58.0 } },
+  { id: 'pasta_fagioli', name: 'Паста е фаджолі по-італійськи (Pasta e fagioli)', per100g: { calories: 125, protein: 6.2, fat: 2.8, carbs: 18.5 } },
+  { id: 'yogur_proteico_hacendado', name: 'Йогурт +Протеїн Hacendado (Mercadona)', per100g: { calories: 52, protein: 10.0, fat: 0.1, carbs: 3.5 } },
+
   // Готові страви та салати
   { id: 'salad_fresh', name: 'Свіжий овочевий салат з олією', per100g: { calories: 68, protein: 1.5, fat: 5.0, carbs: 4.5 } },
   { id: 'salad_greek', name: 'Грецький салат з фетою', per100g: { calories: 115, protein: 3.5, fat: 9.5, carbs: 4.0 } },

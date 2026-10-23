@@ -23,6 +23,7 @@ import { MealType } from '../types/nutrition';
 import { parseRecipeFromUrl, parseSmartDish } from '../services/recipeParser';
 import { ParsedRecipe } from '../types/recipe';
 import { useUserStore } from '../store/userStore';
+import { resolveCrossLingualEntity } from '../services/foodOntology';
 
 export interface ChefDishItem {
   id: string;
@@ -552,6 +553,130 @@ export const CHEF_CATALOG: ChefDishItem[] = [
     instructions: [
       'Ідеальний снек перед або після фізичної активності чи як перекус у дорозі.'
     ]
+  },
+  {
+    id: 'chef-es1',
+    name: 'Іспанська тортилья де пататас (Tortilla de patatas)',
+    tier: 'pro',
+    category: 'lunch',
+    categoryLabel: 'Обід',
+    weightGrams: 220,
+    macros: { calories: 341, protein: 12.1, fat: 21.5, carbs: 24.6 },
+    photo: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=500&q=80',
+    prepTime: '20 хв',
+    cookLossNote: '-10% втрата вологи',
+    shortDesc: 'Автентична іспанська тортилья на оливковій олії з картоплею та свіжими яйцями',
+    ingredients: [
+      { name: 'Куряче яйце добірне', grams: 110 },
+      { name: 'Картопля золотиста', grams: 95 },
+      { name: 'Оливкова олія Extra Virgin', grams: 15 }
+    ],
+    instructions: [
+      'Повільно підсмажити тонкі слайси картоплі в оливковій олії до м’якості.',
+      'Збити яйця з сіллю, з’єднати з теплою картоплею та дати постояти 5 хвилин.',
+      'Вилити на гарячу пательню, сформувати округлу форму та перевернути тарілкою.'
+    ]
+  },
+  {
+    id: 'chef-es2',
+    name: 'Гаспачо андалузький традиційний (Gazpacho andaluz)',
+    tier: 'free',
+    category: 'dinner',
+    categoryLabel: 'Вечеря',
+    weightGrams: 300,
+    macros: { calories: 138, protein: 2.4, fat: 7.8, carbs: 14.4 },
+    photo: 'https://images.unsplash.com/photo-1547496502-affa22d38842?auto=format&fit=crop&w=500&q=80',
+    prepTime: '5 хв',
+    shortDesc: 'Освіжаючий холодний томатний суп з огірками, солодким перцем та іспанською олією',
+    ingredients: [
+      { name: 'Стиглі томати', grams: 200 },
+      { name: 'Огірок свіжий', grams: 60 },
+      { name: 'Перець солодкий', grams: 30 },
+      { name: 'Оливкова олія Extra Virgin', grams: 10 }
+    ],
+    instructions: [
+      'Подрібнити стиглі помідори, огірок і перець у блендері до шовковистої текстури.',
+      'Влити холодну оливкову олію Extra Virgin та винний оцет, охолодити в холодильнику.'
+    ]
+  },
+  {
+    id: 'chef-s2',
+    name: 'Хамон Іберіко з соковитою динею (Jamón Ibérico con Melón)',
+    tier: 'pro',
+    category: 'snack',
+    categoryLabel: 'Перекус',
+    weightGrams: 160,
+    macros: { calories: 195, protein: 18.6, fat: 7.8, carbs: 12.0 },
+    photo: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80',
+    prepTime: '3 хв',
+    shortDesc: 'Добірний іспанський в’ялений хамон із високим вмістом білка та солодка диня',
+    ingredients: [
+      { name: 'Хамон Іберіко / Серрано', grams: 60 },
+      { name: 'Диня свіжа (Melón piel de sapo)', grams: 100 }
+    ],
+    instructions: [
+      'Нарізати диню тонкими скибочками.',
+      'Обернути кожну скибочку найтоншим слайсом хамону іберіко.'
+    ]
+  },
+  {
+    id: 'chef-fr1',
+    name: 'Французький круасан вершковий (Croissant au beurre)',
+    tier: 'free',
+    category: 'breakfast',
+    categoryLabel: 'Сніданок',
+    weightGrams: 70,
+    macros: { calories: 284, protein: 5.7, fat: 14.7, carbs: 32.1 },
+    photo: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=500&q=80',
+    prepTime: '2 хв',
+    shortDesc: 'Класичний паризький круасан на натуральному вершковому маслі',
+    ingredients: [
+      { name: 'Круасан вершковий французький', grams: 70 }
+    ],
+    instructions: [
+      'Злегка прогріти в духовці 2 хвилини до хрусткої скоринки та аромату масла.'
+    ]
+  },
+  {
+    id: 'chef-it1',
+    name: 'Паста е фаджолі по-римськи (Pasta e fagioli)',
+    tier: 'pro',
+    category: 'lunch',
+    categoryLabel: 'Обід',
+    weightGrams: 280,
+    macros: { calories: 350, protein: 17.4, fat: 7.8, carbs: 51.8 },
+    photo: 'https://images.unsplash.com/photo-1621996346565-e3d5d62810a9?auto=format&fit=crop&w=500&q=80',
+    prepTime: '20 хв',
+    shortDesc: 'Італійська паста з білою квасолею каннелліні, томатами, розмарином та олією',
+    ingredients: [
+      { name: 'Паста твердих сортів (Ditalini)', grams: 60 },
+      { name: 'Квасоля біла варена (Cannellini)', grams: 120 },
+      { name: 'Томатний соус пасата', grams: 90 },
+      { name: 'Оливкова олія Extra Virgin', grams: 10 }
+    ],
+    instructions: [
+      'Припустити розмарин з часником в оливковій олії, додати томати та квасолю.',
+      'Зварити пасту до стану al dente та з’єднати з густим квасолевим соусом.'
+    ]
+  },
+  {
+    id: 'chef-es3',
+    name: 'Протеїновий йогурт Hacendado з чорницею (+Proteínas Mercadona)',
+    tier: 'free',
+    category: 'snack',
+    categoryLabel: 'Перекус',
+    weightGrams: 180,
+    macros: { calories: 125, protein: 18.0, fat: 0.2, carbs: 12.5 },
+    photo: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80',
+    prepTime: '1 хв',
+    shortDesc: 'Популярний знежирений білковий десерт з Mercadona з додаванням ягід',
+    ingredients: [
+      { name: 'Йогурт +Протеїн Hacendado (Mercadona)', grams: 150 },
+      { name: 'Свіжа чорниця / лохина', grams: 30 }
+    ],
+    instructions: [
+      'Змішати протеїновий пудинг або йогурт Hacendado зі свіжими ягодами.'
+    ]
   }
 ];
 
@@ -644,7 +769,39 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
       }
     }
 
+    // Крос-мовний онтологічний резолвер (ES, EN, UK, FR, IT, DE, PL)
+    const crossEntity = resolveCrossLingualEntity(q);
+    let matchesOntology = false;
+    if (crossEntity) {
+      if (crossEntity.id === 'chicken') {
+        matchesOntology = item.name.toLowerCase().includes('курк') || item.name.toLowerCase().includes('chicken') || item.name.toLowerCase().includes('pollo') || item.shortDesc.toLowerCase().includes('курк');
+      } else if (crossEntity.id === 'tortilla') {
+        matchesOntology = item.name.toLowerCase().includes('тортиль') || item.name.toLowerCase().includes('tortilla');
+      } else if (crossEntity.id === 'gazpacho') {
+        matchesOntology = item.name.toLowerCase().includes('гаспач') || item.name.toLowerCase().includes('gazpacho');
+      } else if (crossEntity.id === 'croissant') {
+        matchesOntology = item.name.toLowerCase().includes('круас') || item.name.toLowerCase().includes('croissant');
+      } else if (crossEntity.id === 'pasta_fagioli') {
+        matchesOntology = item.name.toLowerCase().includes('фаджол') || item.name.toLowerCase().includes('fagioli') || item.name.toLowerCase().includes('квасол');
+      } else if (crossEntity.id === 'jamon') {
+        matchesOntology = item.name.toLowerCase().includes('хамон') || item.name.toLowerCase().includes('jamon') || item.name.toLowerCase().includes('jamón');
+      } else if (crossEntity.id === 'yogurt_protein') {
+        matchesOntology = item.name.toLowerCase().includes('йогурт') || item.name.toLowerCase().includes('hacendado') || item.name.toLowerCase().includes('протеїн');
+      } else if (crossEntity.id === 'beef_steak') {
+        matchesOntology = item.name.toLowerCase().includes('стейк') || item.name.toLowerCase().includes('яловичин') || item.name.toLowerCase().includes('beef') || item.name.toLowerCase().includes('steak') || item.name.toLowerCase().includes('ternera');
+      } else if (crossEntity.id === 'salmon') {
+        matchesOntology = item.name.toLowerCase().includes('лосос') || item.name.toLowerCase().includes('salmon') || item.name.toLowerCase().includes('salmón');
+      } else if (crossEntity.id === 'pizza') {
+        matchesOntology = item.name.toLowerCase().includes('піц') || item.name.toLowerCase().includes('pizza');
+      } else if (crossEntity.id === 'burger') {
+        matchesOntology = item.name.toLowerCase().includes('бургер') || item.name.toLowerCase().includes('мак') || item.name.toLowerCase().includes('burger');
+      } else if (crossEntity.id === 'eggs') {
+        matchesOntology = item.name.toLowerCase().includes('яйц') || item.name.toLowerCase().includes('омлет') || item.name.toLowerCase().includes('egg') || item.name.toLowerCase().includes('huevo');
+      }
+    }
+
     const matchesSearch =
+      matchesOntology ||
       item.name.toLowerCase().includes(q) ||
       item.shortDesc.toLowerCase().includes(q) ||
       item.categoryLabel.toLowerCase().includes(q) ||

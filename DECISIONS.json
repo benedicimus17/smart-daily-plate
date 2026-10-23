@@ -5,10 +5,10 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-23T06:25:00",
+    "last_updated": "2026-10-23T07:40:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 5.2: Stripe Billing Integration & Monetization Engine (€4.99/mo, €35.99/yr)",
-    "sprint_goal": "Інтеграція платіжного шлюзу Stripe Checkout, тарифи в Євро (€4.99/міс, €35.99/рік), 7-денний безкоштовний тріал та емісія криптографічних ліцензій."
+    "current_sprint": "Stage 5.3: Global Multilingual Food Ontology & Cross-Market Catalogs (ES, EN, UK, FR, IT, DE, PL)",
+    "sprint_goal": "Розгортання транскордонної онтології їжі, семантичний багатомовний пошук страв (kurka/pollo/chicken -> куряче філе; tortilla, croissant, pasta e fagioli), база Mercadona / Hacendado та архітектура світових супермаркетів Open Food Facts."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
@@ -19,10 +19,10 @@
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-23T06:25:00",
-    "verified_by": "QA Auditor & Monetization Lead",
-    "report_artifact": "qa_report_stage5_2_stripe_billing_and_monetization.md",
-    "tests_passed": "53/53",
+    "verified_at": "2026-10-23T07:40:00",
+    "verified_by": "QA Auditor & Chief Architect",
+    "report_artifact": "qa_report_stage5_3_multilingual_food_ontology_and_global_search.md",
+    "tests_passed": "59/59",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -178,6 +178,13 @@
       "automated_tests": "PASSED (src/services/__tests__/stripeBilling.test.ts - 53/53 passed)",
       "ui_verified": true,
       "notes": "Повна інтеграція європейського платіжного шлюзу Stripe Checkout: тарифи в Євро (€4.99/міс та €35.99/рік зі знижкою 40%), 7-денний тріал 0 €, підтримка Apple Pay, Google Pay, Visa/Mastercard, генерація крипто-сертифіката SHA-256 та оновлений преміальний UI ProSubscriptionModal."
+    },
+    {
+      "feature": "Global Multilingual Food Ontology & Cross-Market Search Engine",
+      "status": "FROZEN_APPROVED",
+      "automated_tests": "PASSED (src/services/__tests__/foodOntology.test.ts - 59/59 passed)",
+      "ui_verified": true,
+      "notes": "Розроблено foodOntology.ts із канонічними ID та багатомовними синонімами на 7 мовах (ES, EN, UK, FR, IT, DE, PL). Пошук страв 'tortilla', 'croissant', 'pasta e fagioli', а також трансліту 'kurka' чи 'pollo' автоматично витягує правильні страви в Шеф-Хабі та AI Парсері. Інтегровано іспанські хіти Mercadona (Hacendado). Затверджено глобальну інтеграцію бази Open Food Facts для світових ринків."
     },
     {
       "feature": "7-Day Personal Dogfooding Mode",
@@ -391,6 +398,11 @@
       "timestamp": "2026-10-23T06:25:00",
       "author": "CEO & Monetization Lead",
       "entry": "Затвердження та розгортання Рішення № 2 (Платіжний шлюз Stripe Checkout та монетизація): 1) Впроваджено європейські тарифи: річний план €35.99/рік (€2.99/міс, знижка -40%) із 7 днями безкоштовного тріалу (0 €) та помісячний план €4.99/міс; 2) Створено stripeBilling.ts з підтримкою Stripe Checkout, Apple Pay, Google Pay, Visa/MC та видачею підписаних SHA-256 цифрових ліцензій; 3) Оновлено ProSubscriptionModal.tsx: преміальний скляний дизайн, бейджі довіри Stripe 256-bit SSL, підтримка багатьох мов (ES, EN, UK) та режим симулятора; 4) Впроваджено 4 нових юніт-тести для білінгу (53/53 vitest пройдено), збірка Vite без помилок, знято 2 скріншоти (audit_stage5_2_01..02)."
+    },
+    {
+      "timestamp": "2026-10-23T07:40:00",
+      "author": "CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Рішення № 3 (Глобальна харчова онтологія, багатомовний семантичний пошук та транскордонні супермаркети): 1) Створено CANONICAL_FOOD_ONTOLOGY у foodOntology.ts: 18 базових сутностей з аліасами на 7 мовах (ES, EN, UK, FR, IT, DE, PL); 2) Інтегровано семантичний пошук у ChefHubModal.tsx та NLP-парсер recipeParser.ts: запити 'tortilla', 'croissant', 'pasta e fagioli', 'kurka' чи 'pollo' безпомилково повертають потрібні страви; 3) Базу поповнено культовими європейськими та іспанськими позиціями (Тортилья де пататас, Гаспачо андалузький, Хамон Іберіко з динею, Французький круасан, Паста е фаджолі, йогурт Hacendado +Proteínas); 4) Затверджено 3-рівневу архітектуру для світових супермаркетів: Canonical ID + локальні топ-списки (Mercadona/Carrefour/Lidl/Biedronka) + API Open Food Facts (3+ млн штрих-кодів у 150+ країнах); 5) Пройдено E2E аудит у реальному браузері (4 скріншоти audit_stage5_3_01..04), 59/59 тестів Vitest пройдено, 0 помилок консолі."
     }
   ]
 }

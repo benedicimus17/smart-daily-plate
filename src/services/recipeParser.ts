@@ -1,6 +1,7 @@
 import { ParsedIngredient, ParsedRecipe } from '../types/recipe';
 import { COMMON_FOODS } from '../data/foodDatabase';
 import { FoodItem, Macros } from '../types/nutrition';
+import { resolveCrossLingualEntity } from './foodOntology';
 
 /**
  * Одиниці вимірювання та їх приблизна вага в грамах
@@ -28,6 +29,27 @@ const UNIT_CONVERSIONS: Record<string, number> = {
  */
 export function findBestMatch(query: string): FoodItem {
   const q = query.toLowerCase().trim();
+
+  // 0. Крос-мовний семантичний онтологічний резолвер (ES, EN, UK, FR, IT, DE, PL)
+  const crossEntity = resolveCrossLingualEntity(q);
+  if (crossEntity) {
+    if (crossEntity.id === 'minced_meat') return COMMON_FOODS.find(f => f.id === 'ground_meat')!;
+    if (crossEntity.id === 'tortilla') return COMMON_FOODS.find(f => f.id === 'tortilla_espanola')!;
+    if (crossEntity.id === 'jamon') return COMMON_FOODS.find(f => f.id === 'jamon_iberico')!;
+    if (crossEntity.id === 'gazpacho') return COMMON_FOODS.find(f => f.id === 'gazpacho_andaluz')!;
+    if (crossEntity.id === 'baguette') return COMMON_FOODS.find(f => f.id === 'baguette_tradition')!;
+    if (crossEntity.id === 'pasta_fagioli') return COMMON_FOODS.find(f => f.id === 'pasta_fagioli')!;
+    if (crossEntity.id === 'chicken') return COMMON_FOODS.find(f => f.id === 'chicken_breast')!;
+    if (crossEntity.id === 'beef_steak') return COMMON_FOODS.find(f => f.id === 'beef_lean')!;
+    if (crossEntity.id === 'salmon') return COMMON_FOODS.find(f => f.id === 'salmon')!;
+    if (crossEntity.id === 'tuna') return COMMON_FOODS.find(f => f.id === 'tuna_canned')!;
+    if (crossEntity.id === 'croissant') return COMMON_FOODS.find(f => f.id === 'croissant')!;
+    if (crossEntity.id === 'pizza') return COMMON_FOODS.find(f => f.id === 'pizza')!;
+    if (crossEntity.id === 'burger') return COMMON_FOODS.find(f => f.id === 'big_mac')!;
+    if (crossEntity.id === 'eggs') return COMMON_FOODS.find(f => f.id === 'eggs')!;
+    if (crossEntity.id === 'syrniki') return COMMON_FOODS.find(f => f.id === 'syrniki_dish')!;
+    if (crossEntity.id === 'yogurt_protein') return COMMON_FOODS.find(f => f.id === 'yogur_proteico_hacendado')!;
+  }
 
   // 1. Фастфуд, випічка, снеки та особливі назви
   if (q.includes('біг мак') || q.includes('бігмак') || q.includes('бургер') || q.includes('гамбургер') || q.includes('чізбургер') || q.includes('макдональд')) {
