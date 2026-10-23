@@ -119,12 +119,18 @@ export const ProfileScreen: React.FC = () => {
                   {user.isRegistered ? user.name : 'Гість (локальний профіль)'}
                 </h3>
                 {user.isPro ? (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-sm">
+                  <button
+                    id="btn-open-pro-modal"
+                    type="button"
+                    onClick={() => setProModalOpen(true)}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-sm cursor-pointer hover:bg-amber-500/30 transition-colors"
+                  >
                     <Crown className="w-3 h-3 text-amber-400" />
                     <span>NUTRIQ PRO</span>
-                  </span>
+                  </button>
                 ) : (
                   <button
+                    id="btn-open-pro-modal"
                     type="button"
                     onClick={() => setProModalOpen(true)}
                     className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-zinc-300 hover:text-amber-300 border border-white/10 hover:border-amber-400/40 transition-colors cursor-pointer"

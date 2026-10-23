@@ -5,24 +5,24 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-23T06:14:00",
+    "last_updated": "2026-10-23T06:25:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 5.1: Cloud Backend (Supabase / Postgres) & Offline Anti-Tamper Security",
-    "sprint_goal": "Розгортання схеми Supabase PostgreSQL, RLS-політики нульової довіри, криптографічний офлайн-захист від зламу підписок PRO."
+    "current_sprint": "Stage 5.2: Stripe Billing Integration & Monetization Engine (€4.99/mo, €35.99/yr)",
+    "sprint_goal": "Інтеграція платіжного шлюзу Stripe Checkout, тарифи в Євро (€4.99/міс, €35.99/рік), 7-денний безкоштовний тріал та емісія криптографічних ліцензій."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
     "styling": "Tailwind CSS (Dark Glassmorphism Luxury theme)",
-    "state_management": "Zustand (NutritionStore with LocalStorage persistence) + Supabase Cloud Sync",
+    "state_management": "Zustand (NutritionStore with LocalStorage persistence) + Supabase Cloud Sync + Stripe Billing",
     "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone)",
     "production_deployment": "https://smart-daily-plate.vercel.app"
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-23T06:14:00",
-    "verified_by": "QA Auditor & Security Architect",
-    "report_artifact": "qa_report_stage5_1_supabase_and_anti_tamper.md",
-    "tests_passed": "49/49",
+    "verified_at": "2026-10-23T06:25:00",
+    "verified_by": "QA Auditor & Monetization Lead",
+    "report_artifact": "qa_report_stage5_2_stripe_billing_and_monetization.md",
+    "tests_passed": "53/53",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -171,6 +171,13 @@
       "automated_tests": "PASSED (src/services/__tests__/cryptoSecurity.test.ts - 49/49 passed)",
       "ui_verified": true,
       "notes": "Створено схему supabase/schema.sql (profiles, subscriptions, daily_logs, weight_logs, grocery_items). Впроваджено RLS-політики нульової довіри (клієнт не може змінювати статус підписки в базі). Реалізовано криптографічний SHA-256 офлайн-захист від злому PRO через DevTools або підміну дат."
+    },
+    {
+      "feature": "Stripe Billing & Monetization Engine (€4.99/mo, €35.99/yr)",
+      "status": "DONE",
+      "automated_tests": "PASSED (src/services/__tests__/stripeBilling.test.ts - 53/53 passed)",
+      "ui_verified": true,
+      "notes": "Повна інтеграція європейського платіжного шлюзу Stripe Checkout: тарифи в Євро (€4.99/міс та €35.99/рік зі знижкою 40%), 7-денний тріал 0 €, підтримка Apple Pay, Google Pay, Visa/Mastercard, генерація крипто-сертифіката SHA-256 та оновлений преміальний UI ProSubscriptionModal."
     },
     {
       "feature": "7-Day Personal Dogfooding Mode",
@@ -379,6 +386,11 @@
       "timestamp": "2026-10-23T06:14:00",
       "author": "CEO & Security Architect",
       "entry": "Затвердження та розгортання Рішення № 1 (Хмарна база даних Supabase та криптографічний офлайн-захист від зламу): 1) Створено DDL-схему supabase/schema.sql із таблицями profiles, subscriptions, daily_logs, weight_logs, grocery_items; 2) Впроваджено RLS (Row Level Security) нульової довіри: клієнт має доступ виключно до власних рядків, а таблиця підписок subscriptions заблокована для запису клієнтом (лише webhook платіжного сервісу); 3) Створено cryptoSecurity.ts для захисту підписок в офлайні: перевірка HMAC/SHA-256 цифрового підпису, неможливість зміни дати чи статусу isPro у пам'яті телефону; 4) Написано клієнт supabaseClient.ts та рушій cloudSync.ts з плавною роботою офлайн; 5) Написано 4 криптографічні юніт-тести (49/49 vitest пройдено), чиста збірка Vite."
+    },
+    {
+      "timestamp": "2026-10-23T06:25:00",
+      "author": "CEO & Monetization Lead",
+      "entry": "Затвердження та розгортання Рішення № 2 (Платіжний шлюз Stripe Checkout та монетизація): 1) Впроваджено європейські тарифи: річний план €35.99/рік (€2.99/міс, знижка -40%) із 7 днями безкоштовного тріалу (0 €) та помісячний план €4.99/міс; 2) Створено stripeBilling.ts з підтримкою Stripe Checkout, Apple Pay, Google Pay, Visa/MC та видачею підписаних SHA-256 цифрових ліцензій; 3) Оновлено ProSubscriptionModal.tsx: преміальний скляний дизайн, бейджі довіри Stripe 256-bit SSL, підтримка багатьох мов (ES, EN, UK) та режим симулятора; 4) Впроваджено 4 нових юніт-тести для білінгу (53/53 vitest пройдено), збірка Vite без помилок, знято 2 скріншоти (audit_stage5_2_01..02)."
     }
   ]
 }
