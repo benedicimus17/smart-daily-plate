@@ -199,6 +199,13 @@
       "automated_tests": "PASSED (src/services/__tests__/dogfoodingPersistence.test.ts - 77/77 passed)",
       "ui_verified": true,
       "notes": "Повноцінний 7-денний режим dogfooding (dogfoodingSeeder.ts): генерація реалістичного раціону на повний тиждень (Пн–Нд) з урахуванням Cook-Loss уварки, води (1800-2500 мл), статусів з'їденого/запланованого та динамічного калібрування Weekly Flex Bank (+350 ккал резерв). Впроваджено 1-тап кнопку в ProfileScreen. Перевірено стійкість у LocalStorage (nutriq-studio-storage-v6), E2E аудит у браузері 390x844 пройдено з 0 помилок."
+    },
+    {
+      "feature": "PWA Native Installation & App Shortcuts",
+      "status": "DONE",
+      "automated_tests": "PASSED (src/services/__tests__/pwaService.test.ts - 92/92 passed)",
+      "ui_verified": true,
+      "notes": "Повна детермінована реалізація нативного встановлення PWA (pwaService.ts): двофакторне детектування Standalone-режиму (iOS Safari WebKit + Chromium display-mode), адаптивний банер PwaInstallBanner.tsx у Профілі з живим статусом та 3-кроковим візуальним модальним гайдом для користувачів iPhone / iOS Safari, системні Web App Manifest ярлики (Шеф-Хаб +, Сканер штрих-коду, Щоденник) та автоматичний перехід при старті через URL параметри. Верифіковано в agent-browser (390x844), 0 помилок."
     }
   ],
   "qa_verification_gate": {
