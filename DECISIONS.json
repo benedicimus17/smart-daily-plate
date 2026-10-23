@@ -5,24 +5,24 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-22T21:05:00",
+    "last_updated": "2026-10-23T06:14:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 5.0: Multilingual Engine (i18n), Device Auto-Detection & Global Readiness",
-    "sprint_goal": "Впровадження рушія i18n, автодетекція системної мови смартфона (Іспанія es, Україна uk, EN/EU), інтерактивний вибір мови, 0% оверхеду на розмір додатку."
+    "current_sprint": "Stage 5.1: Cloud Backend (Supabase / Postgres) & Offline Anti-Tamper Security",
+    "sprint_goal": "Розгортання схеми Supabase PostgreSQL, RLS-політики нульової довіри, криптографічний офлайн-захист від зламу підписок PRO."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
     "styling": "Tailwind CSS (Dark Glassmorphism Luxury theme)",
-    "state_management": "Zustand (NutritionStore with LocalStorage persistence)",
+    "state_management": "Zustand (NutritionStore with LocalStorage persistence) + Supabase Cloud Sync",
     "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone)",
     "production_deployment": "https://smart-daily-plate.vercel.app"
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-22T21:05:00",
-    "verified_by": "QA Auditor & Lead Frontend Architect",
-    "report_artifact": "qa_report_stage5_0_i18n_multilingual_engine.md",
-    "tests_passed": "45/45",
+    "verified_at": "2026-10-23T06:14:00",
+    "verified_by": "QA Auditor & Security Architect",
+    "report_artifact": "qa_report_stage5_1_supabase_and_anti_tamper.md",
+    "tests_passed": "49/49",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -164,6 +164,13 @@
       "automated_tests": "PASSED (src/store/__tests__/languageStore.test.ts - 45/45 passed)",
       "ui_verified": true,
       "notes": "Повна багатомовність додатку: автоматичне визначення мови смартфона (Іспанія es, Україна uk, EN/EU), персистентний вибір у налаштуваннях Профілю, модалка з 6 прапорами, нульове споживання пам'яті (~3.5 КБ на мову)."
+    },
+    {
+      "feature": "Supabase PostgreSQL Schema & Offline Anti-Tamper Security",
+      "status": "DONE",
+      "automated_tests": "PASSED (src/services/__tests__/cryptoSecurity.test.ts - 49/49 passed)",
+      "ui_verified": true,
+      "notes": "Створено схему supabase/schema.sql (profiles, subscriptions, daily_logs, weight_logs, grocery_items). Впроваджено RLS-політики нульової довіри (клієнт не може змінювати статус підписки в базі). Реалізовано криптографічний SHA-256 офлайн-захист від злому PRO через DevTools або підміну дат."
     },
     {
       "feature": "7-Day Personal Dogfooding Mode",
@@ -367,6 +374,11 @@
       "timestamp": "2026-10-22T21:05:00",
       "author": "CEO & Lead Frontend Architect",
       "entry": "Впровадження мультиязичного рушія (i18n), автодетекції мови пристрою та підтримки європейських ринків (Stage 5.0): 1) Створено рушій translations.ts та languageStore.ts з автодетекцією мови смартфона (navigator.languages / navigator.language), пріоритетом іспанської (es) для користувачів в Іспанії, української (uk), англійської (en) та підтримкою de, fr, it; 2) Вибір користувача надійно персиститься в LocalStorage (nutriq-locale-storage-v1); 3) Створено преміальну скляну модалку LanguageSelectorModal.tsx із 6 прапорами та нативними назвами мов; 4) Локалізовано нижній док навігації (Inicio/Diario/Progreso/Perfil), вкладку ваги (Mi peso sin agua), список покупок (Lista de compras) та Профіль; 5) Проведено аналіз ваги: кожен словник займає лише ~3.5 КБ (gzip), 0% навантаження на продуктивність; 6) 45/45 тестів vitest пройдено, збірка Vite без помилок, знято 3 E2E скріншоти (audit_stage5_01..03)."
+    },
+    {
+      "timestamp": "2026-10-23T06:14:00",
+      "author": "CEO & Security Architect",
+      "entry": "Затвердження та розгортання Рішення № 1 (Хмарна база даних Supabase та криптографічний офлайн-захист від зламу): 1) Створено DDL-схему supabase/schema.sql із таблицями profiles, subscriptions, daily_logs, weight_logs, grocery_items; 2) Впроваджено RLS (Row Level Security) нульової довіри: клієнт має доступ виключно до власних рядків, а таблиця підписок subscriptions заблокована для запису клієнтом (лише webhook платіжного сервісу); 3) Створено cryptoSecurity.ts для захисту підписок в офлайні: перевірка HMAC/SHA-256 цифрового підпису, неможливість зміни дати чи статусу isPro у пам'яті телефону; 4) Написано клієнт supabaseClient.ts та рушій cloudSync.ts з плавною роботою офлайн; 5) Написано 4 криптографічні юніт-тести (49/49 vitest пройдено), чиста збірка Vite."
     }
   ]
 }
