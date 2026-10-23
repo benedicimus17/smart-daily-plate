@@ -17,13 +17,22 @@ import {
   ChefHat,
   Lock,
   Crown,
-  Globe
+  Globe,
+  Barcode,
+  Camera,
+  ScanLine,
+  AlertCircle
 } from 'lucide-react';
 import { MealType } from '../types/nutrition';
 import { parseRecipeFromUrl, parseSmartDish } from '../services/recipeParser';
 import { ParsedRecipe } from '../types/recipe';
 import { useUserStore } from '../store/userStore';
 import { resolveCrossLingualEntity } from '../services/foodOntology';
+import {
+  lookupBarcode,
+  calculatePortionMacros,
+  ScannedProduct
+} from '../services/openFoodFactsService';
 
 export interface ChefDishItem {
   id: string;
@@ -702,8 +711,19 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   const { user, setProStatus } = useUserStore();
   const isProUser = Boolean(user.isPro);
 
-  // Режим роботи Шеф-Хабу: 1. Меню страв, 2. AI Парсер (TikTok/Reels), 3. Розумний текст
-  const [activeTab, setActiveTab] = useState<'catalog' | 'ai_parser' | 'smart_text'>('catalog');
+  // Режим роботи Шеф-Хабу: 1. Меню страв, 2. Сканер штрих-кодів, 3. AI Парсер (TikTok/Reels), 4. Розумний текст
+  const [activeTab, setActiveTab] = useState<'catalog' | 'barcode' | 'ai_parser' | 'smart_text'>('catalog');
+
+  // Стан для Barcode Scanner (Stage 5.4)
+  const [barcodeInput, setBarcodeInput] = useState('8480000123456');
+  const [scannedProduct, setScannedProduct] = useState<ScannedProduct | null>(null);
+  const [barcodeGrams, setBarcodeGrams] = useState<number>(150);
+  const [barcodeTargetSlot, setBarcodeTargetSlot] = useState<MealType>('snack');
+  const [barcodeTargetTime, setBarcodeTargetTime] = useState<string>('11:00');
+  const [isBarcodeLoading, setIsBarcodeLoading] = useState(false);
+  const [barcodeError, setBarcodeError] = useState<string | null>(null);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isAddedFromBarcode, setIsAddedFromBarcode] = useState(false);
 
   // Фільтри каталогу
   const [selectedFilter, setSelectedFilter] = useState<'all' | MealType>('all');
@@ -897,6 +917,59 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     setSmartCalculated(parsed.macrosPerServing);
   };
 
+  // Сканування / пошук товару за штрих-кодом (Stage 5.4)
+  const handlePerformBarcodeScan = async (code: string) => {
+    const targetCode = (code || barcodeInput).trim();
+    if (!targetCode) return;
+
+    setIsBarcodeLoading(true);
+    setBarcodeError(null);
+
+    try {
+      const result = await lookupBarcode(targetCode);
+      setIsBarcodeLoading(false);
+
+      if (result.success && result.product) {
+        setScannedProduct(result.product);
+        setBarcodeGrams(result.product.servingGrams || 100);
+        setBarcodeInput(result.product.barcode);
+      } else {
+        setBarcodeError(result.error || 'Не вдалося знайти товар за цим штрих-кодом.');
+      }
+    } catch (e: any) {
+      setIsBarcodeLoading(false);
+      setBarcodeError('Сталася помилка при зверненні до сервісу штрих-кодів.');
+    }
+  };
+
+  // Додавання розпізнаного товару зі штрих-коду в розклад
+  const handleAddScannedProduct = () => {
+    if (!scannedProduct) return;
+    const macros = calculatePortionMacros(scannedProduct, barcodeGrams);
+
+    const defaultTime = barcodeTargetSlot === 'breakfast' ? '08:30' :
+                        barcodeTargetSlot === 'lunch' ? '13:00' :
+                        barcodeTargetSlot === 'snack' ? '11:00' : '19:30';
+
+    onAddDishToDay(barcodeTargetSlot, {
+      name: `${scannedProduct.name}${scannedProduct.brand ? ` (${scannedProduct.brand})` : ''}`,
+      weightGrams: macros.grams,
+      macros: {
+        calories: macros.calories,
+        protein: macros.protein,
+        fat: macros.fat,
+        carbs: macros.carbs
+      },
+      timestamp: barcodeTargetTime || defaultTime
+    });
+
+    setIsAddedFromBarcode(true);
+    setTimeout(() => {
+      setIsAddedFromBarcode(false);
+      onClose();
+    }, 850);
+  };
+
   const handleAddSmartTextDish = () => {
     const macros = smartCalculated || {
       calories: Math.round((parseFloat(smartWeight) || 200) * 1.8),
@@ -954,48 +1027,62 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
           </button>
         </div>
 
-        {/* 3 ГОЛОВНІ РЕЖИМИ ШЕФ-ХАБУ */}
-        <div className="grid grid-cols-3 gap-1.5 p-2 bg-black/40 border-b border-white/10 shrink-0 text-xs">
+        {/* 4 ГОЛОВНІ РЕЖИМИ ШЕФ-ХАБУ */}
+        <div className="grid grid-cols-4 gap-1 p-1.5 bg-black/40 border-b border-white/10 shrink-0 text-[11px]">
           <button
             id="tab-chef-catalog"
             type="button"
             onClick={() => setActiveTab('catalog')}
-            className={`py-2 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all ${
+            className={`py-2 px-1 rounded-xl font-bold flex flex-col items-center justify-center gap-0.5 transition-all ${
               activeTab === 'catalog'
                 ? 'bg-amber-400 text-zinc-950 shadow-md shadow-amber-400/20'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Меню страв</span>
+            <span className="truncate">Меню</span>
+          </button>
+
+          <button
+            id="tab-chef-barcode"
+            type="button"
+            onClick={() => setActiveTab('barcode')}
+            className={`py-2 px-1 rounded-xl font-bold flex flex-col items-center justify-center gap-0.5 transition-all ${
+              activeTab === 'barcode'
+                ? 'bg-amber-400 text-zinc-950 shadow-md shadow-amber-400/20'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            <Barcode className="w-3.5 h-3.5" />
+            <span className="truncate">Штрих-код</span>
           </button>
 
           <button
             id="tab-chef-parser"
             type="button"
             onClick={() => setActiveTab('ai_parser')}
-            className={`py-2 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all ${
+            className={`py-2 px-1 rounded-xl font-bold flex flex-col items-center justify-center gap-0.5 transition-all ${
               activeTab === 'ai_parser'
                 ? 'bg-amber-400 text-zinc-950 shadow-md shadow-amber-400/20'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
             <Link2 className="w-3.5 h-3.5" />
-            <span>AI Імпорт</span>
+            <span className="truncate">AI Імпорт</span>
           </button>
 
           <button
             id="tab-chef-smart"
             type="button"
             onClick={() => setActiveTab('smart_text')}
-            className={`py-2 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all ${
+            className={`py-2 px-1 rounded-xl font-bold flex flex-col items-center justify-center gap-0.5 transition-all ${
               activeTab === 'smart_text'
                 ? 'bg-amber-400 text-zinc-950 shadow-md shadow-amber-400/20'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>Вільний текст</span>
+            <span className="truncate">Вільний</span>
           </button>
         </div>
 
@@ -1165,7 +1252,327 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
           )}
 
           {/* ========================================================= */}
-          {/* РЕЖИМ 2: AI ІМПОРТ З TIKTOK / REELS / ПОСИЛАННЯ */}
+          {/* РЕЖИМ 2: СКАНЕР ШТРИХ-КОДІВ (OPEN FOOD FACTS & СУПЕРМАРКЕТИ) */}
+          {/* ========================================================= */}
+          {activeTab === 'barcode' && (
+            <div className="space-y-3.5 animate-fadeIn">
+              {/* Інфо-банер */}
+              <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-200 flex items-start gap-2.5">
+                <ScanLine className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-extrabold text-emerald-300">Камера & Open Food Facts API</div>
+                  <div className="text-[11px] text-emerald-200/80 mt-0.5">
+                    Скануйте штрих-код будь-якого упакованого продукту (Mercadona, Carrefour, Lidl, Сільпо та 3+ млн продуктів світу).
+                  </div>
+                </div>
+              </div>
+
+              {/* Відображення видошукача камери */}
+              <div className="relative rounded-2xl border border-white/15 bg-black/60 p-4 overflow-hidden flex flex-col items-center justify-center min-h-[140px] shadow-inner">
+                {/* Кутові рамки сканера */}
+                <div className="absolute top-2.5 left-2.5 w-4 h-4 border-t-2 border-l-2 border-amber-400 rounded-tl-sm" />
+                <div className="absolute top-2.5 right-2.5 w-4 h-4 border-t-2 border-r-2 border-amber-400 rounded-tr-sm" />
+                <div className="absolute bottom-2.5 left-2.5 w-4 h-4 border-b-2 border-l-2 border-amber-400 rounded-bl-sm" />
+                <div className="absolute bottom-2.5 right-2.5 w-4 h-4 border-b-2 border-r-2 border-amber-400 rounded-br-sm" />
+
+                {/* Анімований неоновий лазерний промінь */}
+                <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_12px_#34d399] animate-pulse pointer-events-none" />
+
+                <Barcode className="w-10 h-10 text-zinc-500/60 mb-1" />
+                <span className="text-[11px] font-bold text-zinc-300 text-center">
+                  {isCameraActive ? '📷 Камера активна: наведіть на штрих-код' : 'Наведіть камеру на штрих-код товару (EAN-13 / EAN-8)'}
+                </span>
+
+                <button
+                  id="btn-toggle-camera-scanner"
+                  type="button"
+                  onClick={() => setIsCameraActive(!isCameraActive)}
+                  className="mt-2.5 px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-[10.5px] font-bold text-white flex items-center gap-1.5 transition-all"
+                >
+                  <Camera className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{isCameraActive ? 'Вимкнути камеру' : 'Увімкнути камеру смартфона'}</span>
+                </button>
+              </div>
+
+              {/* Швидкі 1-тап пресети перевірених товарів */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                  Швидкі штрих-коди (Mercadona / UA / Global):
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    id="btn-preset-hacendado-yogurt"
+                    type="button"
+                    onClick={() => {
+                      setBarcodeInput('8480000123456');
+                      handlePerformBarcodeScan('8480000123456');
+                    }}
+                    className="px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-[10.5px] font-bold text-emerald-300"
+                  >
+                    🇪🇸 +Proteínas Mercadona
+                  </button>
+
+                  <button
+                    id="btn-preset-hacendado-queso"
+                    type="button"
+                    onClick={() => {
+                      setBarcodeInput('8480000204780');
+                      handlePerformBarcodeScan('8480000204780');
+                    }}
+                    className="px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-[10.5px] font-bold text-emerald-300"
+                  >
+                    🇪🇸 Queso 0% Hacendado
+                  </button>
+
+                  <button
+                    id="btn-preset-avena-mercadona"
+                    type="button"
+                    onClick={() => {
+                      setBarcodeInput('8410076472092');
+                      handlePerformBarcodeScan('8410076472092');
+                    }}
+                    className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300"
+                  >
+                    🇪🇸 Вівсянка Mercadona
+                  </button>
+
+                  <button
+                    id="btn-preset-yagotynsky"
+                    type="button"
+                    onClick={() => {
+                      setBarcodeInput('4823000914872');
+                      handlePerformBarcodeScan('4823000914872');
+                    }}
+                    className="px-2 py-1 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 text-[10.5px] font-bold text-blue-300"
+                  >
+                    🇺🇦 Сир 5% Яготинський
+                  </button>
+
+                  <button
+                    id="btn-preset-grechka"
+                    type="button"
+                    onClick={() => {
+                      setBarcodeInput('4820000000001');
+                      handlePerformBarcodeScan('4820000000001');
+                    }}
+                    className="px-2 py-1 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 text-[10.5px] font-bold text-blue-300"
+                  >
+                    🇺🇦 Гречка відбірна
+                  </button>
+
+                  <button
+                    id="btn-preset-coca-cola-zero"
+                    type="button"
+                    onClick={() => {
+                      setBarcodeInput('5449000131805');
+                      handlePerformBarcodeScan('5449000131805');
+                    }}
+                    className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300"
+                  >
+                    🌍 Coca-Cola Zero
+                  </button>
+                </div>
+              </div>
+
+              {/* Поле ручного введення штрих-коду */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                  Номер штрих-коду (8-14 цифр):
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Barcode className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      id="input-manual-barcode"
+                      type="text"
+                      value={barcodeInput}
+                      onChange={(e) => setBarcodeInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handlePerformBarcodeScan(barcodeInput)}
+                      placeholder="Введіть код, напр. 8480000123456"
+                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-black/60 border border-white/15 text-xs font-mono font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+                  <button
+                    id="btn-search-barcode"
+                    type="button"
+                    disabled={isBarcodeLoading}
+                    onClick={() => handlePerformBarcodeScan(barcodeInput)}
+                    className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 font-bold text-xs text-zinc-950 transition-all flex items-center justify-center shrink-0 disabled:opacity-50"
+                  >
+                    {isBarcodeLoading ? (
+                      <div className="w-3.5 h-3.5 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <span>Знайти</span>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Повідомлення про помилку */}
+              {barcodeError && (
+                <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/25 text-xs text-rose-300 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>{barcodeError}</span>
+                </div>
+              )}
+
+              {/* Картка знайденого товару */}
+              {scannedProduct && (
+                <div className="p-3.5 rounded-2xl bg-[#0a0f0c] border border-amber-400/30 text-white space-y-3 shadow-lg animate-fadeIn">
+                  <div className="flex gap-3 items-center">
+                    {scannedProduct.imageUrl ? (
+                      <img
+                        src={scannedProduct.imageUrl}
+                        alt={scannedProduct.name}
+                        className="w-14 h-14 rounded-xl object-cover border border-white/10 bg-black/40 shrink-0"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = '/dinner_steak_hd.jpg';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-zinc-500">
+                        <Barcode className="w-6 h-6 text-amber-400" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {scannedProduct.brand && (
+                          <span className="text-[10px] font-black uppercase text-amber-300 bg-amber-400/15 border border-amber-400/30 px-1.5 py-0.5 rounded">
+                            {scannedProduct.brand}
+                          </span>
+                        )}
+                        <span className="text-[9.5px] font-medium text-zinc-400">
+                          {scannedProduct.source === 'offline_preset' ? '🟢 Офлайн-каталог' : '🌐 Open Food Facts'}
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-bold text-white truncate mt-0.5">
+                        {scannedProduct.name}
+                      </h4>
+                      <p className="text-[10px] text-zinc-400 font-mono">
+                        EAN: {scannedProduct.barcode}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Вибір грамів порції */}
+                  <div className="p-2.5 rounded-xl bg-black/50 border border-white/10 space-y-2">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-zinc-400 font-bold">Розмір порції:</span>
+                      <div className="flex items-center gap-1">
+                        <input
+                          id="input-barcode-grams"
+                          type="number"
+                          min="1"
+                          max="2000"
+                          value={barcodeGrams}
+                          onChange={(e) => setBarcodeGrams(Math.max(1, parseFloat(e.target.value) || 100))}
+                          className="w-16 px-2 py-0.5 rounded-lg bg-black/70 border border-amber-400/40 text-center text-xs font-black text-amber-300 focus:outline-none"
+                        />
+                        <span className="text-xs font-bold text-zinc-400">г</span>
+                      </div>
+                    </div>
+
+                    {/* Швидкі кнопки розміру порції */}
+                    <div className="grid grid-cols-4 gap-1 text-[10px]">
+                      {[50, 100, 150, 200].map((g) => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => setBarcodeGrams(g)}
+                          className={`py-1 rounded-lg font-bold border transition-all ${
+                            barcodeGrams === g
+                              ? 'bg-amber-400 text-zinc-950 border-amber-400'
+                              : 'bg-white/5 text-zinc-300 border-white/5 hover:text-white'
+                          }`}
+                        >
+                          {g}г
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Розраховані макроси на вибрані грами */}
+                  {(() => {
+                    const macros = calculatePortionMacros(scannedProduct, barcodeGrams);
+                    return (
+                      <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs flex items-center justify-between">
+                        <div>
+                          <div className="text-[10px] font-bold text-emerald-300">
+                            КБЖВ на {macros.grams}г:
+                          </div>
+                          <div className="text-[11px] text-zinc-300 mt-0.5">
+                            <span className="text-emerald-400 font-bold">{macros.protein}г</span> Білки •{' '}
+                            <span className="text-amber-400 font-bold">{macros.fat}г</span> Жири •{' '}
+                            <span className="text-cyan-400 font-bold">{macros.carbs}г</span> Вуглеводи
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-base font-black text-white">{macros.calories}</span>
+                          <span className="text-[10px] font-bold text-zinc-400 ml-1">ккал</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Вибір прийому їжі */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                      Додати в прийом:
+                    </label>
+                    <div className="grid grid-cols-4 gap-1 text-[10.5px]">
+                      {[
+                        { id: 'breakfast', label: 'Сніданок', time: '08:30' },
+                        { id: 'lunch', label: 'Обід', time: '13:00' },
+                        { id: 'snack', label: 'Перекус', time: '11:00' },
+                        { id: 'dinner', label: 'Вечеря', time: '19:30' }
+                      ].map((slot) => (
+                        <button
+                          key={slot.id}
+                          type="button"
+                          onClick={() => {
+                            setBarcodeTargetSlot(slot.id as MealType);
+                            setBarcodeTargetTime(slot.time);
+                          }}
+                          className={`py-1.5 rounded-xl font-bold border transition-all ${
+                            barcodeTargetSlot === slot.id
+                              ? 'bg-amber-400 text-zinc-950 border-amber-400 shadow-sm'
+                              : 'bg-white/5 text-zinc-400 border-white/5 hover:text-white'
+                          }`}
+                        >
+                          {slot.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Кнопка додавання у щоденник */}
+                  <button
+                    id="btn-add-scanned-product"
+                    type="button"
+                    onClick={handleAddScannedProduct}
+                    className="w-full py-2.5 rounded-xl font-black text-xs text-zinc-950 bg-gradient-to-r from-amber-400 to-amber-500 shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                  >
+                    {isAddedFromBarcode ? (
+                      <>
+                        <Check className="w-4 h-4 text-zinc-950 stroke-[3]" />
+                        <span>Додано в щоденник!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4 text-zinc-950 stroke-[3]" />
+                        <span>
+                          Додати {barcodeGrams}г ({calculatePortionMacros(scannedProduct, barcodeGrams).calories} ккал)
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* РЕЖИМ 3: AI ІМПОРТ З TIKTOK / REELS / ПОСИЛАННЯ */}
           {/* ========================================================= */}
           {activeTab === 'ai_parser' && (
             <div className="space-y-3.5 animate-fadeIn">

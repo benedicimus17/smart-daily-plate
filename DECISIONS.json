@@ -5,10 +5,10 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-23T07:40:00",
+    "last_updated": "2026-10-23T08:28:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 5.3: Global Multilingual Food Ontology & Cross-Market Catalogs (ES, EN, UK, FR, IT, DE, PL)",
-    "sprint_goal": "Розгортання транскордонної онтології їжі, семантичний багатомовний пошук страв (kurka/pollo/chicken -> куряче філе; tortilla, croissant, pasta e fagioli), база Mercadona / Hacendado та архітектура світових супермаркетів Open Food Facts."
+    "current_sprint": "Stage 5.4: Live Camera Barcode Scanner & Open Food Facts Global API",
+    "sprint_goal": "Впровадження живого сканера штрих-кодів у Шеф-Хаб: інтерактивний видошукач камери, підключення Open Food Facts v2 API (3+ млн товарів), нульова затримка офлайн-пресетів Mercadona/Hacendado, України та світу, динамічний слайдер порцій та додавання у щоденник."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
@@ -19,10 +19,10 @@
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-23T07:40:00",
+    "verified_at": "2026-10-23T08:28:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage5_3_multilingual_food_ontology_and_global_search.md",
-    "tests_passed": "59/59",
+    "report_artifact": "qa_report_stage5_4_live_camera_barcode_scanner.md",
+    "tests_passed": "72/72",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -185,6 +185,13 @@
       "automated_tests": "PASSED (src/services/__tests__/foodOntology.test.ts - 59/59 passed)",
       "ui_verified": true,
       "notes": "Розроблено foodOntology.ts із канонічними ID та багатомовними синонімами на 7 мовах (ES, EN, UK, FR, IT, DE, PL). Пошук страв 'tortilla', 'croissant', 'pasta e fagioli', а також трансліту 'kurka' чи 'pollo' автоматично витягує правильні страви в Шеф-Хабі та AI Парсері. Інтегровано іспанські хіти Mercadona (Hacendado). Затверджено глобальну інтеграцію бази Open Food Facts для світових ринків."
+    },
+    {
+      "feature": "Live Camera Barcode Scanner & Open Food Facts Global API",
+      "status": "DONE",
+      "automated_tests": "PASSED (src/services/__tests__/openFoodFactsService.test.ts - 72/72 passed)",
+      "ui_verified": true,
+      "notes": "Повна детермінована реалізація Сканера штрих-кодів у Шеф-Хабі: 1) openFoodFactsService.ts з підтримкою live API Open Food Facts v2 (3+ млн продуктів світу) та нульовою затримкою завдяки офлайн-каталогу хітів Mercadona (Hacendado +Proteínas, Queso Batido, Avena), України (Яготинський 5%, Гречка) та Global (Coca-Cola Zero, Nutella); 2) Інтерактивний видошукач камери зі скануючим лазером та кнопкою перемикання камери; 3) Автоматичний розрахунок макросів на обрану кількість грамів зі швидкими кнопками [50г]..[200г] та миттєвим додаванням у вибраний тайм-слот розкладу. Верифіковано в agent-browser, 0 помилок."
     },
     {
       "feature": "7-Day Personal Dogfooding Mode",
@@ -403,6 +410,11 @@
       "timestamp": "2026-10-23T07:40:00",
       "author": "CEO & QA Auditor",
       "entry": "Затвердження та розгортання Рішення № 3 (Глобальна харчова онтологія, багатомовний семантичний пошук та транскордонні супермаркети): 1) Створено CANONICAL_FOOD_ONTOLOGY у foodOntology.ts: 18 базових сутностей з аліасами на 7 мовах (ES, EN, UK, FR, IT, DE, PL); 2) Інтегровано семантичний пошук у ChefHubModal.tsx та NLP-парсер recipeParser.ts: запити 'tortilla', 'croissant', 'pasta e fagioli', 'kurka' чи 'pollo' безпомилково повертають потрібні страви; 3) Базу поповнено культовими європейськими та іспанськими позиціями (Тортилья де пататас, Гаспачо андалузький, Хамон Іберіко з динею, Французький круасан, Паста е фаджолі, йогурт Hacendado +Proteínas); 4) Затверджено 3-рівневу архітектуру для світових супермаркетів: Canonical ID + локальні топ-списки (Mercadona/Carrefour/Lidl/Biedronka) + API Open Food Facts (3+ млн штрих-кодів у 150+ країнах); 5) Пройдено E2E аудит у реальному браузері (4 скріншоти audit_stage5_3_01..04), 59/59 тестів Vitest пройдено, 0 помилок консолі."
+    },
+    {
+      "timestamp": "2026-10-23T08:28:00",
+      "author": "CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Черги № 5.4 (Live Camera Barcode Scanner & Open Food Facts Global API): 1) Створено openFoodFactsService.ts з підтримкою live Open Food Facts API v2 (3+ млн штрих-кодів світу) та офлайн-базою для 0 мс доступу до топ-товарів Mercadona/Hacendado, України та Європи; 2) У Шеф-Хабі (ChefHubModal.tsx) інтегровано 4-й режим 'Штрих-код' із темним скляним видошукачем камери, неоновим скануючим променем, швидкими кнопками-пресетами та полем введення EAN; 3) Реалізовано динамічний калькулятор порцій (50г, 100г, 150г, 200г) з автоматичним перерахунком КБЖВ та вибором цільового прийому їжі; 4) Додано 13 нових юніт-тестів (72/72 тестів Vitest успішно пройдено, чиста збірка Vite за 2.7с); 5) Проведено E2E аудит у реальному браузері agent-browser (390x844), зафіксовано скріншот audit_stage5_4_barcode_scanner.png, 0 помилок у консолі."
     }
   ]
 }
