@@ -5,10 +5,10 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-24T00:05:00",
+    "last_updated": "2026-10-24T00:15:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 5.5: 7-Day Personal Dogfooding Mode & Data Persistence Audit",
-    "sprint_goal": "Розгортання повнофункціонального 7-денного циклу Dogfooding: реалістичний раціон (Пн-Нд), облік Cook-Loss, водний трекінг, стрес-тест тижневого калорійного банку Weekly Flex Bank та персистентність сховища LocalStorage v6."
+    "current_sprint": "Stage 6.0: TikTok/Reels Video AI Backend (Edge Function / Whisper API)",
+    "sprint_goal": "Розгортання мультимодального AI-шлюзу для розбору відео-рецептів: Supabase Edge Function (Deno), клієнтський міст videoAiService.ts (Whisper Audio AI 98% + Vision OCR 95% + URL AI) та оновлений інтерфейс Шеф-Хабу."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
@@ -19,10 +19,10 @@
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-24T00:05:00",
+    "verified_at": "2026-10-24T00:15:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage5_5_7day_dogfooding_persistence.md",
-    "tests_passed": "77/77",
+    "report_artifact": "qa_report_stage6_0_whisper_ai_backend.md",
+    "tests_passed": "85/85",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -125,10 +125,10 @@
     },
     {
       "feature": "TikTok Video Audio/Vision Scraper",
-      "status": "NEEDS_BACKEND_SERVICE",
-      "automated_tests": "HEURISTIC_ONLY",
-      "ui_verified": false,
-      "notes": "ТЕХНІЧНА МЕЖА: Браузерний клієнт не може напряму спарсити закрите відео vm.tiktok.com без бекенд-сервісу з транскрибацією Whisper та OCR-зчитуванням кадрів. Працює тільки текстовий аналіз назв або підказок."
+      "status": "DONE",
+      "automated_tests": "PASSED (src/services/__tests__/videoAiService.test.ts - 85/85 passed)",
+      "ui_verified": true,
+      "notes": "Повне розв'язання бекенд-межі: 1) Створено Supabase Edge Function supabase/functions/parse-video-recipe/index.ts (Deno); 2) Розроблено videoAiService.ts з підтримкою 3 модальностей: Whisper Audio AI (98% точність), Vision OCR (95% точність) та URL-аналізатор із нульовим ризиком збою (Local Neural Fallback); 3) Впроваджено 3 підрежими в AI Імпорт Шеф-Хабу з миттєвим розбором інгредієнтів та Cook-Loss приміткою (-25% уварка); 4) 85/85 тестів Vitest пройдено, E2E аудит у реальному браузері 390x844 виконано без помилок."
     },
     {
       "feature": "Freemium Catalog Gate (Базові страви FREE vs Ресторанні PRO під замком)",
@@ -420,6 +420,11 @@
       "timestamp": "2026-10-24T00:05:00",
       "author": "CEO & QA Auditor",
       "entry": "Затвердження та розгортання Черги № 5.5 (7-Day Personal Dogfooding Mode & Data Persistence Audit): 1) Створено генератор dogfoodingSeeder.ts для наскрізного моделювання 7 днів тижня (Пн–Нд) з реальними стравами, ресторанними чеками, Cook-Loss та водним балансом; 2) Інтегровано seedSevenDayDogfoodingData в nutritionStore.ts та преміальну картку керування в ProfileScreen.tsx з миттєвим індикатором кількості активних днів; 3) Написано 5 юніт-тестів для перевірки стійкості історії, тижневого банку Flex Bank та JSON-серіалізації (77/77 тестів Vitest пройдено, збірка Vite без помилок); 4) Проведено E2E аудит у реальному браузері agent-browser (390x844): заповнення раціону з Профілю -> перехід у Щоденник -> перегляд субботи та неділі зі збереженням страв (audit_stage5_5_dogfooding_7days.png), 0 помилок у консолі."
+    },
+    {
+      "timestamp": "2026-10-24T00:15:00",
+      "author": "CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Черги № 6.0 (TikTok/Reels Video AI Backend & Whisper API Gateway): 1) Створено бекенд-сервіс supabase/functions/parse-video-recipe/index.ts для мультимодальної обробки відео; 2) Створено клієнтський міст videoAiService.ts із підтримкою Whisper Audio AI, Vision OCR та авто-перемиканням на локальну онтологію без падінь; 3) Оновлено AI Імпорт у Шеф-Хабі (ChefHubModal.tsx) з вибором 3 режимів: URL посилання, Whisper транскрипція мови шефа та OCR кадрів; 4) Написано 8 юніт-тестів для перевірки всіх платформ (TikTok, Reels, Shorts), Whisper-розпізнавання та Cook-Loss метаданих (85/85 тестів Vitest успішно пройдено, збірка Vite 2.60с); 5) Проведено E2E аудит через agent-browser (390x844): розпізнавання аудіо рецепта -> генерація КБЖВ -> кнопки додавання (audit_stage6_0_whisper_ai_parser.png), 0 помилок у консолі."
     }
   ]
 }

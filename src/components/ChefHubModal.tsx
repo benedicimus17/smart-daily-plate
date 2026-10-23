@@ -21,10 +21,13 @@ import {
   Barcode,
   Camera,
   ScanLine,
-  AlertCircle
+  AlertCircle,
+  Mic,
+  Video,
+  CookingPot
 } from 'lucide-react';
 import { MealType } from '../types/nutrition';
-import { parseRecipeFromUrl, parseSmartDish } from '../services/recipeParser';
+import { parseSmartDish } from '../services/recipeParser';
 import { ParsedRecipe } from '../types/recipe';
 import { useUserStore } from '../store/userStore';
 import { resolveCrossLingualEntity } from '../services/foodOntology';
@@ -33,6 +36,7 @@ import {
   calculatePortionMacros,
   ScannedProduct
 } from '../services/openFoodFactsService';
+import { parseVideoRecipeWithAi } from '../services/videoAiService';
 
 export interface ChefDishItem {
   id: string;
@@ -736,9 +740,15 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   const [isPreviewAdded, setIsPreviewAdded] = useState(false);
   const [proPaywallDish, setProPaywallDish] = useState<ChefDishItem | null>(null);
 
-  // Стан для AI Парсера
+  // Стан для AI Парсера (Stage 6.0: Multi-Modal Whisper + OCR + Edge Gateway)
   const [parserUrl, setParserUrl] = useState('https://www.tiktok.com/@chef/video/crepes-with-meat');
   const [videoDishHint, setVideoDishHint] = useState('');
+  const [videoAiTab, setVideoAiTab] = useState<'url' | 'whisper' | 'ocr'>('url');
+  const [audioTranscript, setAudioTranscript] = useState('- 200г Куряче філе\n- 50г Твердий сир\n- 150г Відварений рис\n- 10г Оливкова олія');
+  const [frameOcrText, setFrameOcrText] = useState('- 120г Лосось свіжий\n- 80г Авокадо хасс\n- 100г Хрусткий салатний мікс');
+  const [videoAiSource, setVideoAiSource] = useState<'whisper_ai' | 'ocr_vision' | 'edge_function' | 'local_neural' | null>(null);
+  const [videoAiConfidence, setVideoAiConfidence] = useState<number | null>(null);
+  const [videoAiCookLoss, setVideoAiCookLoss] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [parsedRecipe, setParsedRecipe] = useState<ParsedRecipe | null>(null);
   const [addedMealSlot, setAddedMealSlot] = useState<MealType | null>(null);
@@ -879,16 +889,32 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     }, 900);
   };
 
-  // Робота AI Парсера
-  const handleParseVideo = (urlToParse: string, hint?: string) => {
+  // Робота AI Парсера (Stage 6.0: Multi-Modal Whisper + OCR + Edge Gateway)
+  const handleParseVideo = async (urlToParse?: string, hint?: string) => {
     setIsParsing(true);
     setAddedMealSlot(null);
+    const effectiveUrl = urlToParse !== undefined ? urlToParse : parserUrl;
     const effectiveHint = hint !== undefined ? hint : videoDishHint;
-    setTimeout(() => {
-      const res = parseRecipeFromUrl(urlToParse, effectiveHint, 2);
-      setParsedRecipe(res);
+
+    try {
+      const res = await parseVideoRecipeWithAi({
+        videoUrl: effectiveUrl,
+        dishHint: effectiveHint,
+        audioTranscript: videoAiTab === 'whisper' ? audioTranscript : undefined,
+        frameOcrText: videoAiTab === 'ocr' ? frameOcrText : undefined,
+        servings: 2
+      });
+
       setIsParsing(false);
-    }, 350);
+      if (res.success && res.recipe) {
+        setParsedRecipe(res.recipe);
+        setVideoAiSource(res.source);
+        setVideoAiConfidence(res.confidence);
+        setVideoAiCookLoss(res.cookLossNote || null);
+      }
+    } catch {
+      setIsParsing(false);
+    }
   };
 
   const handleAddParsedToSlot = (slot: MealType) => {
@@ -1572,108 +1598,217 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
           )}
 
           {/* ========================================================= */}
-          {/* РЕЖИМ 3: AI ІМПОРТ З TIKTOK / REELS / ПОСИЛАННЯ */}
+          {/* РЕЖИМ 3: AI ІМПОРТ З TIKTOK / REELS / WHISPER / OCR */}
           {/* ========================================================= */}
           {activeTab === 'ai_parser' && (
             <div className="space-y-3.5 animate-fadeIn">
-              <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/20 text-xs text-amber-200 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Вставте посилання на відео з рецептом, і ШІ автоматично розпізнає тарілку.</span>
-              </div>
-
-              {/* Зразки */}
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-                  Швидкі приклади:
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  <button
-                    id="btn-example-crepes"
-                    type="button"
-                    onClick={() => {
-                      setParserUrl('https://www.tiktok.com/@chef/video/crepes-with-meat');
-                      setVideoDishHint('крепси з м’ясом');
-                      handleParseVideo('https://www.tiktok.com/@chef/video/crepes-with-meat', 'крепси з м’ясом');
-                    }}
-                    className="px-2.5 py-1 rounded-xl bg-amber-400/15 hover:bg-amber-400/25 border border-amber-400/30 text-[10.5px] font-bold text-amber-300"
-                  >
-                    🥞 TikTok: Крепси з м'ясом
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setParserUrl('https://www.tiktok.com/@chef/video/pasta-shrimp-spinach');
-                      setVideoDishHint('паста з креветками');
-                      handleParseVideo('https://www.tiktok.com/@chef/video/pasta-shrimp-spinach', 'паста з креветками');
-                    }}
-                    className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300 hover:text-white"
-                  >
-                    🍝 TikTok: Паста з креветками
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setParserUrl('https://www.instagram.com/reels/protein-oat-pancakes');
-                      setVideoDishHint('панкейки');
-                      handleParseVideo('https://www.instagram.com/reels/protein-oat-pancakes', 'панкейки');
-                    }}
-                    className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300 hover:text-white"
-                  >
-                    🥞 Reels: Панкейки
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setParserUrl('https://www.tiktok.com/@healthy/video/salmon-quinoa-bowl');
-                      setVideoDishHint('лососевий боул');
-                      handleParseVideo('https://www.tiktok.com/@healthy/video/salmon-quinoa-bowl', 'лососевий боул');
-                    }}
-                    className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300 hover:text-white"
-                  >
-                    🥗 TikTok: Лососевий боул
-                  </button>
+              {/* Інфо-бейдж Multi-Modal */}
+              <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/25 text-xs text-amber-200 flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-extrabold text-amber-300">Multi-Modal AI Engine (Stage 6.0)</div>
+                  <div className="text-[11px] text-amber-200/80 mt-0.5">
+                    Розбір рецептів через Whisper Audio API, OCR-текст з відеокадрів або пряме посилання на відео (TikTok, Reels, Shorts).
+                  </div>
                 </div>
               </div>
 
-              {/* Поле вводу посилання та уточнення страви */}
-              <div className="space-y-2">
-                <div>
-                  <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1">
-                    Посилання на відео (TikTok / Reels / YouTube):
-                  </label>
-                  <input
-                    type="text"
-                    value={parserUrl}
-                    onChange={(e) => setParserUrl(e.target.value)}
-                    placeholder="https://www.tiktok.com/@..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
+              {/* 3 підрежими: URL, Whisper, OCR */}
+              <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-black/50 border border-white/10 text-[10.5px]">
+                <button
+                  type="button"
+                  onClick={() => setVideoAiTab('url')}
+                  className={`py-1.5 rounded-lg font-bold flex items-center justify-center gap-1 transition-all ${
+                    videoAiTab === 'url'
+                      ? 'bg-amber-400 text-zinc-950 shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Link2 className="w-3 h-3" />
+                  <span>URL відео</span>
+                </button>
+
+                <button
+                  id="tab-sub-whisper"
+                  type="button"
+                  onClick={() => setVideoAiTab('whisper')}
+                  className={`py-1.5 rounded-lg font-bold flex items-center justify-center gap-1 transition-all ${
+                    videoAiTab === 'whisper'
+                      ? 'bg-amber-400 text-zinc-950 shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Mic className="w-3 h-3" />
+                  <span>Whisper аудіо</span>
+                </button>
+
+                <button
+                  id="tab-sub-ocr"
+                  type="button"
+                  onClick={() => setVideoAiTab('ocr')}
+                  className={`py-1.5 rounded-lg font-bold flex items-center justify-center gap-1 transition-all ${
+                    videoAiTab === 'ocr'
+                      ? 'bg-amber-400 text-zinc-950 shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Video className="w-3 h-3" />
+                  <span>OCR кадри</span>
+                </button>
+              </div>
+
+              {/* Підрежим 1: URL відео */}
+              {videoAiTab === 'url' && (
+                <div className="space-y-2.5 animate-fadeIn">
+                  {/* Зразки */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                      Швидкі приклади:
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      <button
+                        id="btn-example-crepes"
+                        type="button"
+                        onClick={() => {
+                          setParserUrl('https://www.tiktok.com/@chef/video/crepes-with-meat');
+                          setVideoDishHint('крепси з м’ясом');
+                          handleParseVideo('https://www.tiktok.com/@chef/video/crepes-with-meat', 'крепси з м’ясом');
+                        }}
+                        className="px-2.5 py-1 rounded-xl bg-amber-400/15 hover:bg-amber-400/25 border border-amber-400/30 text-[10.5px] font-bold text-amber-300"
+                      >
+                        🥞 TikTok: Крепси з м'ясом
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setParserUrl('https://www.tiktok.com/@chef/video/pasta-shrimp-spinach');
+                          setVideoDishHint('паста з креветками');
+                          handleParseVideo('https://www.tiktok.com/@chef/video/pasta-shrimp-spinach', 'паста з креветками');
+                        }}
+                        className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300 hover:text-white"
+                      >
+                        🍝 TikTok: Паста з креветками
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setParserUrl('https://www.instagram.com/reels/protein-oat-pancakes');
+                          setVideoDishHint('панкейки');
+                          handleParseVideo('https://www.instagram.com/reels/protein-oat-pancakes', 'панкейки');
+                        }}
+                        className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300 hover:text-white"
+                      >
+                        🥞 Reels: Панкейки
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setParserUrl('https://www.tiktok.com/@healthy/video/salmon-quinoa-bowl');
+                          setVideoDishHint('лососевий боул');
+                          handleParseVideo('https://www.tiktok.com/@healthy/video/salmon-quinoa-bowl', 'лососевий боул');
+                        }}
+                        className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300 hover:text-white"
+                      >
+                        🥗 TikTok: Лососевий боул
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Поле вводу посилання */}
+                  <div className="space-y-2">
+                    <div>
+                      <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1">
+                        Посилання на відео (TikTok / Reels / YouTube):
+                      </label>
+                      <input
+                        id="input-parser-video-url"
+                        type="text"
+                        value={parserUrl}
+                        onChange={(e) => setParserUrl(e.target.value)}
+                        placeholder="https://www.tiktok.com/@..."
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1 flex items-center justify-between">
+                        <span>Назва страви з відео (якщо коротке посилання):</span>
+                        <span className="text-[9.5px] text-zinc-500 font-normal">необов’язково</span>
+                      </label>
+                      <input
+                        id="input-parser-dish-hint"
+                        type="text"
+                        value={videoDishHint}
+                        onChange={(e) => setVideoDishHint(e.target.value)}
+                        placeholder="Наприклад: крепси з м'ясом, вівсянка, шаурма..."
+                        className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Підрежим 2: Whisper аудіодоріжка */}
+              {videoAiTab === 'whisper' && (
+                <div className="space-y-2.5 animate-fadeIn">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider block">
+                      Транскрипція мови шефа (Whisper AI):
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setAudioTranscript('- 200г Куряче філе\n- 50г Твердий сир\n- 150г Відварений рис\n- 10г Оливкова олія')}
+                      className="text-[9.5px] font-bold text-amber-300 hover:underline"
+                    >
+                      Вставити зразок
+                    </button>
+                  </div>
+                  <textarea
+                    id="input-audio-transcript"
+                    rows={4}
+                    value={audioTranscript}
+                    onChange={(e) => setAudioTranscript(e.target.value)}
+                    placeholder="Вставте або надиктуйте інгредієнти з аудіодоріжки відео..."
+                    className="w-full p-3 rounded-xl bg-black/60 border border-white/15 text-xs font-mono text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
                   />
                 </div>
+              )}
 
-                <div>
-                  <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1 flex items-center justify-between">
-                    <span>Назва страви з відео (якщо коротке посилання):</span>
-                    <span className="text-[9.5px] text-zinc-500 font-normal">необов’язково</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={videoDishHint}
-                    onChange={(e) => setVideoDishHint(e.target.value)}
-                    placeholder="Наприклад: крепси з м'ясом, вівсянка, шаурма..."
-                    className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
+              {/* Підрежим 3: OCR субтитри / текст кадру */}
+              {videoAiTab === 'ocr' && (
+                <div className="space-y-2.5 animate-fadeIn">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider block">
+                      Текст та написи з відеокадрів (Vision OCR):
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setFrameOcrText('- 120г Лосось свіжий\n- 80г Авокадо хасс\n- 100г Хрусткий салатний мікс')}
+                      className="text-[9.5px] font-bold text-amber-300 hover:underline"
+                    >
+                      Вставити зразок
+                    </button>
+                  </div>
+                  <textarea
+                    id="input-frame-ocr-text"
+                    rows={4}
+                    value={frameOcrText}
+                    onChange={(e) => setFrameOcrText(e.target.value)}
+                    placeholder="Вставте розпізнані написи, стікери чи субтитри на екрані відео..."
+                    className="w-full p-3 rounded-xl bg-black/60 border border-white/15 text-xs font-mono text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
                   />
                 </div>
-              </div>
+              )}
 
               <button
                 id="btn-parse-video"
                 type="button"
-                onClick={() => handleParseVideo(parserUrl, videoDishHint)}
+                onClick={() => handleParseVideo()}
                 disabled={isParsing}
-                className="w-full py-2.5 rounded-xl font-black text-xs text-zinc-950 bg-gradient-to-r from-amber-400 to-amber-500 shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                className="w-full py-2.5 rounded-xl font-black text-xs text-zinc-950 bg-gradient-to-r from-amber-400 to-amber-500 shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-zinc-950" />
-                <span>{isParsing ? 'Розпізнавання та розрахунок...' : 'Розпізнати КБЖВ з відео'}</span>
+                <span>{isParsing ? 'AI-розпізнавання та розрахунок...' : 'Розпізнати КБЖВ через ШІ'}</span>
               </button>
 
               {/* Результат розпізнавання */}
@@ -1681,9 +1816,20 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                 <div className="p-3.5 rounded-2xl bg-black/50 border border-emerald-500/30 space-y-3 animate-fadeIn">
                   <div className="flex items-center justify-between pb-2 border-b border-white/10">
                     <div>
-                      <span className="text-[9.5px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full uppercase">
-                        Розпізнано
-                      </span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[9.5px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full uppercase">
+                          {videoAiSource === 'whisper_ai'
+                            ? '🎙️ Whisper Audio AI'
+                            : videoAiSource === 'ocr_vision'
+                            ? '👁️ Vision OCR AI'
+                            : '⚡ AI Розпізнано'}
+                        </span>
+                        {videoAiConfidence && (
+                          <span className="text-[9.5px] font-mono text-zinc-400">
+                            {Math.round(videoAiConfidence * 100)}% точність
+                          </span>
+                        )}
+                      </div>
                       <h4 className="text-xs font-bold text-white mt-1">{parsedRecipe.title}</h4>
                     </div>
                     <div className="text-right">
@@ -1691,6 +1837,14 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                       <span className="text-sm font-black text-amber-300">{parsedRecipe.macrosPerServing.calories} ккал</span>
                     </div>
                   </div>
+
+                  {/* Cook-loss примітка якщо виявлено м'ясо/птицю/рибу */}
+                  {videoAiCookLoss && (
+                    <div className="px-2.5 py-1.5 rounded-xl bg-amber-400/10 border border-amber-400/20 text-[10.5px] font-bold text-amber-300 flex items-center gap-1.5">
+                      <CookingPot className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>{videoAiCookLoss}</span>
+                    </div>
+                  )}
 
                   <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-xs font-bold text-white flex items-center justify-between">
                     <span className="text-emerald-400 flex items-center gap-1">
