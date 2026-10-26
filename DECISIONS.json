@@ -5,23 +5,23 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-26T19:37:00",
+    "last_updated": "2026-10-26T20:04:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 7.0: Product Analytics & Health Telemetry Engine",
-    "sprint_goal": "Впровадження детермінованого рушія продуктової аналітики та телеметрії здоров'я за стандартом GDPR (EU 2016/679): 100% анонімний збір ключових конверсій (онбординг, підміна страв, сканер штрих-кодів, гідратація, шеринг, PRO-модалка) без витоку PII, з можливістю 1-клік перегляду журналів JSON, завантаження та повного очищення у Профілі."
+    "current_sprint": "Stage 8.0: Google Play Market Preparation (Assets & TWA Readiness)",
+    "sprint_goal": "Підготовка технічних та маркетингових активів для виходу в Google Play Store: генерація Digital Asset Links, сторінки видалення акаунту (delete-account.html), Feature Graphic (1024x500), 4 вітринних скріншотів (1080x1920) та текстового пакета метаданих."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
     "styling": "Tailwind CSS (Dark Glassmorphism Luxury theme)",
     "state_management": "Zustand (NutritionStore with LocalStorage persistence) + Supabase Cloud Sync + Stripe Billing",
-    "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone, App Shortcuts, Web Push Notifications, Social Share, Allergen Guard, Dietary Onboarding, Reality Meal Swap, GDPR Telemetry Engine)",
+    "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone, App Shortcuts, Web Push Notifications, Social Share, Allergen Guard, Dietary Onboarding, Reality Meal Swap, GDPR Telemetry Engine, TWA Ready)",
     "production_deployment": "https://smart-daily-plate.vercel.app"
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-26T19:37:00",
+    "verified_at": "2026-10-26T20:04:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage7_0_product_analytics_telemetry.md",
+    "report_artifact": "qa_report_stage8_0_google_play_assets_readiness.md",
     "tests_passed": "128/128",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
@@ -241,6 +241,13 @@
       "automated_tests": "PASSED (src/services/__tests__/analyticsService.test.ts - 128/128 passed)",
       "ui_verified": true,
       "notes": "Детермінована система локальної аналітики конверсій: 1) Відстеження 12 ключових продуктових подій (онбординг, підміна їжі, пропуск, сканер штрих-коду, перегляд PRO, шеринг, гідратація); 2) Жорстка санітизація PII (відсікання email, phone, name, pin, IP); 3) Локальний кільцевий буфер (100 подій); 4) Блок у Профілі з тумблером opt-out, лічильником активності, красивим переглядачем JSON та кнопкою очищення; 5) 100% відповідність GDPR ст. 15, 17, 20."
+    },
+    {
+      "feature": "Google Play Market Assets & Store Listing Package",
+      "status": "FROZEN_APPROVED",
+      "automated_tests": "PASSED (Asset generation & build verified)",
+      "ui_verified": true,
+      "notes": "Повний комплект для публікації в Google Play Store: 1) Digital Asset Links у public/.well-known/assetlinks.json для безшовного TWA; 2) Публічна веб-сторінка запиту видалення акаунту delete-account.html за правилами Google Data Safety; 3) Головний банер Feature Graphic (1024x500); 4) 4 вітринні скріншоти (1080x1920); 5) Текстові описи (UA, ES, EN) у play_store_metadata.md."
     }
   ],
   "qa_verification_gate": {
@@ -507,6 +514,11 @@
       "timestamp": "2026-10-26T19:37:00",
       "author": "Founder, CEO & QA Auditor",
       "entry": "Затвердження та розгортання Етапу 7.0 (Product Analytics & Health Events Telemetry): 1) Розроблено analyticsService.ts: повна відповідність стандарту GDPR (EU 2016/679), жорстка санітизація PII (відсікання імен, email, номерів, IP), кільцевий буфер до 100 подій, автогенерація анонімної сесії та підтримка opt-out; 2) Інтегровано виклики trackEvent у ключеві конверсійні вузли: MyPlanWizard (старт, кроки, фініш), QuickMealSwapModal (підміна на круасани/піцу, пропуск), WaterTracker (склянки води), ChefHubModal (сканер штрих-кодів), ProSubscriptionModal (перегляд та чекаут PRO), SocialShareModal (генерація та шеринг картки дня), LogScreen (галочки виконання страв); 3) У ProfileScreen.tsx створено блок секції 6 'Анонімна продуктова аналітика (GDPR)' з перемикачем дозволу, лічильником активності, кнопкою перегляду журналу JSON у темному модальному вікні та очищенням буфера; 4) Написано 7 нових юніт-тестів (128/128 vitest пройдено), збірка Vite 2.95с без помилок, проведено E2E аудит у реальному браузері (390x844), зафіксовано артефакти audit_stage7_0_profile_telemetry.png та audit_stage7_0_telemetry_modal.png, 0 помилок у консолі."
+    },
+    {
+      "timestamp": "2026-10-26T20:04:00",
+      "author": "Founder, CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Етапу 8.0 (Google Play Market Assets & Store Listing Package): 1) Створено public/.well-known/assetlinks.json для безшовного запуску TWA без адресного рядка; 2) Створено public/delete-account.html для проходження політики Google Play Data Safety (публічний запит на видалення персональних даних); 3) Згенеровано офіційний банер Feature Graphic (1024x500) у public/play_store_feature_graphic_1024x500.png; 4) Згенеровано 4 повнорозмірні вітринні скріншоти (1080x1920) у public/store_assets/; 5) Сформовано повний пакет метаданих та описів у play_store_metadata.md (UA, ES, EN). Верифіковано збірку Vite (dist містить усі активи), 0 помилок."
     }
   ]
 }
