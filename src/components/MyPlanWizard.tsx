@@ -4,12 +4,21 @@ import { useNutritionStore } from '../store/nutritionStore';
 import { calculatePersonalPlan } from '../math/planCalculator';
 import { Gender, ActivityLevel, NutritionGoal, WeightLossPace } from '../types/user';
 import {
+  DietType,
+  StandardAllergen,
+  ALLERGEN_META,
+  UserDietaryRestrictions
+} from '../services/allergenService';
+import {
   ArrowLeft,
   X,
   CheckCircle2,
   Mail,
   Sparkles,
-  AlertTriangle
+  AlertTriangle,
+  ShieldCheck,
+  Plus,
+  Trash2
 } from 'lucide-react';
 import { LegalModal } from './LegalModal';
 
@@ -39,6 +48,12 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
   const [takesProtein, setTakesProtein] = useState<boolean>(user.takesProtein || false);
   const [eatingRhythm, setEatingRhythm] = useState<'3_meals' | '5_meals'>(user.eatingRhythm || '3_meals');
   const [pace, setPace] = useState<WeightLossPace>(user.pace || 'steady');
+
+  // Особливості харчування та алергії (Stage 6.5)
+  const [dietType, setDietType] = useState<DietType>(user.dietType || 'standard');
+  const [allergens, setAllergens] = useState<StandardAllergen[]>(user.allergens || []);
+  const [customAllergies, setCustomAllergies] = useState<string[]>(user.customAllergies || []);
+  const [customInput, setCustomInput] = useState<string>('');
 
   // Дані реєстрації
   const [email, setEmail] = useState(user.email || '');
@@ -79,6 +94,25 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
     setQuestionIndex((prev) => prev + 1);
   };
 
+  const toggleAllergen = (item: StandardAllergen) => {
+    setAllergens((prev) =>
+      prev.includes(item) ? prev.filter((a) => a !== item) : [...prev, item]
+    );
+  };
+
+  const handleAddCustomAllergy = () => {
+    const trimmed = customInput.trim();
+    if (!trimmed) return;
+    if (!customAllergies.includes(trimmed)) {
+      setCustomAllergies((prev) => [...prev, trimmed]);
+    }
+    setCustomInput('');
+  };
+
+  const handleRemoveCustomAllergy = (name: string) => {
+    setCustomAllergies((prev) => prev.filter((a) => a !== name));
+  };
+
   const handleFinalRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -98,7 +132,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           goal,
           pace,
           eatingRhythm,
-          takesProtein
+          takesProtein,
+          dietType,
+          allergens,
+          customAllergies
         },
         plan.targets,
         {
@@ -109,7 +146,13 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
         }
       );
 
-      generateMenuForTargets(plan.targets, eatingRhythm);
+      const restrictions: UserDietaryRestrictions = {
+        dietType,
+        allergens,
+        customAllergies
+      };
+
+      generateMenuForTargets(plan.targets, eatingRhythm, { userRestrictions: restrictions });
       updateTargets(plan.targets);
       setIsSubmitting(false);
       onCompleted?.();
@@ -130,7 +173,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           goal,
           pace,
           eatingRhythm,
-          takesProtein
+          takesProtein,
+          dietType,
+          allergens,
+          customAllergies
         },
         plan.targets,
         {
@@ -140,7 +186,14 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           password: ''
         }
       );
-      generateMenuForTargets(plan.targets, eatingRhythm);
+
+      const restrictions: UserDietaryRestrictions = {
+        dietType,
+        allergens,
+        customAllergies
+      };
+
+      generateMenuForTargets(plan.targets, eatingRhythm, { userRestrictions: restrictions });
       updateTargets(plan.targets);
       setIsSubmitting(false);
       onCompleted?.();
@@ -589,9 +642,161 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
         )}
 
         {/* ======================================================== */}
-        {/* ПИТАННЯ 9: Персональний розрахунок + Шлюз реєстрації */}
+        {/* ПИТАННЯ 9: Особливості харчування та алергії (Stage 6.5) */}
         {/* ======================================================== */}
         {questionIndex === 9 && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="text-center space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-400/15 border border-emerald-400/30 text-emerald-300 text-xs font-bold mb-0.5">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Безпека та адаптація раціону</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Тип дієти та алергії
+              </h2>
+              <p className="text-xs text-zinc-400">
+                Комп'ютер автоматично виключить заборонені продукти з вашого першого меню
+              </p>
+            </div>
+
+            {/* ВИБІР ТИПУ ДІЄТИ */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider block">
+                Тип харчування
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'standard', title: '🥩 Звичайний', desc: 'Мʼясо, птиця, риба, все' },
+                  { id: 'vegetarian', title: '🌱 Вегетаріанське', desc: 'Без мʼяса та птиці' },
+                  { id: 'vegan', title: '🌿 Веганське', desc: '100% рослинні продукти' },
+                  { id: 'pescatarian', title: '🐟 Пескетаріанське', desc: 'Риба, морепродукти' }
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    id={`wizard-diet-${item.id}`}
+                    type="button"
+                    onClick={() => setDietType(item.id as DietType)}
+                    className={`p-3 rounded-2xl border text-left transition-all active:scale-[0.98] cursor-pointer ${
+                      dietType === item.id
+                        ? 'border-emerald-400 bg-emerald-400/10 ring-2 ring-emerald-400/70'
+                        : 'border-white/10 bg-black/40 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="text-xs font-bold text-white">{item.title}</div>
+                    <div className="text-[10px] text-zinc-400 mt-0.5">{item.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* СПИСОК АЛЕРГЕНІВ */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
+                  Алергії та непереносимості
+                </label>
+                <span className="text-[10px] text-zinc-500">Оберіть усі, що є</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {(Object.keys(ALLERGEN_META) as StandardAllergen[]).map((key) => {
+                  const meta = ALLERGEN_META[key];
+                  const isSelected = allergens.includes(key);
+                  return (
+                    <button
+                      key={key}
+                      id={`wizard-allergen-${key}`}
+                      type="button"
+                      onClick={() => toggleAllergen(key)}
+                      className={`p-2.5 rounded-2xl border flex items-center gap-2 text-left transition-all active:scale-[0.98] cursor-pointer ${
+                        isSelected
+                          ? 'border-amber-400 bg-amber-400/15 ring-1 ring-amber-400 text-white'
+                          : 'border-white/10 bg-black/40 text-zinc-400 hover:border-white/20'
+                      }`}
+                    >
+                      <span className="text-lg shrink-0">{meta.icon}</span>
+                      <div className="min-w-0">
+                        <div className="text-[11px] font-bold truncate leading-tight">
+                          {key === 'lactose' ? 'Лактоза' : key === 'gluten' ? 'Глютен' : key === 'nuts' ? 'Горіхи' : key === 'eggs' ? 'Яйця' : key === 'seafood' ? 'Морепродукти' : 'Соя'}
+                        </div>
+                        <div className="text-[9px] text-zinc-500 leading-none">
+                          {isSelected ? 'Виключити 🚫' : 'Дозволено'}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ВЛАСНІ АЛЕРГІЇ / ВИКЛЮЧЕННЯ */}
+            <div className="space-y-2 pt-1">
+              <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider block">
+                Специфічні продукти (наприклад: яблука, мед, селера)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="wizard-custom-allergy-input"
+                  type="text"
+                  value={customInput}
+                  onChange={(e) => setCustomInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddCustomAllergy();
+                    }
+                  }}
+                  placeholder="Введіть продукт..."
+                  className="flex-1 px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400/60"
+                />
+                <button
+                  id="wizard-add-custom-allergy-btn"
+                  type="button"
+                  onClick={handleAddCustomAllergy}
+                  className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs text-zinc-200 font-bold flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Додати</span>
+                </button>
+              </div>
+
+              {customAllergies.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {customAllergies.map((item) => (
+                    <span
+                      key={item}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs"
+                    >
+                      <span>🚫 {item}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCustomAllergy(item)}
+                        className="hover:text-white cursor-pointer ml-0.5"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button
+              id="wizard-dietary-continue-btn"
+              type="button"
+              onClick={handleNext}
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs tracking-wide shadow-lg shadow-amber-400/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+            >
+              <span>Продовжити до розрахунку калорій</span>
+              <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+            </button>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* ПИТАННЯ 10: Персональний розрахунок + Шлюз реєстрації */}
+        {/* ======================================================== */}
+        {questionIndex === 10 && (
           <div className="space-y-5 animate-fadeIn">
             <div className="text-center space-y-1">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-xs font-bold mb-1">

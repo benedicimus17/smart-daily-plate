@@ -5,24 +5,24 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-26T07:48:00",
+    "last_updated": "2026-10-26T08:08:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 6.4: Smart Allergen & Dietary Restriction Engine",
-    "sprint_goal": "Повна інтеграція системи контролю алергенів та типів харчування (allergenService.ts, DietaryRestrictionsModal.tsx, AllergenConflictModal.tsx, дієто-адаптивний menuGenerator.ts, перевірка конфліктів лактози/глютену/м'яса/кастомних алергій при додаванні страв у ChefHubModal та налаштування в ProfileScreen)."
+    "current_sprint": "Stage 6.5: Direct Dietary & Allergen Onboarding Wizard Integration",
+    "sprint_goal": "Інтеграція вибору типу харчування (стандарт, вегетаріанське, веганське, пескетаріанське), стандартних алергенів (лактоза, глютен, горіхи, яйця, морепродукти, соя) та користувацьких алергій безпосередньо у первинний візард онбордингу (MyPlanWizard.tsx). Автоматична генерація 100% безпечного адаптивного першого раціону (нутові боули, стейки з тофу) без м'яса та конфліктних інгредієнтів відразу при завершенні плану."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
     "styling": "Tailwind CSS (Dark Glassmorphism Luxury theme)",
     "state_management": "Zustand (NutritionStore with LocalStorage persistence) + Supabase Cloud Sync + Stripe Billing",
-    "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone, App Shortcuts, Web Push Notifications, Social Share, Allergen Guard)",
+    "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone, App Shortcuts, Web Push Notifications, Social Share, Allergen Guard, Dietary Onboarding)",
     "production_deployment": "https://smart-daily-plate.vercel.app"
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-26T07:48:00",
+    "verified_at": "2026-10-26T08:08:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage6_4_allergen_dietary_engine.md",
-    "tests_passed": "120/120",
+    "report_artifact": "qa_report_stage6_5_onboarding_dietary_integration.md",
+    "tests_passed": "121/121",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -473,6 +473,11 @@
       "timestamp": "2026-10-26T07:48:00",
       "author": "CEO & QA Auditor",
       "entry": "Затвердження та розгортання Черги № 6.4 (Smart Allergen & Dietary Restriction Engine): 1) Створено сервіс allergenService.ts з онтологією тригерів на 3 мовах (лактоза, глютен, горіхи, яйця, морепродукти, соя, м'ясо та індивідуальні алергени користувача); 2) Дієто-адаптивний генератор щоденного меню в menuGenerator.ts: автоматичне виключення м'яса при вегетаріанстві/веганстві та заміна на білкові рослинні альтернативи (боули з нутом, тофу стейки, скрембли); 3) Створено шлюз захисту AllergenConflictModal.tsx у ChefHubModal: інтерактивне попередження про алерген/м'ясо з ШІ-порадою, авто-заміною або додаванням під власну відповідальність; 4) Створено модальне вікно налаштувань DietaryRestrictionsModal.tsx у ProfileScreen; 5) Додано 9 нових юніт-тестів (120/120 vitest пройдено, збірка Vite 2.83с); 6) Проведено E2E аудит через agent-browser (390x844): вибір вегетаріанства, активація захисту від лактози, перерахунок меню (audit_stage6_4_dietary_modal.png), 0 помилок консолі."
+    },
+    {
+      "timestamp": "2026-10-26T08:08:00",
+      "author": "CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Черги № 6.5 (Direct Dietary & Allergen Onboarding Wizard Integration): 1) Інтегровано крок № 9 'Тип дієти та алергії' безпосередньо у первинний візард MyPlanWizard.tsx (вибір типу харчування: standard, vegetarian, vegan, pescatarian; перемикачі 6 стандартних алергенів: лактоза, глютен, горіхи, яйця, морепродукти, соя; введення специфічних алергій користувача); 2) Оновлено обробники завершення плану handleFinalRegister та handleGuestSkip: параметри dietType, allergens, customAllergies зберігаються в userStore та миттєво передаються в generateMenuForTargets(plan.targets, eatingRhythm, { userRestrictions }); 3) Комп'ютер відразу створює для нового користувача 100% безпечне перше меню на день (нут та кіноа, стейк з тофу, дзен-омлет) без м'яса та лактози; 4) Додано юніт-тест збереження обмежень (121/121 vitest успішно пройдено, збірка Vite 2.72с); 5) Проведено E2E аудит через agent-browser (390x844): повний онбординг з вибором 'Вегетаріанське' та 'Безлактозне' -> збереження в guest режимі -> верифікація першого згенерованого меню (audit_stage6_5_wizard_dietary.png, audit_stage6_5_dashboard_vegetarian.png), 0 помилок у консолі."
     }
   ]
 }

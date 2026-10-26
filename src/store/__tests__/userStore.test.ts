@@ -92,4 +92,36 @@ describe('userStore - Onboarding, Freemium & Test User Reset', () => {
     expect(user.savedTargets?.calories).toBe(2300);
     expect(user.eatingRhythm).toBe('5_meals');
   });
+
+  it('saves dietary restrictions (dietType, allergens, customAllergies) during onboarding plan completion', () => {
+    const store = useUserStore.getState();
+
+    store.savePlanAndRegister(
+      {
+        gender: 'female',
+        age: 26,
+        weightKg: 58,
+        heightCm: 168,
+        activityLevel: 'moderate',
+        goal: 'lose_weight',
+        pace: 'steady',
+        eatingRhythm: '3_meals',
+        takesProtein: true,
+        dietType: 'vegetarian',
+        allergens: ['lactose', 'nuts'],
+        customAllergies: ['яблука', 'мед']
+      },
+      { calories: 1650, protein: 110, fat: 50, carbs: 190 },
+      {
+        name: 'Софія',
+        email: 'sofia@test.ua'
+      }
+    );
+
+    const user = useUserStore.getState().user;
+    expect(user.isRegistered).toBe(true);
+    expect(user.dietType).toBe('vegetarian');
+    expect(user.allergens).toEqual(['lactose', 'nuts']);
+    expect(user.customAllergies).toEqual(['яблука', 'мед']);
+  });
 });
