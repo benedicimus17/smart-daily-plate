@@ -1,0 +1,51 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'app.nutriq.plate'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "app.nutriq.plate"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("../keystore/release.keystore")
+            storePassword "NutriqRelease2026!"
+            keyAlias "nutriq_release_key"
+            keyPassword "NutriqRelease2026!"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.browser:browser:1.8.0'
+    // Official Google AndroidBrowserHelper library for Trusted Web Activity (TWA)
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}

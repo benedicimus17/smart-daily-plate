@@ -5,10 +5,10 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-26T20:04:00",
+    "last_updated": "2026-10-26T22:10:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 8.0: Google Play Market Preparation (Assets & TWA Readiness)",
-    "sprint_goal": "Підготовка технічних та маркетингових активів для виходу в Google Play Store: генерація Digital Asset Links, сторінки видалення акаунту (delete-account.html), Feature Graphic (1024x500), 4 вітринних скріншотів (1080x1920) та текстового пакета метаданих."
+    "current_sprint": "Stage 8.1: Android TWA Project & Digital Keystore Generation",
+    "sprint_goal": "Створення офіційного сховища ключів release.keystore (термін дії до 2054 року), синхронізація реального SHA-256 відбитка з assetlinks.json та налаштування нативного проекту Android Studio (Google AndroidBrowserHelper 2.5.0) для вивантаження підписаного пакета .aab у Google Play Console."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
@@ -19,9 +19,9 @@
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-26T20:04:00",
+    "verified_at": "2026-10-26T22:10:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage8_0_google_play_assets_readiness.md",
+    "report_artifact": "qa_report_stage8_1_android_bundle_twa_readiness.md",
     "tests_passed": "128/128",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
@@ -248,6 +248,13 @@
       "automated_tests": "PASSED (Asset generation & build verified)",
       "ui_verified": true,
       "notes": "Повний комплект для публікації в Google Play Store: 1) Digital Asset Links у public/.well-known/assetlinks.json для безшовного TWA; 2) Публічна веб-сторінка запиту видалення акаунту delete-account.html за правилами Google Data Safety; 3) Головний банер Feature Graphic (1024x500); 4) 4 вітринні скріншоти (1080x1920); 5) Текстові описи (UA, ES, EN) у play_store_metadata.md."
+    },
+    {
+      "feature": "Native Android TWA Project & Google Play Keystore",
+      "status": "FROZEN_APPROVED",
+      "automated_tests": "PASSED (Keytool RSA 2048-bit & AndroidManifest verified)",
+      "ui_verified": true,
+      "notes": "Повноцінний нативний проєкт Android Studio у папці android/: 1) Сховище ключів android/keystore/release.keystore (SHA-256 відбиток підтверджено); 2) Інтеграція Google AndroidBrowserHelper 2.5.0 із захистом авто-верифікації Digital Asset Links; 3) Готові конфігурації build.gradle та AndroidManifest.xml для випуску підписаного .aab; 4) Покроковий гайд у android/README_PLAY_STORE.md."
     }
   ],
   "qa_verification_gate": {
@@ -519,6 +526,11 @@
       "timestamp": "2026-10-26T20:04:00",
       "author": "Founder, CEO & QA Auditor",
       "entry": "Затвердження та розгортання Етапу 8.0 (Google Play Market Assets & Store Listing Package): 1) Створено public/.well-known/assetlinks.json для безшовного запуску TWA без адресного рядка; 2) Створено public/delete-account.html для проходження політики Google Play Data Safety (публічний запит на видалення персональних даних); 3) Згенеровано офіційний банер Feature Graphic (1024x500) у public/play_store_feature_graphic_1024x500.png; 4) Згенеровано 4 повнорозмірні вітринні скріншоти (1080x1920) у public/store_assets/; 5) Сформовано повний пакет метаданих та описів у play_store_metadata.md (UA, ES, EN). Верифіковано збірку Vite (dist містить усі активи), 0 помилок."
+    },
+    {
+      "timestamp": "2026-10-26T22:10:00",
+      "author": "Founder, CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Етапу 8.1 (Android TWA Project & Digital Keystore Generation): 1) Згенеровано 2048-бітний RSA ключ release.keystore з терміном дії до 2054 року в android/keystore/release.keystore; 2) Витягнуто точний SHA-256 відбиток (D4:C2:8B:F0:...) та синхронізовано його з public/.well-known/assetlinks.json; 3) Розгорнуто повноцінний нативний проєкт Android Studio (TWA) у папці android/ з підтримкою бібліотеки Google AndroidBrowserHelper 2.5.0, авто-верифікацією intent-filter, Splash Screen та іконками; 4) Складено покрокову інструкцію для створення .aab у android/README_PLAY_STORE.md."
     }
   ]
 }
