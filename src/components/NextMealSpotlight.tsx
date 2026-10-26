@@ -1,42 +1,79 @@
 import React, { useState } from 'react';
-import { ChefHat, ChevronRight, X } from 'lucide-react';
+import { ChefHat, ChevronRight, X, ArrowLeftRight } from 'lucide-react';
+import { useNutritionStore } from '../store/nutritionStore';
+import { MealType, Macros } from '../types/nutrition';
+import { QuickMealSwapModal } from './QuickMealSwapModal';
 
 interface NextMealSpotlightProps {
   onOpenLog?: () => void;
 }
 
 export const NextMealSpotlight: React.FC<NextMealSpotlightProps> = ({ onOpenLog }) => {
+  const { dailyLog, updateMealEntry, removeFoodFromMeal, addFoodToMeal } = useNutritionStore();
   const [recipeModalOpen, setRecipeModalOpen] = useState(false);
+  const [swapModalOpen, setSwapModalOpen] = useState(false);
 
-  // Визначення поточної страви за часом доби
+  // Визначення поточного слоту за часом доби
   const currentHour = new Date().getHours();
+  let targetType: MealType = 'lunch';
   let mealTag = '13:00 • ОБІД';
-  let mealTitle = 'Лосось на грилі зі спаржею';
-  let mealKcal = 480;
-  let mealProtein = 42;
-  let mealFats = 22;
-  let mealCarbs = 18;
-  let mealImage = '/dinner_steak_hd.jpg';
   let mealHint = 'Час приготувати збалансований обід';
 
   if (currentHour < 11) {
+    targetType = 'breakfast';
     mealTag = '08:30 • СНІДАНОК';
-    mealTitle = 'Омлет з авокадо та шпинатом';
-    mealKcal = 380;
-    mealProtein = 28;
-    mealFats = 24;
-    mealCarbs = 12;
     mealHint = 'Ідеальний білковий старт дня';
   } else if (currentHour >= 16) {
+    targetType = 'dinner';
     mealTag = '19:30 • ВЕЧЕРЯ';
-    mealTitle = 'Gourmet Steak & Greens';
-    mealKcal = 510;
-    mealProtein = 46;
-    mealFats = 24;
-    mealCarbs = 14;
-    mealImage = '/dinner_steak_hd.jpg';
-    mealHint = 'Пора дістати стейк на розморозку';
+    mealHint = 'Час легкої та ситної вечері';
   }
+
+  // Зчитуємо реальну першу страву з поточного слоту в щоденнику
+  const currentCategory = dailyLog.meals[targetType];
+  const activeEntry = currentCategory?.entries?.[0];
+
+  const mealTitle = activeEntry?.name || (targetType === 'breakfast' ? 'Дзен-Омлет з авокадо' : targetType === 'lunch' ? 'Нут та кіноа Боул' : 'Gourmet Steak & Greens');
+  const mealKcal = activeEntry?.macros?.calories || (targetType === 'breakfast' ? 380 : targetType === 'lunch' ? 520 : 480);
+  const mealProtein = activeEntry?.macros?.protein || (targetType === 'breakfast' ? 28 : targetType === 'lunch' ? 35 : 42);
+  const mealFats = activeEntry?.macros?.fat || 20;
+  const mealCarbs = activeEntry?.macros?.carbs || 30;
+  const mealImage = targetType === 'breakfast'
+    ? 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=500&q=80'
+    : targetType === 'lunch'
+    ? 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80'
+    : '/dinner_steak_hd.jpg';
+
+  const handleSkipMeal = (type: MealType) => {
+    if (activeEntry) {
+      removeFoodFromMeal(type, activeEntry.id);
+    }
+  };
+
+  const handleReplaceMeal = (
+    type: MealType,
+    newDish: { name: string; weightGrams: number; macros: Macros; recipeDetails?: string }
+  ) => {
+    if (activeEntry) {
+      updateMealEntry(type, activeEntry.id, {
+        name: newDish.name,
+        weightGrams: newDish.weightGrams,
+        macros: newDish.macros,
+        recipeDetails: newDish.recipeDetails,
+        eaten: true
+      });
+    } else {
+      addFoodToMeal(type, {
+        foodId: `quick-swap-${Date.now()}`,
+        name: newDish.name,
+        weightGrams: newDish.weightGrams,
+        macros: newDish.macros,
+        recipeDetails: newDish.recipeDetails,
+        eaten: true,
+        timestamp: targetType === 'breakfast' ? '08:30' : targetType === 'lunch' ? '13:00' : '19:30'
+      });
+    }
+  };
 
   return (
     <>
@@ -59,16 +96,29 @@ export const NextMealSpotlight: React.FC<NextMealSpotlightProps> = ({ onOpenLog 
             </span>
           </div>
 
-          <button
-            id="btn-recipe"
-            type="button"
-            onClick={() => setRecipeModalOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-[10.5px] font-semibold text-zinc-300 hover:text-amber-300 transition-all active:scale-95"
-          >
-            <ChefHat className="w-3 h-3 text-amber-400" />
-            <span>Рецепт</span>
-            <ChevronRight className="w-3 h-3 text-zinc-500" />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              id="btn-quick-reality-swap"
+              type="button"
+              onClick={() => setSwapModalOpen(true)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-400/15 hover:bg-amber-400/25 border border-amber-400/40 text-[10.5px] font-black text-amber-300 transition-all active:scale-95 cursor-pointer shadow-sm"
+              title="З'їв інше або пропустив прийом"
+            >
+              <ArrowLeftRight className="w-3 h-3 text-amber-400" />
+              <span>З'їв інше / Пропустив</span>
+            </button>
+
+            <button
+              id="btn-recipe"
+              type="button"
+              onClick={() => setRecipeModalOpen(true)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-[10.5px] font-semibold text-zinc-300 hover:text-amber-300 transition-all active:scale-95"
+            >
+              <ChefHat className="w-3 h-3 text-amber-400" />
+              <span>Рецепт</span>
+              <ChevronRight className="w-3 h-3 text-zinc-500" />
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -163,7 +213,7 @@ export const NextMealSpotlight: React.FC<NextMealSpotlightProps> = ({ onOpenLog 
                 setRecipeModalOpen(false);
                 onOpenLog?.();
               }}
-              className="w-full mt-4 py-2.5 rounded-xl font-bold text-xs text-zinc-950 flex items-center justify-center gap-1.5 transition-all active:scale-95"
+              className="w-full mt-4 py-2.5 rounded-xl font-bold text-xs text-zinc-950 flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
               style={{
                 background: 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)',
                 boxShadow: '0 4px 14px rgba(245,158,11,0.35)'
@@ -175,6 +225,17 @@ export const NextMealSpotlight: React.FC<NextMealSpotlightProps> = ({ onOpenLog 
           </div>
         </div>
       )}
+
+      {/* МОДАЛКА ШВИДКОЇ ЗАМІНИ НА РЕАЛЬНУ ЇЖУ (MERCADONA / ПІЦА / КРУАСАНИ) */}
+      <QuickMealSwapModal
+        isOpen={swapModalOpen}
+        mealType={targetType}
+        currentDishName={mealTitle}
+        currentCalories={mealKcal}
+        onClose={() => setSwapModalOpen(false)}
+        onSkipMeal={handleSkipMeal}
+        onReplaceMeal={handleReplaceMeal}
+      />
     </>
   );
 };

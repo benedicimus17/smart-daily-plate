@@ -5,23 +5,23 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-26T13:35:00",
+    "last_updated": "2026-10-26T14:40:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 6.5.1: 15-Bot Autonomous Crash-Test & Diet/Allergen Penetration Audit",
-    "sprint_goal": "Стрес-тестування первинної реєстрації та онбордингу через 15 автономних Playwright-ботів (різні дієти: веган, вегетаріанець, пескетаріанець, поліалергік; різні психотипи: дисциплінований, хаотичний, швидкісний; крайові значення: 14 років, 85 років, 180 кг). Виявлення та ліквідація проколів у генерації меню для 5-разового дробового харчування."
+    "current_sprint": "Stage 6.5.2: 1-Tap Reality Meal Swap & Fast Skip Engine",
+    "sprint_goal": "Впровадження 1-клік функціоналу швидкої підміни запланованого прийому їжі реальними альтернативами на ходу (2 круасани з кавою, піца Mercadona, сендвіч, шаурма) або повного пропуску прийому їжі (0 ккал) з миттєвим перерахунком денного балансу калорій та макросів прямо з головного екрана (NextMealSpotlight), розкладу дня (LogScreen) та картки страви (DishDetailModal)."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
     "styling": "Tailwind CSS (Dark Glassmorphism Luxury theme)",
     "state_management": "Zustand (NutritionStore with LocalStorage persistence) + Supabase Cloud Sync + Stripe Billing",
-    "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone, App Shortcuts, Web Push Notifications, Social Share, Allergen Guard, Dietary Onboarding)",
+    "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone, App Shortcuts, Web Push Notifications, Social Share, Allergen Guard, Dietary Onboarding, Reality Meal Swap)",
     "production_deployment": "https://smart-daily-plate.vercel.app"
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-26T13:35:00",
+    "verified_at": "2026-10-26T14:40:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage6_5_1_crash_test_15_bots.md",
+    "report_artifact": "qa_report_stage6_5_2_reality_meal_swap.md",
     "tests_passed": "121/121",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
@@ -227,6 +227,13 @@
       "automated_tests": "PASSED (src/services/__tests__/allergenService.test.ts - 120/120 passed)",
       "ui_verified": true,
       "notes": "Повна інтеграція шлюзу контролю алергенів та типів харчування (allergenService.ts): 1) Багатомовна онтологія тригерів (лактоза, глютен, горіхи, яйця, морепродукти, соя, м'ясо та кастомні алергії); 2) Авто-адаптація щоденного меню в menuGenerator.ts під вегетаріанство (боули з нутом, тофу-скрембл, стейки з тофу без м'яса) та виключення алергенів; 3) Захисний екран AllergenConflictModal.tsx у ChefHubModal з ШІ-порадою, авто-заміною або додаванням під власну відповідальність; 4) Модальне вікно налаштувань DietaryRestrictionsModal.tsx у ProfileScreen. Верифіковано через agent-browser (390x844), 0 помилок."
+    },
+    {
+      "feature": "1-Tap Reality Meal Swap & Fast Skip Engine",
+      "status": "FROZEN_APPROVED",
+      "automated_tests": "PASSED (121/121 vitest passed, Playwright verified)",
+      "ui_verified": true,
+      "notes": "Швидка адаптація під непередбачувані ситуації реального життя: 1) Кнопка 'З'їв інше / Пропустив' на головному дашборді (NextMealSpotlight), у розкладі дня (LogScreen) та в картці страви (DishDetailModal); 2) Опція 'Пропустити цей прийом (0 ккал)' з миттєвим звільненням калорій; 3) Набір швидких пресетів популярного фастфуду/перекусів (2 круасани з кавою Mercadona, піца Mercadona, сендвіч, шаурма, салат-боул, суші); 4) Поле швидкого вводу власної назви з авто-розрахунком калорій (parseQuickDishInput); 5) Миттєвий перерахунок залишку калорій і макросів у реальному часі."
     }
   ],
   "qa_verification_gate": {
@@ -483,6 +490,11 @@
       "timestamp": "2026-10-26T13:35:00",
       "author": "CEO & QA Auditor",
       "entry": "Затвердження та проведення краш-тесту (Stage 6.5.1: 15-Bot Autonomous Crash-Test & Diet/Allergen Penetration Audit): 1) Створено та запущено автономний тестовий стенд із 15 Playwright-ботів, що симулюють реальних користувачів (дисциплінований, веган, поліалергік, хаотичний із бектрекінгом, швидкісний гість, крайовий вік 14 та 85 років, вага 180 кг, тестові рядки замість email); 2) Виявлено критичний дефект у menuGenerator.ts: при виборі 5-разового дробового харчування генератор пропонував м'ясо (індичку, яловичину) та йогурт навіть для веганів/безлактозників; 3) Точково виправлено menuGenerator.ts: додано повну адаптацію веганського та безлактозного меню для 5 прийомів (тофу скрембл, нутовий боул, кокосовий чіа-пудинг без молочки/горіхів, стейк із тофу); 4) Повторний прогін: 15/15 ботів успішно пройшли онбординг (100%), згенеровані меню строго відповідають усім обмеженням, 0 помилок консолі."
+    },
+    {
+      "timestamp": "2026-10-26T14:40:00",
+      "author": "Founder, CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Черги № 6.5.2 (1-Tap Reality Meal Swap & Fast Skip Engine): 1) Створено QuickMealSwapModal.tsx для миттєвої зміни/видалення прийому їжі: опція повного пропуску (0 ккал), пресети реального життя (2 круасани з кавою Mercadona, піца Mercadona, сендвіч, шаурма, салат-боул, суші) та швидкий NLP-ввід (parseQuickDishInput); 2) Інтегровано кнопку швидкої підміни на головному екрані в NextMealSpotlight.tsx (поряд із рецептом), у кожному рядку таймлайну LogScreen.tsx та всередині картки DishDetailModal.tsx; 3) Забезпечено миттєвий перерахунок балансу та кілець калорій через updateMealEntry та removeFoodFromMeal в nutritionStore; 4) 121/121 тестів Vitest пройдено, збірка Vite без помилок, успішний E2E тест у реальному браузері, 0 помилок у консолі."
     }
   ]
 }

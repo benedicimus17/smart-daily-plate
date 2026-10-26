@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { X, Check, ChefHat, Sparkles, Scale, Clock, RefreshCw, Crown } from 'lucide-react';
+import { X, Check, ChefHat, Sparkles, Scale, Clock, RefreshCw, Crown, ArrowLeftRight } from 'lucide-react';
 import { MealEntry, MealType, Macros } from '../types/nutrition';
 import { getNextSwapCandidate, SmartSwapResult } from '../services/smartSwapEngine';
 import { CHEF_CATALOG } from './ChefHubModal';
 import { useUserStore } from '../store/userStore';
+import { QuickMealSwapModal } from './QuickMealSwapModal';
 
 interface DishDetailModalProps {
   isOpen: boolean;
@@ -466,6 +467,8 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
     setIsEditingTime(false);
   };
 
+  const [realitySwapOpen, setRealitySwapOpen] = useState(false);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn">
       {/* Окремий бекдроп для закриття тапом збоку */}
@@ -723,6 +726,16 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
           {/* Кнопки дій */}
           <div className="pt-2 space-y-2">
             <button
+              id="btn-dish-detail-reality-swap"
+              type="button"
+              onClick={() => setRealitySwapOpen(true)}
+              className="w-full py-2.5 rounded-2xl bg-amber-400/15 hover:bg-amber-400/25 border border-amber-400/40 text-amber-300 font-extrabold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5 text-amber-400" />
+              <span>З'їв інше (2 круасани, піца, сендвіч...)</span>
+            </button>
+
+            <button
               type="button"
               onClick={() => {
                 onToggleEaten(mealType, entry.id);
@@ -744,13 +757,33 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
                 onRemove(mealType, entry.id);
                 onClose();
               }}
-              className="w-full py-2.5 rounded-2xl bg-white/[0.03] hover:bg-rose-500/10 border border-white/5 hover:border-rose-500/30 text-zinc-400 hover:text-rose-300 font-bold text-xs transition-all text-center"
+              className="w-full py-2.5 rounded-2xl bg-white/[0.03] hover:bg-rose-500/10 border border-white/5 hover:border-rose-500/30 text-zinc-400 hover:text-rose-300 font-bold text-xs transition-all text-center cursor-pointer"
             >
               Видалити страву з розкладу
             </button>
           </div>
         </div>
       </div>
+
+      {/* МОДАЛКА ШВИДКОЇ ЗАМІНИ НА РЕАЛЬНУ ЇЖУ */}
+      <QuickMealSwapModal
+        isOpen={realitySwapOpen}
+        mealType={mealType}
+        currentDishName={entry.name}
+        currentCalories={entry.macros.calories}
+        onClose={() => setRealitySwapOpen(false)}
+        onSkipMeal={(type) => {
+          onRemove(type, entry.id);
+          onClose();
+        }}
+        onReplaceMeal={(type, newDish) => {
+          if (onSwapDish) {
+            onSwapDish(type, entry.id, newDish);
+          }
+          setRealitySwapOpen(false);
+          onClose();
+        }}
+      />
     </div>
   );
 };

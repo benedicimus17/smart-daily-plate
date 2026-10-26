@@ -618,3 +618,37 @@ export function parseRecipeFromText(
     macrosPer100g,
   };
 }
+
+/**
+ * Швидкий резолвер вільної фрази користувача (наприклад: "2 круасани", "піца", "салат")
+ * для 1-тап підміни реального прийому їжі.
+ */
+export function parseQuickDishInput(query: string): { name: string; weightGrams: number; macros: Macros } | null {
+  const q = query.trim().toLowerCase();
+  if (!q) return null;
+
+  const matched = findBestMatch(q);
+  if (!matched) return null;
+
+  // Визначення приблизної ваги: якщо вказано "2 шт", "2 круасани" тощо
+  let multiplier = 1;
+  const countMatch = q.match(/(\d+)\s*(шт|круасан|шмат|кусок|порц)?/);
+  if (countMatch && parseInt(countMatch[1], 10) > 1 && parseInt(countMatch[1], 10) <= 6) {
+    multiplier = parseInt(countMatch[1], 10);
+  }
+
+  const baseWeight = matched.defaultServingWeight || 150;
+  const totalWeight = baseWeight * multiplier;
+  const ratio = totalWeight / 100;
+
+  return {
+    name: query.trim(),
+    weightGrams: totalWeight,
+    macros: {
+      calories: Math.round(matched.per100g.calories * ratio),
+      protein: Math.round(matched.per100g.protein * ratio),
+      fat: Math.round(matched.per100g.fat * ratio),
+      carbs: Math.round(matched.per100g.carbs * ratio)
+    }
+  };
+}

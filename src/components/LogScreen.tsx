@@ -6,6 +6,7 @@ import { SmartBalancerModal } from './SmartBalancerModal';
 import { DiningOutEstimatorModal } from './DiningOutEstimatorModal';
 import { QuickAddModal } from './QuickAddModal';
 import { DishDetailModal } from './DishDetailModal';
+import { QuickMealSwapModal } from './QuickMealSwapModal';
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -18,7 +19,8 @@ import {
   ChevronRight as ChevronRightIcon,
   Clock,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  ArrowLeftRight
 } from 'lucide-react';
 
 interface LogScreenProps {
@@ -62,6 +64,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
   const [balancerOpen, setBalancerOpen] = useState(false);
   const [diningOpen, setDiningOpen] = useState(false);
   const [quickAddConfig, setQuickAddConfig] = useState<{ mealType: MealType; initialTime?: string } | null>(null);
+  const [realitySwapConfig, setRealitySwapConfig] = useState<{ mealType: MealType; dishName: string; calories: number } | null>(null);
 
   // Стан для модалки деталей страви
   const [selectedDish, setSelectedDish] = useState<{ mealType: MealType; entry: MealEntry } | null>(null);
@@ -574,16 +577,33 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
                     </div>
                   </div>
 
-                  {/* Кнопки дій: стрілочка деталей та видалення */}
+                  {/* Кнопки дій: швидка підміна, стрілочка деталей та видалення */}
                   <div className="flex items-center gap-1 shrink-0">
-                    <ChevronRightIcon className="w-3.5 h-3.5 text-zinc-500 group-hover:text-amber-400 transition-colors" />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setRealitySwapConfig({
+                          mealType,
+                          dishName: entry.name,
+                          calories: entry.macros.calories
+                        });
+                      }}
+                      className="p-1.5 rounded-lg bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 hover:text-amber-200 border border-amber-400/30 transition-all active:scale-95 text-[10px] font-black flex items-center gap-1 cursor-pointer"
+                      title="З'їв інше / Замінити в 1 тап"
+                    >
+                      <ArrowLeftRight className="w-3 h-3 text-amber-400" />
+                      <span className="hidden sm:inline">З'їв інше</span>
+                    </button>
+
+                    <ChevronRightIcon className="w-3.5 h-3.5 text-zinc-500 group-hover:text-amber-400 transition-colors ml-1" />
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         removeFoodFromMeal(mealType, entry.id);
                       }}
-                      className="p-1 text-zinc-600 hover:text-rose-400 transition-colors ml-1"
+                      className="p-1 text-zinc-600 hover:text-rose-400 transition-colors ml-0.5 cursor-pointer"
                       title="Видалити"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -667,6 +687,46 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
           setQuickAddConfig(null);
         }}
       />
+
+      {/* МОДАЛКА ШВИДКОЇ ЗАМІНИ НА РЕАЛЬНУ ЇЖУ (MERCADONA / ПІЦА / КРУАСАНИ) */}
+      {realitySwapConfig && (
+        <QuickMealSwapModal
+          isOpen={true}
+          mealType={realitySwapConfig.mealType}
+          currentDishName={realitySwapConfig.dishName}
+          currentCalories={realitySwapConfig.calories}
+          onClose={() => setRealitySwapConfig(null)}
+          onSkipMeal={(type) => {
+            const cat = dailyLog.meals[type];
+            const entry = cat.entries.find(e => e.name === realitySwapConfig.dishName);
+            if (entry) {
+              removeFoodFromMeal(type, entry.id);
+            }
+          }}
+          onReplaceMeal={(type, newDish) => {
+            const cat = dailyLog.meals[type];
+            const entry = cat.entries.find(e => e.name === realitySwapConfig.dishName);
+            if (entry) {
+              updateMealEntry(type, entry.id, {
+                name: newDish.name,
+                weightGrams: newDish.weightGrams,
+                macros: newDish.macros,
+                recipeDetails: newDish.recipeDetails,
+                eaten: true
+              });
+            } else {
+              addFoodToMeal(type, {
+                foodId: `reality-swap-${Date.now()}`,
+                name: newDish.name,
+                weightGrams: newDish.weightGrams,
+                macros: newDish.macros,
+                recipeDetails: newDish.recipeDetails,
+                eaten: true
+              });
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
