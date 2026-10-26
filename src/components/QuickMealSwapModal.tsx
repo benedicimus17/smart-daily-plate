@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { MealType, Macros } from '../types/nutrition';
 import { parseQuickDishInput } from '../services/recipeParser';
+import { trackEvent } from '../services/analyticsService';
 
 export interface QuickPreset {
   id: string;
@@ -153,6 +154,13 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
   };
 
   const handleApplyPreset = (preset: QuickPreset) => {
+    trackEvent('meal_reality_swapped', {
+      mealType,
+      presetId: preset.id,
+      presetName: preset.name,
+      calories: preset.macros.calories,
+      isCustom: false
+    });
     onReplaceMeal(mealType, {
       name: preset.name,
       weightGrams: preset.weightGrams,
@@ -175,6 +183,13 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
     const protein = parsed ? parsed.macros.protein : Math.round(calories * 0.15 / 4);
     const fat = parsed ? parsed.macros.fat : Math.round(calories * 0.35 / 9);
     const carbs = parsed ? parsed.macros.carbs : Math.round(calories * 0.50 / 4);
+
+    trackEvent('meal_reality_swapped', {
+      mealType,
+      dishName: title,
+      calories,
+      isCustom: true
+    });
 
     onReplaceMeal(mealType, {
       name: title,
@@ -232,6 +247,11 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
             id="btn-skip-meal-now"
             type="button"
             onClick={() => {
+              trackEvent('meal_skipped', {
+                mealType,
+                dishName: currentDishName,
+                savedCalories: currentCalories
+              });
               onSkipMeal(mealType);
               onClose();
             }}

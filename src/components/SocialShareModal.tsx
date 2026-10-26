@@ -18,6 +18,7 @@ import {
   createShareCardBlob,
   shareOrDownloadCard
 } from '../services/socialShareService';
+import { trackEvent } from '../services/analyticsService';
 
 interface SocialShareModalProps {
   isOpen: boolean;
@@ -79,6 +80,10 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({
       const res = await shareOrDownloadCard(blob, `nutriq_daily_${format}.png`);
 
       if (res.success) {
+        trackEvent('social_card_shared', {
+          format,
+          method: res.method
+        });
         if (res.method === 'native') {
           showToast('✓ Надіслано через системний шеринг!');
         } else if (res.method === 'clipboard') {

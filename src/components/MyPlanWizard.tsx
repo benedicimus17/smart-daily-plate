@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUserStore } from '../store/userStore';
 import { useNutritionStore } from '../store/nutritionStore';
 import { calculatePersonalPlan } from '../math/planCalculator';
@@ -9,6 +9,7 @@ import {
   ALLERGEN_META,
   UserDietaryRestrictions
 } from '../services/allergenService';
+import { trackEvent } from '../services/analyticsService';
 import {
   ArrowLeft,
   X,
@@ -60,6 +61,12 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [legalOpen, setLegalOpen] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) {
+      trackEvent('onboarding_started');
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   // Парсинг числових значень із захистом від NaN
@@ -85,12 +92,14 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
   };
 
   const handleNext = () => {
+    trackEvent('onboarding_step_completed', { nextStep: questionIndex + 1 });
     setQuestionIndex((prev) => prev + 1);
   };
 
   // 1-тап вибір для категорій (миттєвий авто-перехід)
   const selectAndAdvance = <T,>(setter: (val: T) => void, val: T) => {
     setter(val);
+    trackEvent('onboarding_step_completed', { nextStep: questionIndex + 1 });
     setQuestionIndex((prev) => prev + 1);
   };
 
@@ -152,6 +161,13 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
         customAllergies
       };
 
+      trackEvent('onboarding_completed', {
+        dietType,
+        isGuest: false,
+        eatingRhythm,
+        goal,
+        pace
+      });
       generateMenuForTargets(plan.targets, eatingRhythm, { userRestrictions: restrictions });
       updateTargets(plan.targets);
       setIsSubmitting(false);
@@ -163,6 +179,13 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
   const handleGuestSkip = () => {
     setIsSubmitting(true);
     setTimeout(() => {
+      trackEvent('onboarding_completed', {
+        dietType,
+        isGuest: true,
+        eatingRhythm,
+        goal,
+        pace
+      });
       savePlanAndRegister(
         {
           gender,

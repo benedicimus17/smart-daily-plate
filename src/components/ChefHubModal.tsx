@@ -39,6 +39,7 @@ import {
 import { parseVideoRecipeWithAi } from '../services/videoAiService';
 import { detectDietaryConflicts, AllergenConflict } from '../services/allergenService';
 import { AllergenConflictModal } from './AllergenConflictModal';
+import { trackEvent } from '../services/analyticsService';
 
 export interface ChefDishItem {
   id: string;
@@ -1025,6 +1026,12 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     try {
       const result = await lookupBarcode(targetCode);
       setIsBarcodeLoading(false);
+
+      trackEvent('barcode_scanned', {
+        barcodePrefix: targetCode.substring(0, 7),
+        success: result.success && !!result.product,
+        productName: result.product?.name ? result.product.name.substring(0, 40) : undefined
+      });
 
       if (result.success && result.product) {
         setScannedProduct(result.product);

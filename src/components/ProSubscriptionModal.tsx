@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Crown,
@@ -15,6 +15,7 @@ import {
 import { useUserStore } from '../store/userStore';
 import { useTranslation } from '../store/languageStore';
 import { initiateSubscriptionCheckout, cancelActiveSubscription, STRIPE_PLANS } from '../services/stripeBilling';
+import { trackEvent } from '../services/analyticsService';
 
 interface ProSubscriptionModalProps {
   isOpen: boolean;
@@ -34,9 +35,19 @@ export const ProSubscriptionModal: React.FC<ProSubscriptionModalProps> = ({
   const [success, setSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
+  useEffect(() => {
+    if (isOpen) {
+      trackEvent('pro_modal_viewed', { plan: selectedPlan });
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleCheckout = async (isSimulator: boolean = false) => {
+    trackEvent('pro_checkout_started', {
+      plan: selectedPlan,
+      isSimulator
+    });
     setIsSubscribing(true);
 
     try {

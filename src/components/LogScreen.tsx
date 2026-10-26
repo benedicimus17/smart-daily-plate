@@ -7,6 +7,7 @@ import { DiningOutEstimatorModal } from './DiningOutEstimatorModal';
 import { QuickAddModal } from './QuickAddModal';
 import { DishDetailModal } from './DishDetailModal';
 import { QuickMealSwapModal } from './QuickMealSwapModal';
+import { trackEvent } from '../services/analyticsService';
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -528,6 +529,11 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
+                        trackEvent('meal_eaten_toggled', {
+                          mealType,
+                          entryId: entry.id,
+                          eaten: !isEaten
+                        });
                         toggleMealEaten(mealType, entry.id);
                       }}
                       className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 active:scale-90 ${

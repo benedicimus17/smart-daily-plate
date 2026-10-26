@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Droplets, Check } from 'lucide-react';
+import { trackEvent } from '../services/analyticsService';
 
 export const WaterTracker: React.FC = () => {
   const [glasses, setGlasses] = useState<number>(3); // 3 з 6 за замовчуванням
@@ -8,11 +9,13 @@ export const WaterTracker: React.FC = () => {
 
   const handleToggleGlass = (index: number) => {
     // Якщо тиснемо на ту саму заповнену склянку — можемо зняти одну або встановити новий рівень
-    if (glasses === index + 1) {
-      setGlasses(index);
-    } else {
-      setGlasses(index + 1);
-    }
+    const newCount = glasses === index + 1 ? index : index + 1;
+    setGlasses(newCount);
+    trackEvent('water_logged', {
+      glassesCount: newCount,
+      totalMl: newCount * glassVolumeMl,
+      targetReached: newCount >= totalGlasses
+    });
   };
 
   const isCompleted = glasses >= totalGlasses;
