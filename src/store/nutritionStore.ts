@@ -6,6 +6,7 @@ import { ParsedRecipe } from '../types/recipe';
 import { CookLossDish } from '../types/cookLoss';
 import { generateDailyMealsForTargets } from '../services/menuGenerator';
 import { generateSevenDayDogfoodingData } from '../services/dogfoodingSeeder';
+import { UserDietaryRestrictions } from '../services/allergenService';
 
 export interface NutritionState {
   currentDate: string;
@@ -24,7 +25,11 @@ export interface NutritionState {
   moveMealEntry: (fromMealType: MealType, toMealType: MealType, entryId: string, newTimestamp?: string) => void;
   toggleMealEaten: (mealType: MealType, entryId: string) => void;
   updateTargets: (targets: Partial<DailyLog['targets']>) => void;
-  generateMenuForTargets: (targets: DailyLog['targets'], eatingRhythm?: '3_meals' | '5_meals', options?: { markPastAsEaten?: boolean }) => void;
+  generateMenuForTargets: (
+    targets: DailyLog['targets'],
+    eatingRhythm?: '3_meals' | '5_meals',
+    options?: { markPastAsEaten?: boolean; userRestrictions?: UserDietaryRestrictions }
+  ) => void;
   quickAddCalories: (mealType: MealType, calories: number, note?: string) => void;
 
   // Дії рецептів

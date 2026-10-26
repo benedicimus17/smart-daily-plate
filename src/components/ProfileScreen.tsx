@@ -37,6 +37,7 @@ import { LegalModal } from './LegalModal';
 import { LanguageSelectorModal } from './LanguageSelectorModal';
 import { NotificationSettingsModal } from './NotificationSettingsModal';
 import { SocialShareModal } from './SocialShareModal';
+import { DietaryRestrictionsModal } from './DietaryRestrictionsModal';
 import { useTranslation } from '../store/languageStore';
 import { PwaInstallBanner } from './PwaInstallBanner';
 
@@ -63,6 +64,7 @@ export const ProfileScreen: React.FC = () => {
   const [languageModalOpen, setLanguageModalOpen] = useState(false);
   const [notificationModalOpen, setNotificationModalOpen] = useState(false);
   const [socialShareOpen, setSocialShareOpen] = useState(false);
+  const [dietaryModalOpen, setDietaryModalOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [exportToast, setExportToast] = useState(false);
   const [deletedToast, setDeletedToast] = useState(false);
@@ -422,6 +424,25 @@ export const ProfileScreen: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold text-emerald-300 bg-emerald-400/10 px-2 py-0.5 rounded-lg border border-emerald-400/20">
                 Stories • Telegram
+              </span>
+              <ChevronRight className="w-4 h-4 text-zinc-500" />
+            </div>
+          </button>
+
+          <button
+            id="btn-open-dietary-restrictions"
+            type="button"
+            onClick={() => setDietaryModalOpen(true)}
+            className="w-full p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/5 hover:border-emerald-400/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span className="font-semibold text-zinc-200">Алергії та Раціон (Вегетаріанство / Лактоза)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-emerald-300 bg-emerald-400/10 px-2 py-0.5 rounded-lg border border-emerald-400/20">
+                {user.dietType === 'vegetarian' ? 'Вегетаріанство' : user.dietType === 'vegan' ? 'Веганство' : user.dietType === 'pescatarian' ? 'Пескетаріанство' : 'Стандарт'}
+                {user.allergens && user.allergens.length > 0 ? ` • ${user.allergens.length} алерг.` : ''}
               </span>
               <ChevronRight className="w-4 h-4 text-zinc-500" />
             </div>
@@ -808,6 +829,12 @@ export const ProfileScreen: React.FC = () => {
           cookLossGramsSaved: 85,
           format: 'story'
         }}
+      />
+
+      {/* Модалка дієтичних обмежень та алергій */}
+      <DietaryRestrictionsModal
+        isOpen={dietaryModalOpen}
+        onClose={() => setDietaryModalOpen(false)}
       />
     </div>
   );

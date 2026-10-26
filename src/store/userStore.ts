@@ -40,6 +40,9 @@ const DEFAULT_USER: UserProfile = {
   pace: 'fast',
   eatingRhythm: '3_meals',
   takesProtein: false,
+  dietType: 'standard',
+  allergens: [],
+  customAllergies: [],
   registeredAt: undefined
 };
 

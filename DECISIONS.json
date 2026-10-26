@@ -5,24 +5,24 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-26T07:18:00",
+    "last_updated": "2026-10-26T07:48:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 6.3: Branded Social Share & Daily Progress Card Generator",
-    "sprint_goal": "Повне впровадження брендованого шерингу прогресу (socialShareService.ts, SocialShareModal.tsx, генерація Canvas 1080x1920 Stories та 1080x1080 квадрат, Web Share API, 1-клік збереження PNG і копіювання в буфер, інтеграція кнопки шерингу в Header та ProfileScreen)."
+    "current_sprint": "Stage 6.4: Smart Allergen & Dietary Restriction Engine",
+    "sprint_goal": "Повна інтеграція системи контролю алергенів та типів харчування (allergenService.ts, DietaryRestrictionsModal.tsx, AllergenConflictModal.tsx, дієто-адаптивний menuGenerator.ts, перевірка конфліктів лактози/глютену/м'яса/кастомних алергій при додаванні страв у ChefHubModal та налаштування в ProfileScreen)."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
     "styling": "Tailwind CSS (Dark Glassmorphism Luxury theme)",
     "state_management": "Zustand (NutritionStore with LocalStorage persistence) + Supabase Cloud Sync + Stripe Billing",
-    "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone, App Shortcuts, Web Push Notifications, Social Share)",
+    "pwa_support": "vite-plugin-pwa (Offline-first, installable standalone, App Shortcuts, Web Push Notifications, Social Share, Allergen Guard)",
     "production_deployment": "https://smart-daily-plate.vercel.app"
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-26T07:18:00",
+    "verified_at": "2026-10-26T07:48:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage6_3_social_share_cards.md",
-    "tests_passed": "111/111",
+    "report_artifact": "qa_report_stage6_4_allergen_dietary_engine.md",
+    "tests_passed": "120/120",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -220,6 +220,13 @@
       "automated_tests": "PASSED (src/services/__tests__/socialShareService.test.ts - 111/111 passed)",
       "ui_verified": true,
       "notes": "Повна інтеграція брендованого генератора карток дня (socialShareService.ts): 1) Рендеринг високої чіткості на Canvas у форматах Stories (9:16, 1080x1920) та Квадрат (1:1, 1080x1080); 2) Візуалізація золотого логотипу NUTRIQ, калорійного кільця, 3 стовпчиків БЖУ, Weekly Flex Bank (+350 ккал), води та позначки Cook-Loss (-25%); 3) 3-рівнева доставка: нативний navigator.share з файлом, копіювання в Clipboard та 1-клік завантаження PNG; 4) Інтеграція модалки SocialShareModal.tsx з кнопкою в Header та ProfileScreen. Верифіковано через agent-browser (390x844), 0 помилок."
+    },
+    {
+      "feature": "Smart Allergen & Dietary Restriction Engine",
+      "status": "DONE",
+      "automated_tests": "PASSED (src/services/__tests__/allergenService.test.ts - 120/120 passed)",
+      "ui_verified": true,
+      "notes": "Повна інтеграція шлюзу контролю алергенів та типів харчування (allergenService.ts): 1) Багатомовна онтологія тригерів (лактоза, глютен, горіхи, яйця, морепродукти, соя, м'ясо та кастомні алергії); 2) Авто-адаптація щоденного меню в menuGenerator.ts під вегетаріанство (боули з нутом, тофу-скрембл, стейки з тофу без м'яса) та виключення алергенів; 3) Захисний екран AllergenConflictModal.tsx у ChefHubModal з ШІ-порадою, авто-заміною або додаванням під власну відповідальність; 4) Модальне вікно налаштувань DietaryRestrictionsModal.tsx у ProfileScreen. Верифіковано через agent-browser (390x844), 0 помилок."
     }
   ],
   "qa_verification_gate": {
@@ -461,6 +468,11 @@
       "timestamp": "2026-10-26T07:18:00",
       "author": "CEO & QA Auditor",
       "entry": "Затвердження та розгортання Черги № 6.3 (Branded Social Share & Daily Progress Card Generator): 1) Створено сервіс socialShareService.ts з повноцінним Canvas-рендерером 2x Retina у форматах Stories (9:16, 1080x1920) та Квадрат (1:1, 1080x1080), золотим логотипом NUTRIQ, калорійним кільцем, 3 колонками БЖУ, Weekly Flex Bank, водою та Cook-Loss; 2) Створено SocialShareModal.tsx з миттєвим перемикачем формату та кнопками шерингу; 3) Впроваджено 3-рівневу дистрибуцію: нативний Web Share API, Clipboard копіювання та 1-клік завантаження PNG; 4) Інтегровано кнопку швидкого шерингу в Header (біля календаря) та в ProfileScreen; 5) Написано 8 нових юніт-тестів (111/111 vitest пройдено, збірка Vite 3.08с); 6) Проведено E2E аудит через agent-browser (390x844): відкрито модалку шерингу з шапки, переключено на квадратний пост, верифіковано завантаження картки (audit_stage6_3_social_share_modal.png), 0 помилок консолі."
+    },
+    {
+      "timestamp": "2026-10-26T07:48:00",
+      "author": "CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Черги № 6.4 (Smart Allergen & Dietary Restriction Engine): 1) Створено сервіс allergenService.ts з онтологією тригерів на 3 мовах (лактоза, глютен, горіхи, яйця, морепродукти, соя, м'ясо та індивідуальні алергени користувача); 2) Дієто-адаптивний генератор щоденного меню в menuGenerator.ts: автоматичне виключення м'яса при вегетаріанстві/веганстві та заміна на білкові рослинні альтернативи (боули з нутом, тофу стейки, скрембли); 3) Створено шлюз захисту AllergenConflictModal.tsx у ChefHubModal: інтерактивне попередження про алерген/м'ясо з ШІ-порадою, авто-заміною або додаванням під власну відповідальність; 4) Створено модальне вікно налаштувань DietaryRestrictionsModal.tsx у ProfileScreen; 5) Додано 9 нових юніт-тестів (120/120 vitest пройдено, збірка Vite 2.83с); 6) Проведено E2E аудит через agent-browser (390x844): вибір вегетаріанства, активація захисту від лактози, перерахунок меню (audit_stage6_4_dietary_modal.png), 0 помилок консолі."
     }
   ]
 }

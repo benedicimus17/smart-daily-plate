@@ -37,6 +37,8 @@ import {
   ScannedProduct
 } from '../services/openFoodFactsService';
 import { parseVideoRecipeWithAi } from '../services/videoAiService';
+import { detectDietaryConflicts, AllergenConflict } from '../services/allergenService';
+import { AllergenConflictModal } from './AllergenConflictModal';
 
 export interface ChefDishItem {
   id: string;
@@ -740,6 +742,20 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   const [isPreviewAdded, setIsPreviewAdded] = useState(false);
   const [proPaywallDish, setProPaywallDish] = useState<ChefDishItem | null>(null);
 
+  // Стан для Шлюзу контролю алергій та дієтичних конфліктів (Stage 6.4)
+  const [allergenConflictState, setAllergenConflictState] = useState<{
+    isOpen: boolean;
+    dishName: string;
+    conflicts: AllergenConflict[];
+    onProceed: () => void;
+    onReplace?: (suggestion: string) => void;
+  }>({
+    isOpen: false,
+    dishName: '',
+    conflicts: [],
+    onProceed: () => {}
+  });
+
   // Стан для AI Парсера (Stage 6.0: Multi-Modal Whisper + OCR + Edge Gateway)
   const [parserUrl, setParserUrl] = useState('https://www.tiktok.com/@chef/video/crepes-with-meat');
   const [videoDishHint, setVideoDishHint] = useState('');
@@ -847,8 +863,32 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     return matchesSearch;
   });
 
-  // Додавання страви з каталогу в розклад
+  // Додавання страви з каталогу в розклад з контролем алергій
   const handleAddCatalogItem = (item: ChefDishItem) => {
+    const conflicts = detectDietaryConflicts(item.name, item.ingredients, user);
+    if (conflicts.length > 0) {
+      setAllergenConflictState({
+        isOpen: true,
+        dishName: item.name,
+        conflicts,
+        onProceed: () => {
+          executeAddCatalogItem(item);
+          setAllergenConflictState((prev) => ({ ...prev, isOpen: false }));
+        },
+        onReplace: (suggestion) => {
+          executeAddCatalogItem({
+            ...item,
+            name: `${item.name} (${suggestion})`
+          });
+          setAllergenConflictState((prev) => ({ ...prev, isOpen: false }));
+        }
+      });
+      return;
+    }
+    executeAddCatalogItem(item);
+  };
+
+  const executeAddCatalogItem = (item: ChefDishItem) => {
     const defaultTime = item.category === 'breakfast' ? '08:30' :
                         item.category === 'lunch' ? '13:00' :
                         item.category === 'snack' ? '11:00' : '19:30';
@@ -867,8 +907,39 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     }, 900);
   };
 
-  // Додавання страви з детального перегляду (Preview Modal)
+  // Додавання страви з детального перегляду (Preview Modal) з контролем алергій
   const handleAddPreviewDish = () => {
+    if (!selectedDishPreview) return;
+    const item = selectedDishPreview;
+    const conflicts = detectDietaryConflicts(item.name, item.ingredients, user);
+
+    if (conflicts.length > 0) {
+      setAllergenConflictState({
+        isOpen: true,
+        dishName: item.name,
+        conflicts,
+        onProceed: () => {
+          executeAddPreviewDish();
+          setAllergenConflictState((prev) => ({ ...prev, isOpen: false }));
+        },
+        onReplace: (suggestion) => {
+          if (selectedDishPreview) {
+            setSelectedDishPreview({
+              ...selectedDishPreview,
+              name: `${selectedDishPreview.name} (${suggestion})`
+            });
+          }
+          executeAddPreviewDish();
+          setAllergenConflictState((prev) => ({ ...prev, isOpen: false }));
+        }
+      });
+      return;
+    }
+
+    executeAddPreviewDish();
+  };
+
+  const executeAddPreviewDish = () => {
     if (!selectedDishPreview) return;
     const defaultTime = previewTargetSlot === 'breakfast' ? '08:30' :
                         previewTargetSlot === 'lunch' ? '13:00' :
@@ -2308,6 +2379,16 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
             </div>
           </div>
         )}
+
+        {/* Шлюз попередження про алерген або дієтичний конфлікт (Stage 6.4) */}
+        <AllergenConflictModal
+          isOpen={allergenConflictState.isOpen}
+          dishName={allergenConflictState.dishName}
+          conflicts={allergenConflictState.conflicts}
+          onCancel={() => setAllergenConflictState((prev) => ({ ...prev, isOpen: false }))}
+          onProceedAnyway={() => allergenConflictState.onProceed()}
+          onReplaceWithSafeAlternative={allergenConflictState.onReplace}
+        />
       </div>
     </div>
   );

@@ -26,6 +26,9 @@ export interface UserBodyMetrics {
   pace: WeightLossPace;
   eatingRhythm?: '3_meals' | '5_meals';
   takesProtein?: boolean;
+  dietType?: 'standard' | 'vegetarian' | 'vegan' | 'pescatarian';
+  allergens?: ('lactose' | 'gluten' | 'nuts' | 'eggs' | 'seafood' | 'soy')[];
+  customAllergies?: string[];
 }
 
 export interface UserProfile extends UserBodyMetrics {
