@@ -108,7 +108,7 @@ export function generateDailyMealsForTargets(
         eaten: options.markPastAsEaten ? true : false,
         recipeDetails: `Нут відварений ${chickpeaGrams}г, кіноа ${quinoaGrams}г, броколі на пару 80г, оливкова олія`
       };
-    } else if (isPescatarian) {
+    } else if (isPescatarian && !isVegan) {
       const salmonRaw = Math.round(220 * baseScale);
       const salmonCooked = Math.round(salmonRaw * 0.78);
       lunchEntry = {
@@ -156,7 +156,7 @@ export function generateDailyMealsForTargets(
         eaten: false,
         recipeDetails: `Тофу гриль ${tofuSteakGrams}г, спаржа свіжа гриль ${asparagusGrams}г, мікс зелені`
       };
-    } else if (isPescatarian) {
+    } else if (isPescatarian && !isVegan) {
       const tunaRaw = Math.round(240 * baseScale);
       const tunaCooked = Math.round(tunaRaw * 0.76);
       dinnerEntry = {
@@ -244,64 +244,163 @@ export function generateDailyMealsForTargets(
   const diFat = targetFat - (bfFat + luFat + snFat);
   const diCarbs = targetCarbs - (bfCarbs + luCarbs + snCarbs);
 
-  const eggsCount = Math.max(2, Math.round(3 * baseScale));
-  const rawTurkeyGrams = Math.round(240 * (luProt / 60));
-  const cookedTurkeyGrams = Math.round(rawTurkeyGrams * 0.75);
-  const yogurtGrams = Math.round(180 * baseScale);
+  const hasLactoseAllergy = restrictions?.allergens?.includes('lactose');
+  const hasNutsAllergy = restrictions?.allergens?.includes('nuts');
+
+  // 1. Сніданок (захист від яєць / веганство)
+  let breakfastEntry: MealEntry;
+  if (isVegan || hasEggsAllergy) {
+    const tofuGrams = Math.round(180 * baseScale);
+    breakfastEntry = {
+      id: `gen-b-${Date.now()}`,
+      foodId: 'vegan_scramble',
+      name: 'Скрембл з тофу, авокадо та тостом',
+      weightGrams: Math.round(180 * baseScale),
+      macros: { calories: bfCals, protein: bfProt, fat: bfFat, carbs: bfCarbs },
+      timestamp: '08:30',
+      eaten: options.markPastAsEaten ? true : false,
+      recipeDetails: `Тофу органічний ${tofuGrams}г, авокадо хасс ${Math.round(40 * baseScale)}г, ${toastLabel} ${Math.round(45 * baseScale)}г`
+    };
+  } else {
+    const eggsCount = Math.max(2, Math.round(3 * baseScale));
+    breakfastEntry = {
+      id: `gen-b-${Date.now()}`,
+      foodId: 'zen_omelet',
+      name: 'Омлет з авокадо та тостом',
+      weightGrams: Math.round(200 * baseScale),
+      macros: { calories: bfCals, protein: bfProt, fat: bfFat, carbs: bfCarbs },
+      timestamp: '08:30',
+      eaten: options.markPastAsEaten ? true : false,
+      recipeDetails: `Курячі яйця ${eggsCount} шт, авокадо хасс ${Math.round(45 * baseScale)}г, ${toastLabel} ${Math.round(45 * baseScale)}г`
+    };
+  }
+
+  // 2. Обід (захист від м'яса / веганство / пескетаріанство)
+  let lunchEntry: MealEntry;
+  if (isVegetarian) {
+    const chickpeaGrams = Math.round(180 * baseScale);
+    lunchEntry = {
+      id: `gen-l-${Date.now()}`,
+      foodId: 'chickpea_quinoa_bowl',
+      name: 'Нут та кіноа Боул з печеними овочами',
+      weightGrams: Math.round(chickpeaGrams + 130 * baseScale + 60),
+      macros: { calories: luCals, protein: luProt, fat: luFat, carbs: luCarbs },
+      timestamp: '13:00',
+      eaten: options.markPastAsEaten ? true : false,
+      recipeDetails: `Нут відварений ${chickpeaGrams}г, кіноа ${Math.round(130 * baseScale)}г, броколі на пару 60г, оливкова олія`
+    };
+  } else if (isPescatarian && !isVegan) {
+    const salmonRaw = Math.round(200 * baseScale);
+    const salmonCooked = Math.round(salmonRaw * 0.78);
+    lunchEntry = {
+      id: `gen-l-${Date.now()}`,
+      foodId: 'salmon_quinoa',
+      name: 'Філе лосося на пару з кіноа',
+      weightGrams: Math.round(salmonCooked + 130 * baseScale),
+      macros: { calories: luCals, protein: luProt, fat: luFat, carbs: luCarbs },
+      timestamp: '13:00',
+      eaten: options.markPastAsEaten ? true : false,
+      isCookLoss: true,
+      rawWeightGrams: salmonRaw,
+      cookedWeightGrams: salmonCooked,
+      recipeDetails: `Лосось ${salmonRaw}г ➔ ${salmonCooked}г (-22% Cook-Loss), кіноа ${Math.round(130 * baseScale)}г`
+    };
+  } else {
+    const rawTurkeyGrams = Math.round(240 * (luProt / 60));
+    const cookedTurkeyGrams = Math.round(rawTurkeyGrams * 0.75);
+    lunchEntry = {
+      id: `gen-l-${Date.now()}`,
+      foodId: 'turkey_quinoa',
+      name: 'Філе індички запечене з кіноа',
+      weightGrams: Math.round(cookedTurkeyGrams + 160 * baseScale),
+      macros: { calories: luCals, protein: luProt, fat: luFat, carbs: luCarbs },
+      timestamp: '13:00',
+      eaten: options.markPastAsEaten ? true : false,
+      isCookLoss: true,
+      rawWeightGrams: rawTurkeyGrams,
+      cookedWeightGrams: cookedTurkeyGrams,
+      recipeDetails: `Філе індички ${rawTurkeyGrams}г ➔ ${cookedTurkeyGrams}г (-25% Cook-Loss), кіноа ${Math.round(130 * baseScale)}г`
+    };
+  }
+
+  // 3. Перекус (захист від лактози / горіхів / веганство)
+  let snackEntry: MealEntry;
   const berriesGrams = Math.round(70 * baseScale);
+  if (isVegan || hasLactoseAllergy) {
+    const chiaGrams = Math.round(35 * baseScale);
+    const nutDetail = hasNutsAllergy ? 'насіння соняшника 15г' : `мигдаль ${Math.round(15 * baseScale)}г`;
+    snackEntry = {
+      id: `gen-s-${Date.now()}`,
+      foodId: 'chia_coconut_pudding',
+      name: 'Кокосовий чіа-пудинг з лісовими ягодами',
+      weightGrams: Math.round(150 + berriesGrams + 20),
+      macros: { calories: snCals, protein: snProt, fat: snFat, carbs: snCarbs },
+      timestamp: '16:30',
+      eaten: options.markPastAsEaten ? true : false,
+      recipeDetails: `Кокосове молоко 150г, насіння чіа ${chiaGrams}г, ягоди ${berriesGrams}г, ${nutDetail}`
+    };
+  } else {
+    const yogurtGrams = Math.round(180 * baseScale);
+    const nutDetail = hasNutsAllergy ? 'насіння соняшника 15г' : `мигдаль ${Math.round(15 * baseScale)}г`;
+    snackEntry = {
+      id: `gen-s-${Date.now()}`,
+      foodId: 'greek_yogurt',
+      name: hasNutsAllergy ? 'Грецький йогурт 2% з лісовими ягодами та насінням' : 'Грецький йогурт 2% з лісовими ягодами та горіхами',
+      weightGrams: Math.round(yogurtGrams + berriesGrams + 20),
+      macros: { calories: snCals, protein: snProt, fat: snFat, carbs: snCarbs },
+      timestamp: '16:30',
+      eaten: options.markPastAsEaten ? true : false,
+      recipeDetails: `Грецький йогурт ${yogurtGrams}г, ягоди ${berriesGrams}г, ${nutDetail}`
+    };
+  }
 
-  const rawSteakGrams = Math.round(260 * (diProt / 55));
-  const cookedSteakGrams = Math.round(rawSteakGrams * 0.74);
-
-  const breakfastEntry: MealEntry = {
-    id: `gen-b-${Date.now()}`,
-    foodId: 'zen_omelet',
-    name: 'Омлет з авокадо та тостом',
-    weightGrams: Math.round(200 * baseScale),
-    macros: { calories: bfCals, protein: bfProt, fat: bfFat, carbs: bfCarbs },
-    timestamp: '08:30',
-    eaten: options.markPastAsEaten ? true : false,
-    recipeDetails: `Курячі яйця ${eggsCount} шт, авокадо хасс ${Math.round(45 * baseScale)}г, тост ${Math.round(45 * baseScale)}г`
-  };
-
-  const lunchEntry: MealEntry = {
-    id: `gen-l-${Date.now()}`,
-    foodId: 'turkey_quinoa',
-    name: 'Філе індички запечене з кіноа',
-    weightGrams: Math.round(cookedTurkeyGrams + 160 * baseScale),
-    macros: { calories: luCals, protein: luProt, fat: luFat, carbs: luCarbs },
-    timestamp: '13:00',
-    eaten: options.markPastAsEaten ? true : false,
-    isCookLoss: true,
-    rawWeightGrams: rawTurkeyGrams,
-    cookedWeightGrams: cookedTurkeyGrams,
-    recipeDetails: `Філе індички ${rawTurkeyGrams}г ➔ ${cookedTurkeyGrams}г (-25% Cook-Loss), кіноа ${Math.round(130 * baseScale)}г`
-  };
-
-  const snackEntry: MealEntry = {
-    id: `gen-s-${Date.now()}`,
-    foodId: 'greek_yogurt',
-    name: 'Грецький йогурт 2% з лісовими ягодами та горіхами',
-    weightGrams: Math.round(yogurtGrams + berriesGrams + 20),
-    macros: { calories: snCals, protein: snProt, fat: snFat, carbs: snCarbs },
-    timestamp: '16:30',
-    eaten: options.markPastAsEaten ? true : false,
-    recipeDetails: `Грецький йогурт ${yogurtGrams}г, ягоди ${berriesGrams}г, мигдаль ${Math.round(15 * baseScale)}г`
-  };
-
-  const dinnerEntry: MealEntry = {
-    id: `gen-d-${Date.now()}`,
-    foodId: 'gourmet_steak',
-    name: 'Gourmet Steak & Greens (Стейк рибай зі спаржею)',
-    weightGrams: Math.round(cookedSteakGrams + 140 * baseScale),
-    macros: { calories: diCals, protein: diProt, fat: diFat, carbs: diCarbs },
-    timestamp: '19:30',
-    eaten: false,
-    isCookLoss: true,
-    rawWeightGrams: rawSteakGrams,
-    cookedWeightGrams: cookedSteakGrams,
-    recipeDetails: `Стейк яловичий ${rawSteakGrams}г ➔ ${cookedSteakGrams}г (-26% Cook-Loss), спаржа свіжа ${Math.round(140 * baseScale)}г`
-  };
+  // 4. Вечеря (захист від м'яса / веганство / пескетаріанство)
+  let dinnerEntry: MealEntry;
+  if (isVegetarian) {
+    const tofuSteakGrams = Math.round(220 * baseScale);
+    dinnerEntry = {
+      id: `gen-d-${Date.now()}`,
+      foodId: 'tofu_steak',
+      name: 'Стейк з тофу на грилі зі спаржею',
+      weightGrams: Math.round(tofuSteakGrams + 140 * baseScale),
+      macros: { calories: diCals, protein: diProt, fat: diFat, carbs: diCarbs },
+      timestamp: '19:30',
+      eaten: false,
+      recipeDetails: `Тофу гриль ${tofuSteakGrams}г, спаржа свіжа ${Math.round(140 * baseScale)}г`
+    };
+  } else if (isPescatarian && !isVegan) {
+    const tunaRaw = Math.round(220 * baseScale);
+    const tunaCooked = Math.round(tunaRaw * 0.76);
+    dinnerEntry = {
+      id: `gen-d-${Date.now()}`,
+      foodId: 'tuna_steak',
+      name: 'Стейк тунця на грилі зі спаржею',
+      weightGrams: Math.round(tunaCooked + 140 * baseScale),
+      macros: { calories: diCals, protein: diProt, fat: diFat, carbs: diCarbs },
+      timestamp: '19:30',
+      eaten: false,
+      isCookLoss: true,
+      rawWeightGrams: tunaRaw,
+      cookedWeightGrams: tunaCooked,
+      recipeDetails: `Тунець стейк ${tunaRaw}г ➔ ${tunaCooked}г (-24% Cook-Loss), спаржа свіжа ${Math.round(140 * baseScale)}г`
+    };
+  } else {
+    const rawSteakGrams = Math.round(260 * (diProt / 55));
+    const cookedSteakGrams = Math.round(rawSteakGrams * 0.74);
+    dinnerEntry = {
+      id: `gen-d-${Date.now()}`,
+      foodId: 'gourmet_steak',
+      name: 'Gourmet Steak & Greens (Стейк рибай зі спаржею)',
+      weightGrams: Math.round(cookedSteakGrams + 140 * baseScale),
+      macros: { calories: diCals, protein: diProt, fat: diFat, carbs: diCarbs },
+      timestamp: '19:30',
+      eaten: false,
+      isCookLoss: true,
+      rawWeightGrams: rawSteakGrams,
+      cookedWeightGrams: cookedSteakGrams,
+      recipeDetails: `Стейк яловичий ${rawSteakGrams}г ➔ ${cookedSteakGrams}г (-26% Cook-Loss), спаржа свіжа ${Math.round(140 * baseScale)}г`
+    };
+  }
 
   return {
     breakfast: {
