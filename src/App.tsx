@@ -20,6 +20,7 @@ import { NextMealSpotlight } from './components/NextMealSpotlight';
 import { WaterTracker } from './components/WaterTracker';
 import { LogScreen } from './components/LogScreen';
 import { ProSubscriptionModal } from './components/ProSubscriptionModal';
+import { SocialShareModal } from './components/SocialShareModal';
 import { useTranslation } from './store/languageStore';
 import { parsePwaActionFromUrl } from './services/pwaService';
 
@@ -44,6 +45,7 @@ export const App: React.FC = () => {
   const [pendingAddAfterWizard, setPendingAddAfterWizard] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [diningModalOpen, setDiningModalOpen] = useState(false);
+  const [socialShareOpen, setSocialShareOpen] = useState(false);
   const [targetMealType, setTargetMealType] = useState<MealType>('lunch');
   const [trendSubTab, setTrendSubTab] = useState<'trend' | 'grocery'>('trend');
   const [inAppAlert, setInAppAlert] = useState<{ title: string; body: string } | null>(null);
@@ -144,6 +146,7 @@ export const App: React.FC = () => {
               hideCalendarButton={activeTab === 'today'}
               onOpenProModal={() => setProModalOpen(true)}
               onResetTestUser={() => setPlanWizardOpen(true)}
+              onOpenShareModal={() => setSocialShareOpen(true)}
             />
           )}
 
@@ -284,6 +287,29 @@ export const App: React.FC = () => {
             isOpen={diningModalOpen}
             onClose={() => setDiningModalOpen(false)}
             onAddMeal={(mealType, data) => addFoodToMeal(mealType, { ...data, eaten: false, foodId: `dining-${Date.now()}` })}
+          />
+
+          {/* Модалка брендового експорту та шерингу дня (Stories / Post) */}
+          <SocialShareModal
+            isOpen={socialShareOpen}
+            onClose={() => setSocialShareOpen(false)}
+            shareData={{
+              dateTitle: 'Сьогоднішній баланс',
+              userName: user.name || 'Alistair',
+              caloriesConsumed: dailyLog.totals.calories,
+              caloriesTarget: dailyLog.targets.calories,
+              proteinGrams: dailyLog.totals.protein,
+              proteinTarget: dailyLog.targets.protein,
+              fatGrams: dailyLog.totals.fat,
+              fatTarget: dailyLog.targets.fat,
+              carbsGrams: dailyLog.totals.carbs,
+              carbsTarget: dailyLog.targets.carbs,
+              waterMl: dailyLog.waterMl,
+              waterTargetMl: Math.round((user.weightKg || 70) * 30),
+              flexBankKcal: 350,
+              cookLossGramsSaved: 85,
+              format: 'story'
+            }}
           />
         </div>
       </div>

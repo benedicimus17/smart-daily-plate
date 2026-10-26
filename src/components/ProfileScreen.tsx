@@ -29,12 +29,14 @@ import {
   Lock,
   Trash2,
   CheckCircle2,
-  Bell
+  Bell,
+  Share2
 } from 'lucide-react';
 import { ProSubscriptionModal } from './ProSubscriptionModal';
 import { LegalModal } from './LegalModal';
 import { LanguageSelectorModal } from './LanguageSelectorModal';
 import { NotificationSettingsModal } from './NotificationSettingsModal';
+import { SocialShareModal } from './SocialShareModal';
 import { useTranslation } from '../store/languageStore';
 import { PwaInstallBanner } from './PwaInstallBanner';
 
@@ -60,6 +62,7 @@ export const ProfileScreen: React.FC = () => {
   const [legalTab, setLegalTab] = useState<'privacy' | 'terms'>('privacy');
   const [languageModalOpen, setLanguageModalOpen] = useState(false);
   const [notificationModalOpen, setNotificationModalOpen] = useState(false);
+  const [socialShareOpen, setSocialShareOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [exportToast, setExportToast] = useState(false);
   const [deletedToast, setDeletedToast] = useState(false);
@@ -401,6 +404,24 @@ export const ProfileScreen: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-lg border border-amber-400/20">
                 Вода • Їжа • Flex Bank
+              </span>
+              <ChevronRight className="w-4 h-4 text-zinc-500" />
+            </div>
+          </button>
+
+          <button
+            id="btn-open-profile-social-share"
+            type="button"
+            onClick={() => setSocialShareOpen(true)}
+            className="w-full p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/5 hover:border-emerald-400/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <Share2 className="w-4 h-4 text-emerald-400" />
+              <span className="font-semibold text-zinc-200">Поділитися днем (Stories / картка)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-emerald-300 bg-emerald-400/10 px-2 py-0.5 rounded-lg border border-emerald-400/20">
+                Stories • Telegram
               </span>
               <ChevronRight className="w-4 h-4 text-zinc-500" />
             </div>
@@ -764,6 +785,29 @@ export const ProfileScreen: React.FC = () => {
         targetWaterMl={Math.round((user.weightKg || 70) * 30)}
         flexBankKcal={350}
         remainingTodayKcal={Math.max(0, dailyLog.targets.calories - dailyLog.totals.calories)}
+      />
+
+      {/* Модалка генерації та шерингу картки дня */}
+      <SocialShareModal
+        isOpen={socialShareOpen}
+        onClose={() => setSocialShareOpen(false)}
+        shareData={{
+          dateTitle: 'Сьогоднішній баланс',
+          userName: user.name || 'Alistair',
+          caloriesConsumed: dailyLog.totals.calories,
+          caloriesTarget: dailyLog.targets.calories,
+          proteinGrams: dailyLog.totals.protein,
+          proteinTarget: dailyLog.targets.protein,
+          fatGrams: dailyLog.totals.fat,
+          fatTarget: dailyLog.targets.fat,
+          carbsGrams: dailyLog.totals.carbs,
+          carbsTarget: dailyLog.targets.carbs,
+          waterMl: dailyLog.waterMl,
+          waterTargetMl: Math.round((user.weightKg || 70) * 30),
+          flexBankKcal: 350,
+          cookLossGramsSaved: 85,
+          format: 'story'
+        }}
       />
     </div>
   );

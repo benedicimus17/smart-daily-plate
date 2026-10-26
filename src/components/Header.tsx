@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, RotateCcw, Crown, Lock } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, RotateCcw, Crown, Lock, Share2 } from 'lucide-react';
 import { useNutritionStore } from '../store/nutritionStore';
 import { useUserStore } from '../store/userStore';
 
@@ -9,6 +9,7 @@ interface HeaderProps {
   hideCalendarButton?: boolean;
   onOpenProModal?: () => void;
   onResetTestUser?: () => void;
+  onOpenShareModal?: () => void;
 }
 
 const formatLocalDate = (d: Date): string => {
@@ -22,7 +23,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSplash,
   hideCalendarButton,
   onOpenProModal,
-  onResetTestUser
+  onResetTestUser,
+  onOpenShareModal
 }) => {
   const { selectedDate, setSelectedDate } = useNutritionStore();
   const { user, resetToNewGuestUser } = useUserStore();
@@ -87,6 +89,18 @@ export const Header: React.FC<HeaderProps> = ({
             title="Вибір дати"
           >
             <Calendar className="w-3.5 h-3.5" />
+          </button>
+        )}
+
+        {onOpenShareModal && (
+          <button
+            id="btn-header-share-daily"
+            type="button"
+            onClick={onOpenShareModal}
+            className="absolute left-9.5 top-1.5 w-8 h-8 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-zinc-400 hover:text-amber-300 hover:border-amber-400/30 transition-all active:scale-95 cursor-pointer"
+            title="Поділитися в Stories / соцмережах"
+          >
+            <Share2 className="w-3.5 h-3.5" />
           </button>
         )}
 
