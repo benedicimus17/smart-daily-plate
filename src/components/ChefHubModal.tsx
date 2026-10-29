@@ -40,6 +40,7 @@ import { parseVideoRecipeWithAi } from '../services/videoAiService';
 import { detectDietaryConflicts, AllergenConflict } from '../services/allergenService';
 import { AllergenConflictModal } from './AllergenConflictModal';
 import { trackEvent } from '../services/analyticsService';
+import { useTranslation } from '../store/languageStore';
 
 export interface ChefDishItem {
   id: string;
@@ -513,7 +514,7 @@ export const CHEF_CATALOG: ChefDishItem[] = [
     ]
   },
   {
-    id: 'chef-l6',
+    id: 'chef-l-greek',
     name: 'Грецький салат зі свіжими овочами та фетою',
     tier: 'free',
     category: 'lunch',
@@ -616,7 +617,7 @@ export const CHEF_CATALOG: ChefDishItem[] = [
     ]
   },
   {
-    id: 'chef-s2',
+    id: 'chef-s-jamon',
     name: 'Хамон Іберіко з соковитою динею (Jamón Ibérico con Melón)',
     tier: 'pro',
     category: 'snack',
@@ -715,6 +716,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  const { t } = useTranslation();
   const { user, setProStatus } = useUserStore();
   const isProUser = Boolean(user.isPro);
 
@@ -1118,7 +1120,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                 </span>
               )}
             </div>
-            <h3 className="text-base font-black text-white tracking-tight">Шеф-Хаб NUTRIQ</h3>
+            <h3 className="text-base font-black text-white tracking-tight">{t('chef_hub_header')}</h3>
           </div>
 
           <button
@@ -1144,7 +1146,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span className="truncate">Меню</span>
+            <span className="truncate">{t('chef_mode_menu')}</span>
           </button>
 
           <button
@@ -1158,7 +1160,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
             }`}
           >
             <Barcode className="w-3.5 h-3.5" />
-            <span className="truncate">Штрих-код</span>
+            <span className="truncate">{t('chef_mode_barcode')}</span>
           </button>
 
           <button
@@ -1172,7 +1174,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
             }`}
           >
             <Link2 className="w-3.5 h-3.5" />
-            <span className="truncate">AI Імпорт</span>
+            <span className="truncate">{t('chef_mode_ai')}</span>
           </button>
 
           <button
@@ -1186,7 +1188,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
-            <span className="truncate">Вільний</span>
+            <span className="truncate">{t('chef_mode_free')}</span>
           </button>
         </div>
 
@@ -1364,9 +1366,9 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
               <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-200 flex items-start gap-2.5">
                 <ScanLine className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-extrabold text-emerald-300">Камера & Open Food Facts API</div>
+                  <div className="font-extrabold text-emerald-300">{t('chef_bc_title')}</div>
                   <div className="text-[11px] text-emerald-200/80 mt-0.5">
-                    Скануйте штрих-код будь-якого упакованого продукту (Mercadona, Carrefour, Lidl, Сільпо та 3+ млн продуктів світу).
+                    {t('chef_bc_desc')}
                   </div>
                 </div>
               </div>
@@ -1384,7 +1386,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
 
                 <Barcode className="w-10 h-10 text-zinc-500/60 mb-1" />
                 <span className="text-[11px] font-bold text-zinc-300 text-center">
-                  {isCameraActive ? '📷 Камера активна: наведіть на штрих-код' : 'Наведіть камеру на штрих-код товару (EAN-13 / EAN-8)'}
+                  {isCameraActive ? t('chef_bc_cam_active') : t('chef_bc_cam_hint')}
                 </span>
 
                 <button
@@ -1394,14 +1396,14 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                   className="mt-2.5 px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-[10.5px] font-bold text-white flex items-center gap-1.5 transition-all"
                 >
                   <Camera className="w-3.5 h-3.5 text-amber-400" />
-                  <span>{isCameraActive ? 'Вимкнути камеру' : 'Увімкнути камеру смартфона'}</span>
+                  <span>{isCameraActive ? t('chef_bc_cam_btn_off') : t('chef_bc_cam_btn_on')}</span>
                 </button>
               </div>
 
               {/* Швидкі 1-тап пресети перевірених товарів */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-                  Швидкі штрих-коди (Mercadona / UA / Global):
+                  {t('chef_bc_quick_presets')}
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   <button
@@ -1413,7 +1415,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                     }}
                     className="px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-[10.5px] font-bold text-emerald-300"
                   >
-                    🇪🇸 +Proteínas Mercadona
+                    +Proteínas Mercadona
                   </button>
 
                   <button
@@ -1425,7 +1427,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                     }}
                     className="px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-[10.5px] font-bold text-emerald-300"
                   >
-                    🇪🇸 Queso 0% Hacendado
+                    Queso 0% Hacendado
                   </button>
 
                   <button
@@ -1437,7 +1439,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                     }}
                     className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300"
                   >
-                    🇪🇸 Вівсянка Mercadona
+                    Avena Mercadona
                   </button>
 
                   <button
@@ -1449,7 +1451,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                     }}
                     className="px-2 py-1 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 text-[10.5px] font-bold text-blue-300"
                   >
-                    🇺🇦 Сир 5% Яготинський
+                    Сир 5% Яготинський
                   </button>
 
                   <button
@@ -1461,7 +1463,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                     }}
                     className="px-2 py-1 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 text-[10.5px] font-bold text-blue-300"
                   >
-                    🇺🇦 Гречка відбірна
+                    Гречка відбірна
                   </button>
 
                   <button
@@ -1473,7 +1475,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                     }}
                     className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300"
                   >
-                    🌍 Coca-Cola Zero
+                    Coca-Cola Zero
                   </button>
                 </div>
               </div>

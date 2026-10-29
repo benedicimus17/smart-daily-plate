@@ -5,10 +5,10 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-29T20:53:00",
+    "last_updated": "2026-10-29T22:18:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 8.2: Pre-Flight Audit Block 1 — Onboarding (ES/EN/UK) & Initial User Flow Polish",
-    "sprint_goal": "Повна локалізація перших 60 секунд користувацького досвіду (візард MyPlanWizard.tsx та шапка Header.tsx) на 3 ключові мови: іспанська (дефолт для старту в Іспанії), англійська та українська. Інтеграція верхнього перемикача мов (ES | EN | UK), 100% переклад усіх 10 запитань та кнопок без хардкоду, верифікація E2E проходження онбордингу та нуль помилок."
+    "current_sprint": "Stage 8.3: Pre-Flight Audit Block 2 — LogScreen, QuickMealSwap, ChefHub & DishDetail Spanish Localization & Polish",
+    "sprint_goal": "Повна локалізація та аудит Щоденника і Швидких дій (LogScreen.tsx, QuickMealSwapModal.tsx, ChefHubModal.tsx, DishDetailModal.tsx) під ринок Іспанії (ES) з підтримкою EN та UK. Пресети Mercadona, сканер штрих-кодів Hacendado, 100% покриття без хардкоду, 130/130 тестів Vitest та нуль помилок."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
@@ -19,10 +19,10 @@
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-29T20:53:00",
+    "verified_at": "2026-10-29T22:18:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage8_2_onboarding_es_audit.md",
-    "tests_passed": "129/129",
+    "report_artifact": "qa_report_stage8_3_log_and_chefhub_audit.md",
+    "tests_passed": "130/130",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -536,6 +536,11 @@
       "timestamp": "2026-10-29T20:53:00",
       "author": "Founder, CEO & QA Auditor",
       "entry": "Затвердження та розгортання Блоку 1 Передпольотного аудиту (Stage 8.2: Onboarding ES/EN/UK Localization & Initial User Flow Polish): 1) Повна інтеграція useTranslation() у MyPlanWizard.tsx та 100% локалізація 10 кроків онбордингу без жодного залишку хардкоду; 2) У верхню панель візарда інтегровано преміальний швидкий перемикач мов (ES | EN | UK) з миттєвою реактивністю інтерфейсу; 3) Адаптовано шапку Header.tsx: переклад календаря (DOM..SÁB), дат на іспанську (Jueves, 29 de octubre) та вітання (¡Hola, Invitado! / Balance de calorías); 4) Розширено словник translations.ts для 6 мов (понад 110 нових ключів онбордингу та контролів); 5) Додано юніт-тести перевірки локалізації (129/129 passed vitest, чиста збірка Vite за 2.80с); 6) Проведено E2E аудит у реальному браузері (agent-browser, 390x844): зафіксовано скріншоти audit_stage8_2_wizard_step1_es.png, audit_stage8_2_wizard_step1_en.png, audit_stage8_2_wizard_dietary_es.png, audit_stage8_2_wizard_step10_es.png, audit_stage8_2_dashboard_es.png, 0 помилок у консолі."
+    },
+    {
+      "timestamp": "2026-10-29T22:18:00",
+      "author": "Founder, CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Блоку 2 Передпольотного аудиту (Stage 8.3: LogScreen, QuickMealSwap, ChefHub & DishDetail Spanish Localization & Polish): 1) Повна інтеграція useTranslation() у LogScreen.tsx: локалізація тижневого календаря (DOM..SÁB, Hoy), підрахунку страв (N platos), бейджів балансу (Balance 100%, +N kcal por encima de la meta, Restante: N kcal), шкал БЖУ та ресторанної кнопки; 2) Оновлено QuickMealSwapModal.tsx: локалізовані пресети Mercadona/Іспанія (croissants con café, pizza, bocadillo de jamón y queso, ensalada con pollo, kebab, burger), швидкий пропуск (0 kcal) та NLP-ввід; 3) Оновлено ChefHubModal.tsx: переклад шапки, 4 вкладок (Menú, Código barras, Importar IA, Manual), сканера штрих-кодів Mercadona/Hacendado та ліквідація дублікатів ID у каталозі шефа (chef-l-greek, chef-s-jamon); 4) Оновлено DishDetailModal.tsx: локалізація порцій, інгредієнтів, інструкцій, Smart Swap та дій; 5) Розширено translations.ts на 75+ ключів (130/130 тестів Vitest passed, чиста збірка Vite за 2.75с); 6) Проведено E2E аудит у реальному браузері (agent-browser, 390x844): знято скріншоти audit_stage8_3_log_es.png, audit_stage8_3_meal_swap_es.png, audit_stage8_3_chefhub_barcode_es.png, audit_stage8_3_dish_detail_es.png, 0 помилок у консолі."
     }
   ]
 }

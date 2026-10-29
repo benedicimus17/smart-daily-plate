@@ -63,4 +63,34 @@ describe('LanguageStore & i18n Engine', () => {
     const val = store.t('non_existing_key', 'Default Fallback');
     expect(val).toBe('Default Fallback');
   });
+
+  it('translates Block 2 (LogScreen, QuickMealSwap, ChefHub, DishDetail) in Spanish, English and Ukrainian', () => {
+    const store = useLanguageStore.getState();
+
+    // Spanish (Spain release default)
+    store.setLanguage('es');
+    expect(store.t('log_today')).toBe('Hoy');
+    expect(store.t('log_balance_100')).toBe('Balance 100%');
+    expect(store.t('swap_badge_reality')).toBe('Vida real • Cambio rápido');
+    expect(store.t('swap_skip_title')).toBe('Saltar esta comida (0 kcal)');
+    expect(store.t('chef_hub_header')).toBe('Chef-Hub NUTRIQ');
+    expect(store.t('chef_mode_menu')).toBe('Menú');
+    expect(store.t('chef_mode_barcode')).toBe('Código barras');
+    expect(store.t('dish_cooked_portion')).toBe('g porción cocinada');
+    expect(store.t('dish_ate_other_btn')).toBe('Comí otra cosa (2 croissants, pizza, bocadillo...)');
+
+    // English
+    store.setLanguage('en');
+    expect(store.t('log_today')).toBe('Today');
+    expect(store.t('log_balance_100')).toBe('100% Balanced');
+    expect(store.t('swap_badge_reality')).toBe('Real Life • Quick Swap');
+    expect(store.t('chef_mode_barcode')).toBe('Barcode');
+
+    // Ukrainian
+    store.setLanguage('uk');
+    expect(store.t('log_today')).toBe('Сьогодні');
+    expect(store.t('log_balance_100')).toBe('Баланс 100%');
+    expect(store.t('swap_badge_reality')).toBe('Реальне життя • Швидка підміна');
+    expect(store.t('chef_mode_barcode')).toBe('Штрих-код');
+  });
 });

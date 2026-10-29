@@ -5,6 +5,7 @@ import { getNextSwapCandidate, SmartSwapResult } from '../services/smartSwapEngi
 import { CHEF_CATALOG } from './ChefHubModal';
 import { useUserStore } from '../store/userStore';
 import { QuickMealSwapModal } from './QuickMealSwapModal';
+import { useTranslation } from '../store/languageStore';
 
 interface DishDetailModalProps {
   isOpen: boolean;
@@ -17,13 +18,6 @@ interface DishDetailModalProps {
   onSwapDish?: (mealType: MealType, entryId: string, newDish: { name: string; weightGrams: number; macros: Macros; recipeDetails?: string }) => void;
   onOpenProModal?: () => void;
 }
-
-const MEAL_LABELS: Record<MealType, string> = {
-  breakfast: 'Сніданок',
-  lunch: 'Обід',
-  dinner: 'Вечеря',
-  snack: 'Перекус'
-};
 
 const DEFAULT_RECIPES: Record<string, {
   photo: string;
@@ -330,6 +324,14 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
 }) => {
   if (!isOpen || !entry || !mealType) return null;
 
+  const { t } = useTranslation();
+  const mealLabels: Record<MealType, string> = {
+    breakfast: t('breakfast'),
+    lunch: t('lunch'),
+    dinner: t('dinner'),
+    snack: t('snack')
+  };
+
   const { user } = useUserStore();
   const isProUser = Boolean(user.isPro);
 
@@ -533,7 +535,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
               </div>
             )}
             <span className="px-2.5 py-1 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-zinc-200 text-[11px] font-bold">
-              {MEAL_LABELS[mealType]}
+              {mealLabels[mealType] || mealType}
             </span>
           </div>
         </div>
@@ -546,29 +548,29 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
               {entry.name}
             </h2>
             <div className="flex items-center gap-2 mt-1 text-xs text-zinc-400">
-              <span className="font-semibold">{entry.weightGrams} г готова порція</span>
+              <span className="font-semibold">{entry.weightGrams} {t('dish_cooked_portion')}</span>
               <span>•</span>
-              <span className="text-amber-300 font-bold">{entry.macros.calories} ккал</span>
+              <span className="text-amber-300 font-bold">{entry.macros.calories} {t('calories')}</span>
             </div>
           </div>
 
           {/* 4 Чіпи КБЖВ */}
           <div className="grid grid-cols-4 gap-2">
             <div className="p-2.5 rounded-2xl bg-black/40 border border-amber-400/20 text-center">
-              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Ккал</div>
+              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">{t('calories')}</div>
               <div className="text-sm font-black text-amber-300 mt-0.5">{entry.macros.calories}</div>
             </div>
             <div className="p-2.5 rounded-2xl bg-black/40 border border-emerald-400/20 text-center">
-              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Білок</div>
-              <div className="text-sm font-black text-emerald-400 mt-0.5">{entry.macros.protein}г</div>
+              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">{t('protein')}</div>
+              <div className="text-sm font-black text-emerald-400 mt-0.5">{entry.macros.protein}g</div>
             </div>
             <div className="p-2.5 rounded-2xl bg-black/40 border border-amber-500/20 text-center">
-              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Жири</div>
-              <div className="text-sm font-black text-amber-400 mt-0.5">{entry.macros.fat}г</div>
+              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">{t('fat')}</div>
+              <div className="text-sm font-black text-amber-400 mt-0.5">{entry.macros.fat}g</div>
             </div>
             <div className="p-2.5 rounded-2xl bg-black/40 border border-indigo-400/20 text-center">
-              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Вуглеводи</div>
-              <div className="text-sm font-black text-indigo-400 mt-0.5">{entry.macros.carbs}г</div>
+              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">{t('carbs')}</div>
+              <div className="text-sm font-black text-indigo-400 mt-0.5">{entry.macros.carbs}g</div>
             </div>
           </div>
 
@@ -577,7 +579,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
             <div className="p-2.5 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center gap-2.5 text-xs text-amber-200">
               <Scale className="w-4 h-4 text-amber-400 shrink-0" />
               <span className="text-[11px] leading-snug">
-                {recipeMeta.cookLossNote || `Cook-Loss: ${entry.rawWeightGrams || 350}г сирого ➔ ${entry.cookedWeightGrams || entry.weightGrams}г готового`}
+                {recipeMeta.cookLossNote || `Cook-Loss: ${entry.rawWeightGrams || 350}g ➔ ${entry.cookedWeightGrams || entry.weightGrams}g`}
               </span>
             </div>
           )}
@@ -586,7 +588,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
           <div className="space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-300">
               <ChefHat className="w-4 h-4 text-amber-400" />
-              <span>Точні інгредієнти страви:</span>
+              <span>{t('dish_exact_ingredients')}</span>
             </div>
 
             <div className="space-y-1.5">
@@ -597,8 +599,8 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
                 >
                   <span className="text-zinc-200 font-medium">• {ing.name}</span>
                   <div className="flex items-center gap-2 text-right">
-                    <span className="text-amber-300 font-bold">{ing.grams}г</span>
-                    <span className="text-[10.5px] text-zinc-500">({ing.calories} ккал)</span>
+                    <span className="text-amber-300 font-bold">{ing.grams}g</span>
+                    <span className="text-[10.5px] text-zinc-500">({ing.calories} {t('calories')})</span>
                   </div>
                 </div>
               ))}
@@ -609,7 +611,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
           <div className="space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-300">
               <Sparkles className="w-4 h-4 text-emerald-400" />
-              <span>Як готувати (Шеф-інструкція):</span>
+              <span>{t('dish_chef_instructions')}</span>
             </div>
 
             <div className="space-y-1.5 text-xs text-zinc-300">
@@ -639,7 +641,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
               >
                 <div className="flex items-center gap-2">
                   <RefreshCw className="w-4 h-4 text-amber-400 shrink-0 group-hover:rotate-45 transition-transform" />
-                  <span className="text-left">🔄 Smart Swap — Замінити страву</span>
+                  <span className="text-left">{t('dish_smart_swap_pro_label')}</span>
                 </div>
                 <span className="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 flex items-center gap-1 shadow-md shrink-0">
                   <Crown className="w-3 h-3 stroke-[2.5]" /> PRO
@@ -652,21 +654,21 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
                 className="w-full py-2.5 rounded-2xl bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/40 text-amber-300 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm"
               >
                 <RefreshCw className="w-4 h-4 stroke-[2.2] text-amber-400" />
-                <span>🔄 Smart Swap — Замінити страву за 2 секунди</span>
+                <span>{t('dish_smart_swap_btn_label')}</span>
               </button>
             ) : (
               <div className="p-3.5 rounded-2xl bg-gradient-to-b from-amber-500/10 to-black/70 border border-amber-400/50 space-y-3 animate-fadeIn">
                 <div className="flex items-center justify-between">
                   <div className="text-[11px] font-black uppercase text-amber-300 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>ШІ-Кандидат на заміну:</span>
+                    <span>{t('dish_swap_candidate_title')}</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowSwapPanel(false)}
                     className="text-[10px] text-zinc-400 hover:text-white"
                   >
-                    Скасувати
+                    {t('dish_swap_cancel')}
                   </button>
                 </div>
 
@@ -684,9 +686,9 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
                       <div className="flex-1 min-w-0">
                         <h5 className="text-xs font-bold text-white truncate">{currentSwapCandidate.candidate.name}</h5>
                         <div className="text-[10.5px] text-zinc-300 flex items-center gap-2 mt-0.5">
-                          <span className="text-amber-300 font-black">{currentSwapCandidate.candidate.macros.calories} ккал</span>
+                          <span className="text-amber-300 font-black">{currentSwapCandidate.candidate.macros.calories} {t('calories')}</span>
                           <span>•</span>
-                          <span className="text-emerald-400 font-bold">{currentSwapCandidate.candidate.macros.protein}г Б</span>
+                          <span className="text-emerald-400 font-bold">{currentSwapCandidate.candidate.macros.protein}g {t('log_protein_short')}</span>
                         </div>
                         <p className="text-[9.5px] text-amber-300/90 font-medium mt-0.5 truncate">
                           {currentSwapCandidate.matchReason}
@@ -701,7 +703,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
                         className="py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all"
                       >
                         <Check className="w-3.5 h-3.5 stroke-[3]" />
-                        <span>Замінити в 1 клік</span>
+                        <span>{t('dish_swap_apply_btn')}</span>
                       </button>
 
                       <button
@@ -710,13 +712,13 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
                         className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-zinc-200 font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all"
                       >
                         <RefreshCw className="w-3 h-3 text-amber-400" />
-                        <span>Замінити знов</span>
+                        <span>{t('dish_swap_next_btn')}</span>
                       </button>
                     </div>
                   </div>
                 ) : (
                   <p className="text-xs text-zinc-400 text-center py-2">
-                    Немає інших кандидатів з подібним балансом.
+                    {t('dish_swap_no_candidates')}
                   </p>
                 )}
               </div>
@@ -732,7 +734,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
               className="w-full py-2.5 rounded-2xl bg-amber-400/15 hover:bg-amber-400/25 border border-amber-400/40 text-amber-300 font-extrabold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer"
             >
               <ArrowLeftRight className="w-3.5 h-3.5 text-amber-400" />
-              <span>З'їв інше (2 круасани, піца, сендвіч...)</span>
+              <span>{t('dish_ate_other_btn')}</span>
             </button>
 
             <button
@@ -748,7 +750,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
               }`}
             >
               <Check className="w-4 h-4 stroke-[3]" />
-              <span>{isEaten ? 'Позначити як "Ще не з\'їдено"' : '✓ Позначити з\'їденим прямо зараз'}</span>
+              <span>{isEaten ? t('dish_mark_uneaten_btn') : t('dish_mark_eaten_btn')}</span>
             </button>
 
             <button
@@ -759,7 +761,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
               }}
               className="w-full py-2.5 rounded-2xl bg-white/[0.03] hover:bg-rose-500/10 border border-white/5 hover:border-rose-500/30 text-zinc-400 hover:text-rose-300 font-bold text-xs transition-all text-center cursor-pointer"
             >
-              Видалити страву з розкладу
+              {t('dish_remove_btn')}
             </button>
           </div>
         </div>

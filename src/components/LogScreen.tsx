@@ -8,6 +8,7 @@ import { QuickAddModal } from './QuickAddModal';
 import { DishDetailModal } from './DishDetailModal';
 import { QuickMealSwapModal } from './QuickMealSwapModal';
 import { trackEvent } from '../services/analyticsService';
+import { useTranslation } from '../store/languageStore';
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -42,14 +43,8 @@ const timeToMinutes = (t?: string): number => {
   return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
 };
 
-const CATEGORY_LABELS: Record<MealType, string> = {
-  breakfast: 'Сніданок',
-  snack: 'Перекус',
-  lunch: 'Обід',
-  dinner: 'Вечеря'
-};
-
 export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQuickAdd, onOpenProModal }) => {
+  const { t, lang } = useTranslation();
   const { user } = useUserStore();
   const {
     dailyLog,
@@ -80,6 +75,13 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
     setIsManuallyBalanced(false);
   }, [selectedDate]);
 
+  const categoryLabels: Record<MealType, string> = {
+    breakfast: t('breakfast'),
+    snack: t('snack'),
+    lunch: t('lunch'),
+    dinner: t('dinner')
+  };
+
   // Календарні розрахунки
   const [weekOffset, setWeekOffset] = useState<number>(0);
   const baseDate = new Date();
@@ -88,19 +90,29 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
   const monday = new Date(baseDate);
   monday.setDate(baseDate.getDate() + daysToMonday + weekOffset * 7);
 
+  const dateLocale = lang === 'es' ? 'es-ES' : lang === 'uk' ? 'uk-UA' : 'en-US';
+  const shortNamesMap: Record<string, string[]> = {
+    es: ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'],
+    en: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'],
+    uk: ['НД', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'],
+    de: ['SO', 'MO', 'DI', 'MI', 'DO', 'FR', 'SA'],
+    fr: ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'],
+    it: ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB']
+  };
+  const weekShortNames = shortNamesMap[lang] || shortNamesMap.es;
+
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
     const dateStr = formatLocalDate(d);
     const isToday = dateStr === formatLocalDate(new Date());
-    const shortNames = ['НД', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
-    const shortName = shortNames[d.getDay()];
+    const shortName = weekShortNames[d.getDay()];
     return {
       date: dateStr,
       shortName,
       dayNum: d.getDate(),
       isToday,
-      monthName: d.toLocaleDateString('uk-UA', { month: 'short' })
+      monthName: d.toLocaleDateString(dateLocale, { month: 'short' })
     };
   });
 
@@ -136,11 +148,20 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
     if (!cat || !cat.entries) return [];
     return cat.entries.map(entry => ({
       mealType: type,
-      categoryTitle: CATEGORY_LABELS[type],
+      categoryTitle: categoryLabels[type],
       entry,
       timeMinutes: timeToMinutes(entry.timestamp)
     }));
   });
+
+  const getDishesCountLabel = (count: number) => {
+    if (lang === 'uk') {
+      if (count === 1) return t('log_dishes_1');
+      if (count >= 2 && count <= 4) return t('log_dishes_2_4');
+      return t('log_dishes_many');
+    }
+    return count === 1 ? t('log_dishes_1') : t('log_dishes_many');
+  };
 
   timelineEntries.sort((a, b) => a.timeMinutes - b.timeMinutes);
 
@@ -206,7 +227,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
               }}
               className="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-bold text-amber-300"
             >
-              Сьогодні
+              {t('log_today')}
             </button>
             <button
               type="button"
@@ -259,11 +280,11 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div>
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-400 block">
-              Загальне меню на день
+              {t('daily_menu')}
             </span>
             <h3 className="text-sm font-black text-white flex items-center gap-1.5 mt-0.5">
               <span>{dailyLog.date}</span>
-              <span className="text-[11px] font-medium text-zinc-400">• {timelineEntries.length} {timelineEntries.length === 1 ? 'страва' : timelineEntries.length < 5 ? 'страви' : 'страв'}</span>
+              <span className="text-[11px] font-medium text-zinc-400">• {timelineEntries.length} {getDishesCountLabel(timelineEntries.length)}</span>
             </h3>
           </div>
 
@@ -271,16 +292,16 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
           {Math.abs(calDelta) <= 50 ? (
             <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10.5px] font-extrabold flex items-center gap-1 shadow-sm">
               <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-              <span>Баланс 100%</span>
+              <span>{t('log_balance_100')}</span>
             </span>
           ) : calDelta > 50 ? (
             <span className="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10.5px] font-extrabold flex items-center gap-1 shadow-sm">
               <AlertCircle className="w-3 h-3 text-rose-400" />
-              <span>+{calDelta} ккал понад норму</span>
+              <span>+{calDelta} {t('calories')} {t('log_over_target')}</span>
             </span>
           ) : (
             <span className="px-2.5 py-1 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 text-[10.5px] font-extrabold flex items-center gap-1 shadow-sm">
-              <span>Залишок: {Math.abs(calDelta)} ккал</span>
+              <span>{t('log_remaining_prefix')} {Math.abs(calDelta)} {t('calories')}</span>
             </span>
           )}
         </div>
@@ -292,7 +313,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
             <div>
               <div className="text-[10px] font-extrabold uppercase tracking-wide text-emerald-400 flex items-center gap-1">
                 <Check className="w-3 h-3 stroke-[3]" />
-                <span>З'їдено зараз</span>
+                <span>{t('log_eaten_now')}</span>
               </div>
               <div className="flex items-baseline gap-1 mt-1">
                 <span className="text-2xl font-black text-white font-mono tracking-tight">
@@ -307,7 +328,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
             <div className="mt-2">
               <div className="flex justify-between text-[9.5px] text-zinc-400 mb-1 font-semibold">
                 <span className="text-emerald-400">{Math.round((dayPlannedMacros.eatenCalories / (targetCalories || 1)) * 100)}%</span>
-                <span>факт</span>
+                <span>{t('log_actual')}</span>
               </div>
               <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
                 <div
@@ -323,7 +344,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
             <div>
               <div className="text-[10px] font-extrabold uppercase tracking-wide text-amber-300 flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
-                <span>Меню на день</span>
+                <span>{t('log_menu_planned')}</span>
               </div>
               <div className="flex items-baseline gap-1 mt-1">
                 <span className="text-2xl font-black text-white font-mono tracking-tight">
@@ -338,9 +359,9 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
             <div className="mt-2">
               <div className="flex justify-between text-[9.5px] text-zinc-400 mb-1 font-semibold">
                 <span className="text-amber-300 font-bold truncate">
-                  {dayPlannedMacros.plannedCalories > 0 ? `Залишок: ${dayPlannedMacros.plannedCalories} ккал` : '✓ Все з\'їдено'}
+                  {dayPlannedMacros.plannedCalories > 0 ? `${t('log_remaining_prefix')} ${dayPlannedMacros.plannedCalories} ${t('calories')}` : t('log_all_eaten')}
                 </span>
-                <span>план</span>
+                <span>{t('log_plan')}</span>
               </div>
               <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
                 <div
@@ -357,19 +378,19 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
         {/* 3 шкали БЖУ для всього дня */}
         <div className="grid grid-cols-3 gap-2 pt-1 text-center">
           <div className="p-2 rounded-xl bg-black/40 border border-emerald-500/20">
-            <span className="text-[9.5px] uppercase font-bold text-emerald-400 block">Білок</span>
-            <span className="text-xs font-black text-white font-mono">{dayPlannedMacros.protein}г</span>
-            <span className="text-[9px] text-zinc-500 block">/ {targetProtein}г</span>
+            <span className="text-[9.5px] uppercase font-bold text-emerald-400 block">{t('protein')}</span>
+            <span className="text-xs font-black text-white font-mono">{dayPlannedMacros.protein}g</span>
+            <span className="text-[9px] text-zinc-500 block">/ {targetProtein}g</span>
           </div>
           <div className="p-2 rounded-xl bg-black/40 border border-amber-500/20">
-            <span className="text-[9.5px] uppercase font-bold text-amber-400 block">Жири</span>
-            <span className="text-xs font-black text-white font-mono">{dayPlannedMacros.fat}г</span>
-            <span className="text-[9px] text-zinc-500 block">/ {targetFat}г</span>
+            <span className="text-[9.5px] uppercase font-bold text-amber-400 block">{t('fat')}</span>
+            <span className="text-xs font-black text-white font-mono">{dayPlannedMacros.fat}g</span>
+            <span className="text-[9px] text-zinc-500 block">/ {targetFat}g</span>
           </div>
           <div className="p-2 rounded-xl bg-black/40 border border-sky-500/20">
-            <span className="text-[9.5px] uppercase font-bold text-sky-400 block">Вуглеводи</span>
-            <span className="text-xs font-black text-white font-mono">{dayPlannedMacros.carbs}г</span>
-            <span className="text-[9px] text-zinc-500 block">/ {targetCarbs}г</span>
+            <span className="text-[9.5px] uppercase font-bold text-sky-400 block">{t('carbs')}</span>
+            <span className="text-xs font-black text-white font-mono">{dayPlannedMacros.carbs}g</span>
+            <span className="text-[9px] text-zinc-500 block">/ {targetCarbs}g</span>
           </div>
         </div>
 
@@ -387,8 +408,8 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
               <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>
                 {calDelta < 0
-                  ? `Недобір: ${Math.abs(calDelta)} ккал • Авто-заповнити меню під ${targetCalories} ккал`
-                  : `Перебір: +${calDelta} ккал • Авто-збалансувати меню під ${targetCalories} ккал`}
+                  ? t('log_auto_align_deficit').replace('{cal}', String(Math.abs(calDelta))).replace('{target}', String(targetCalories))
+                  : t('log_auto_align_surplus').replace('{cal}', String(calDelta)).replace('{target}', String(targetCalories))}
               </span>
             </button>
           </div>
@@ -402,10 +423,10 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
             <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping shrink-0" />
             <div>
               <div className="text-[11px] font-bold text-rose-200">
-                Перевищення ліміту дня +{excessKcal} ккал
+                {t('log_overlimit_badge').replace('{cal}', String(excessKcal))}
               </div>
               <div className="text-[9.5px] text-rose-300/80">
-                ШІ пропонує зменшити порцію або списати у Flex Bank
+                {t('log_overlimit_hint')}
               </div>
             </div>
           </div>
@@ -420,7 +441,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
             }}
           >
             <Sparkles className="w-3.5 h-3.5 text-zinc-950" />
-            <span>Збалансувати</span>
+            <span>{t('log_balance_action')}</span>
           </button>
         </div>
       )}
@@ -434,7 +455,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
           className="w-full p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-emerald-400/40 flex items-center justify-center gap-2 text-xs font-bold text-zinc-200 hover:text-emerald-300 transition-all active:scale-95 shadow-sm"
         >
           <UtensilsCrossed className="w-4 h-4 text-emerald-400" />
-          <span>Їсте не вдома? Додати страву в ресторані (+приховані олії)</span>
+          <span>{t('log_dining_button')}</span>
         </button>
       </div>
 
@@ -467,7 +488,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
                             ? 'bg-zinc-800 text-zinc-400 border-zinc-700'
                             : 'bg-amber-400/15 border-amber-400/30 text-amber-300 hover:border-amber-400/60'
                         }`}
-                        title="Натисніть щоб змінити час"
+                        title={t('log_click_change_time')}
                       >
                         <Clock className="w-2.5 h-2.5" />
                         <span>{entry.timestamp || '08:30'}</span>
@@ -503,7 +524,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
                     </h4>
 
                     <span className="text-[10px] text-zinc-500">
-                      • {entry.macros.calories} ккал
+                      • {entry.macros.calories} {t('calories')}
                     </span>
                   </div>
 
@@ -511,7 +532,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
                     type="button"
                     onClick={() => setQuickAddConfig({ mealType, initialTime: entry.timestamp })}
                     className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all active:scale-95"
-                    title="Додати страву в цей прийом"
+                    title={t('log_add_meal_to_slot')}
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -541,7 +562,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
                           ? 'bg-emerald-400 text-zinc-950 shadow-sm shadow-emerald-400/30'
                           : 'border-2 border-white/30 bg-black/40 hover:border-amber-400'
                       }`}
-                      title={isEaten ? 'Позначено як з\'їдено' : 'Позначити з\'їденим'}
+                      title={isEaten ? t('log_marked_as_eaten') : t('log_mark_as_eaten')}
                     >
                       {isEaten && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </button>
@@ -562,22 +583,22 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
                           isEaten ? 'text-zinc-600' : 'text-zinc-400'
                         }`}
                       >
-                        <span>{entry.weightGrams}г</span>
+                        <span>{entry.weightGrams}g</span>
                         <span>•</span>
                         <span className={isEaten ? 'text-zinc-500' : 'text-amber-300 font-bold'}>
-                          {entry.macros.calories} ккал
+                          {entry.macros.calories} {t('calories')}
                         </span>
                         <span>•</span>
                         <span className={isEaten ? 'text-zinc-500' : 'text-emerald-400/90'}>
-                          {entry.macros.protein}г Б
+                          {entry.macros.protein}g {t('log_protein_short')}
                         </span>
                         <span>•</span>
                         <span className={isEaten ? 'text-zinc-500' : 'text-amber-400/80'}>
-                          {entry.macros.fat}г Ж
+                          {entry.macros.fat}g {t('log_fat_short')}
                         </span>
                         <span>•</span>
                         <span className={isEaten ? 'text-zinc-500' : 'text-indigo-400/80'}>
-                          {entry.macros.carbs}г В
+                          {entry.macros.carbs}g {t('log_carbs_short')}
                         </span>
                       </div>
                     </div>
@@ -596,10 +617,10 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
                         });
                       }}
                       className="p-1.5 rounded-lg bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 hover:text-amber-200 border border-amber-400/30 transition-all active:scale-95 text-[10px] font-black flex items-center gap-1 cursor-pointer"
-                      title="З'їв інше / Замінити в 1 тап"
+                      title={t('log_swap_quick')}
                     >
                       <ArrowLeftRight className="w-3 h-3 text-amber-400" />
-                      <span className="hidden sm:inline">З'їв інше</span>
+                      <span className="hidden sm:inline">{t('log_swap_quick')}</span>
                     </button>
 
                     <ChevronRightIcon className="w-3.5 h-3.5 text-zinc-500 group-hover:text-amber-400 transition-colors ml-1" />
@@ -610,7 +631,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
                         removeFoodFromMeal(mealType, entry.id);
                       }}
                       className="p-1 text-zinc-600 hover:text-rose-400 transition-colors ml-0.5 cursor-pointer"
-                      title="Видалити"
+                      title={t('log_delete_dish')}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -621,7 +642,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
           })
         ) : (
           <div className="p-8 text-center bg-black/30 rounded-3xl border border-white/5 text-zinc-500 text-xs">
-            На цей день ще немає запланованих прийомів їжі.
+            {t('log_no_meals_today')}
           </div>
         )}
       </div>
@@ -633,7 +654,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
         className="w-full py-3.5 rounded-2xl bg-white/[0.04] border border-dashed border-white/20 hover:border-amber-400/50 text-xs font-bold text-zinc-300 hover:text-amber-300 flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
       >
         <Plus className="w-4 h-4 text-amber-400" />
-        <span>+ Додати свій прийом їжі або перекус (наприклад, 11:00)</span>
+        <span>{t('log_add_custom_slot')}</span>
       </button>
 
       {/* МОДАЛКА ДЕТАЛЕЙ СТРАВИ (ФОТО, ТОЧНІ ГРАМИ, РЕЦЕПТ, ЗМІНА ЧАСУ) */}

@@ -10,6 +10,7 @@ import {
 import { MealType, Macros } from '../types/nutrition';
 import { parseQuickDishInput } from '../services/recipeParser';
 import { trackEvent } from '../services/analyticsService';
+import { useTranslation } from '../store/languageStore';
 
 export interface QuickPreset {
   id: string;
@@ -96,6 +97,164 @@ export const REALITY_PRESETS: QuickPreset[] = [
   }
 ];
 
+export const getLocalizedPresets = (lang: string): QuickPreset[] => {
+  if (lang === 'es') {
+    return [
+      {
+        id: 'croissant_coffee',
+        name: '2 croissants con café (Mercadona/Panadería)',
+        category: 'Desayuno rápido',
+        icon: '🥐',
+        weightGrams: 160,
+        macros: { calories: 640, protein: 12, fat: 34, carbs: 72 },
+        note: '2 croissants recién horneados con café solo'
+      },
+      {
+        id: 'pizza_slice',
+        name: 'Pizza (2 porciones o 1/2 pizza Mercadona/Pizzería)',
+        category: 'Comida rápida / Pizza',
+        icon: '🍕',
+        weightGrams: 240,
+        macros: { calories: 680, protein: 26, fat: 28, carbs: 80 },
+        note: 'Masa fina, queso mozzarella, tomate'
+      },
+      {
+        id: 'sandwich_baguette',
+        name: 'Bocadillo de jamón y queso (Mercadona / Bar)',
+        category: 'Bocadillo',
+        icon: '🥪',
+        weightGrams: 200,
+        macros: { calories: 520, protein: 24, fat: 20, carbs: 60 },
+        note: 'Pan crujiente, jamón serrano o cocido, queso'
+      },
+      {
+        id: 'market_salad_bowl',
+        name: 'Ensalada preparada con pollo (Mercadona / Super)',
+        category: 'Ensalada lista',
+        icon: '🥗',
+        weightGrams: 280,
+        macros: { calories: 360, protein: 28, fat: 14, carbs: 30 },
+        note: 'Mix verde, pollo asado, aderezo ligero'
+      },
+      {
+        id: 'shawarma_kebab',
+        name: 'Kebab / Dürum de ternera o pollo (Comida callejera)',
+        category: 'Comida callejera',
+        icon: '🌯',
+        weightGrams: 350,
+        macros: { calories: 720, protein: 36, fat: 32, carbs: 72 },
+        note: 'Pan plano, carne asada, verduras, salsa suave'
+      },
+      {
+        id: 'burger_fries',
+        name: 'Hamburguesa clásica de ternera',
+        category: 'Comida rápida',
+        icon: '🍔',
+        weightGrams: 220,
+        macros: { calories: 590, protein: 30, fat: 29, carbs: 52 },
+        note: 'Pan brioche, carne de vacuno, salsa especial'
+      },
+      {
+        id: 'protein_bar_shake',
+        name: 'Barrita de proteínas + bebida',
+        category: 'Snack fitness',
+        icon: '🥤',
+        weightGrams: 90,
+        macros: { calories: 280, protein: 25, fat: 9, carbs: 24 },
+        note: 'Snack rápido sobre la marcha'
+      },
+      {
+        id: 'sushi_set',
+        name: 'Bandeja de sushi (8 piezas salmón/philadelphia)',
+        category: 'Comida japonesa',
+        icon: '🍣',
+        weightGrams: 240,
+        macros: { calories: 440, protein: 18, fat: 12, carbs: 64 },
+        note: 'Arroz, salmón fresco, queso crema, alga nori'
+      }
+    ];
+  }
+
+  if (lang === 'en') {
+    return [
+      {
+        id: 'croissant_coffee',
+        name: '2 butter croissants with coffee (Mercadona/Bakery)',
+        category: 'Bakery on the go',
+        icon: '🥐',
+        weightGrams: 160,
+        macros: { calories: 640, protein: 12, fat: 34, carbs: 72 },
+        note: '2 fresh croissants with black coffee'
+      },
+      {
+        id: 'pizza_slice',
+        name: 'Pizza (2 slices or 1/2 pizza Mercadona/Pizzeria)',
+        category: 'Fast Food / Pizza',
+        icon: '🍕',
+        weightGrams: 240,
+        macros: { calories: 680, protein: 26, fat: 28, carbs: 80 },
+        note: 'Thin crust, mozzarella cheese, tomatoes'
+      },
+      {
+        id: 'sandwich_baguette',
+        name: 'Ham & cheese baguette sandwich (Bocadillo)',
+        category: 'Sandwich',
+        icon: '🥪',
+        weightGrams: 200,
+        macros: { calories: 520, protein: 24, fat: 20, carbs: 60 },
+        note: 'Crispy bread, ham, cheese'
+      },
+      {
+        id: 'market_salad_bowl',
+        name: 'Ready chicken salad bowl (Mercadona / Market)',
+        category: 'Quick salad',
+        icon: '🥗',
+        weightGrams: 280,
+        macros: { calories: 360, protein: 28, fat: 14, carbs: 30 },
+        note: 'Mixed greens, grilled chicken, light dressing'
+      },
+      {
+        id: 'shawarma_kebab',
+        name: 'Shawarma / Doner kebab (Street food)',
+        category: 'Street food',
+        icon: '🌯',
+        weightGrams: 350,
+        macros: { calories: 720, protein: 36, fat: 32, carbs: 72 },
+        note: 'Flatbread, roasted meat, vegetables, garlic sauce'
+      },
+      {
+        id: 'burger_fries',
+        name: 'Classic beef burger',
+        category: 'Fast food',
+        icon: '🍔',
+        weightGrams: 220,
+        macros: { calories: 590, protein: 30, fat: 29, carbs: 52 },
+        note: 'Brioche bun, beef patty, sauce'
+      },
+      {
+        id: 'protein_bar_shake',
+        name: 'Protein bar + drink',
+        category: 'Fitness snack',
+        icon: '🥤',
+        weightGrams: 90,
+        macros: { calories: 280, protein: 25, fat: 9, carbs: 24 },
+        note: 'Quick snack on the go'
+      },
+      {
+        id: 'sushi_set',
+        name: 'Sushi combo (8 rolls, salmon/philadelphia)',
+        category: 'Japanese food',
+        icon: '🍣',
+        weightGrams: 240,
+        macros: { calories: 440, protein: 18, fat: 12, carbs: 64 },
+        note: 'Rice, salmon, cream cheese, nori'
+      }
+    ];
+  }
+
+  return REALITY_PRESETS;
+};
+
 interface QuickMealSwapModalProps {
   isOpen: boolean;
   mealType: MealType;
@@ -114,13 +273,6 @@ interface QuickMealSwapModalProps {
   ) => void;
 }
 
-const MEAL_LABELS: Record<MealType, string> = {
-  breakfast: 'Сніданок',
-  lunch: 'Обід',
-  dinner: 'Вечеря',
-  snack: 'Перекус'
-};
-
 export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
   isOpen,
   mealType,
@@ -130,11 +282,23 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
   onSkipMeal,
   onReplaceMeal
 }) => {
+  const { t, lang } = useTranslation();
+  const presets = getLocalizedPresets(lang);
+
+  const mealLabels: Record<MealType, string> = {
+    breakfast: t('breakfast'),
+    lunch: t('lunch'),
+    dinner: t('dinner'),
+    snack: t('snack')
+  };
+
   const [customInput, setCustomInput] = useState('');
   const [customCalories, setCustomCalories] = useState('');
   const [parsedPreview, setParsedPreview] = useState<{ name: string; calories: number } | null>(null);
 
   if (!isOpen) return null;
+
+  const currentMealTitle = mealLabels[mealType] || mealType;
 
   const handleInputChange = (val: string) => {
     setCustomInput(val);
@@ -195,10 +359,12 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
       name: title,
       weightGrams: parsed?.weightGrams || 200,
       macros: { calories, protein, fat, carbs },
-      recipeDetails: `Швидка заміна в 1 клік (${title})`
+      recipeDetails: `1-Click Swap (${title})`
     });
     onClose();
   };
+
+  const questionTitle = t('swap_title_question').replace('{meal}', currentMealTitle);
 
   return (
     <div
@@ -228,15 +394,16 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
         <div className="pr-8 space-y-1">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-[11px] font-black uppercase tracking-wider">
             <Zap className="w-3 h-3 text-amber-400" />
-            <span>Реальне життя • Швидка підміна</span>
+            <span>{t('swap_badge_reality')}</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            Що ви з'їли на {MEAL_LABELS[mealType]}?
+            {questionTitle}
           </h2>
           {currentDishName && (
             <p className="text-xs text-zinc-400">
-              Зараз у плані: <span className="text-zinc-200 font-semibold">{currentDishName}</span>
-              {currentCalories ? ` (${currentCalories} ккал)` : ''}
+              {t('swap_current_plan')}{' '}
+              <span className="text-zinc-200 font-semibold">{currentDishName}</span>
+              {currentCalories ? ` (${currentCalories} ${t('calories')})` : ''}
             </p>
           )}
         </div>
@@ -263,10 +430,10 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
               </div>
               <div>
                 <div className="text-xs font-black text-rose-200 group-hover:text-rose-100">
-                  Пропустив цей прийом (0 ккал)
+                  {t('swap_skip_title')}
                 </div>
                 <div className="text-[10px] text-zinc-400">
-                  Не було часу / на інтервальному голодуванні. Вивільнити калорії дня.
+                  {t('swap_skip_subtitle')}
                 </div>
               </div>
             </div>
@@ -278,13 +445,13 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
         <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-              Швидкі готові варіанти (1 тап)
+              {t('swap_popular_title')}
             </span>
-            <span className="text-[10px] text-zinc-500">Авто-розрахунок КБЖВ</span>
+            <span className="text-[10px] text-zinc-500">{t('swap_auto_calc')}</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
-            {REALITY_PRESETS.map((preset) => (
+            {presets.map((preset) => (
               <button
                 key={preset.id}
                 id={`btn-preset-${preset.id}`}
@@ -300,9 +467,9 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
                     {preset.name}
                   </div>
                   <div className="flex items-center gap-1.5 text-[9.5px] text-zinc-400 mt-0.5">
-                    <span className="text-amber-300 font-extrabold">{preset.macros.calories} ккал</span>
+                    <span className="text-amber-300 font-extrabold">{preset.macros.calories} {t('calories')}</span>
                     <span>•</span>
-                    <span className="text-emerald-400">{preset.macros.protein}г Б</span>
+                    <span className="text-emerald-400">{preset.macros.protein}g {t('log_protein_short')}</span>
                   </div>
                 </div>
               </button>
@@ -313,7 +480,7 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
         {/* 3. ВАРІАНТ: ВВЕСТИ СВОЄ ЗА 2 СЕКУНДИ */}
         <form onSubmit={handleApplyCustom} className="mt-4 pt-3 border-t border-white/10 space-y-2.5">
           <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider block">
-            Або введіть що з'їли (наприклад: 2 круасани, піца, шаурма)
+            {t('swap_custom_label')}
           </label>
 
           <div className="space-y-2">
@@ -324,7 +491,7 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
                 type="text"
                 value={customInput}
                 onChange={(e) => handleInputChange(e.target.value)}
-                placeholder="Наприклад: 2 круасани з капучино..."
+                placeholder={t('swap_custom_input_ph')}
                 className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
               />
             </div>
@@ -335,7 +502,7 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
                 type="number"
                 value={customCalories}
                 onChange={(e) => setCustomCalories(e.target.value)}
-                placeholder="Калорії (якщо відомо, або лишіть пустим)"
+                placeholder={t('swap_custom_cal_ph')}
                 className="flex-1 px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
               />
 
@@ -346,14 +513,14 @@ export const QuickMealSwapModal: React.FC<QuickMealSwapModalProps> = ({
                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 disabled:opacity-40 text-zinc-950 font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer"
               >
                 <Check className="w-3.5 h-3.5 stroke-[3]" />
-                <span>Замінити</span>
+                <span>{t('swap_btn_replace')}</span>
               </button>
             </div>
 
             {parsedPreview && (
               <div className="p-2 rounded-xl bg-amber-400/10 border border-amber-400/30 text-[10.5px] text-amber-200 flex items-center justify-between">
-                <span>Знайдено в онтології: <strong>{parsedPreview.name}</strong></span>
-                <span className="font-black text-amber-300">~{parsedPreview.calories} ккал</span>
+                <span>{t('swap_ontology_found')} <strong>{parsedPreview.name}</strong></span>
+                <span className="font-black text-amber-300">~{parsedPreview.calories} {t('calories')}</span>
               </div>
             )}
           </div>
