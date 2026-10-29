@@ -18,6 +18,7 @@ import {
   requestNotificationPermission,
   dispatchNutriqNotification
 } from '../services/notificationService';
+import { useTranslation } from '../store/languageStore';
 
 interface NotificationSettingsModalProps {
   isOpen: boolean;
@@ -36,6 +37,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
   flexBankKcal = 350,
   remainingTodayKcal = 420
 }) => {
+  const { t } = useTranslation();
   const [settings, setSettings] = useState<NotificationSettings>(loadNotificationSettings());
   const [permission, setPermission] = useState<NotificationPermissionState>(getNotificationPermissionStatus());
   const [testSentToast, setTestSentToast] = useState(false);
@@ -109,13 +111,13 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
             </div>
             <div>
               <h3 className="font-extrabold text-base text-white tracking-tight flex items-center gap-2">
-                <span>Розумні нагадування</span>
+                <span>{t('notifications_title', 'Розумні нагадування')}</span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
                   Web Push
                 </span>
               </h3>
               <p className="text-xs text-zinc-400">
-                Гідратація, розклад прийомів їжі та баланс Flex Bank
+                {t('notifications_subtitle', 'Гідратація, розклад прийомів їжі та баланс Flex Bank')}
               </p>
             </div>
           </div>
@@ -135,23 +137,23 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
           <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-sm text-white">Увімкнути сповіщення</span>
+                <span className="font-bold text-sm text-white">{t('notifications_enable_toggle', 'Увімкнути сповіщення')}</span>
                 {permission === 'granted' ? (
                   <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Дозволено
+                    <CheckCircle2 className="w-3 h-3" /> {t('notifications_granted', 'Дозволено')}
                   </span>
                 ) : permission === 'denied' ? (
                   <span className="text-[10px] text-rose-400 font-semibold flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" /> Заблоковано в браузері
+                    <AlertCircle className="w-3 h-3" /> {t('notifications_denied', 'Заблоковано в браузері')}
                   </span>
                 ) : (
                   <span className="text-[10px] text-amber-400 font-semibold">
-                    Потребує дозволу
+                    {t('notifications_prompt', 'Потребує дозволу')}
                   </span>
                 )}
               </div>
               <p className="text-[11px] text-zinc-400 mt-0.5">
-                Отримуйте нагадування навіть при згорнутому застосунку
+                {t('notifications_subtitle', 'Отримуйте нагадування навіть при згорнутому застосунку')}
               </p>
             </div>
 
@@ -179,9 +181,9 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
                   <Droplets className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="font-bold text-xs text-zinc-200 block">Трекер води</span>
+                  <span className="font-bold text-xs text-zinc-200 block">{t('water_tracker', 'Трекер води')}</span>
                   <span className="text-[10px] text-zinc-400">
-                    Регулярні нагадування про склянку води
+                    {t('glasses_count', 'Регулярні нагадування про склянку води')}
                   </span>
                 </div>
               </div>
@@ -207,7 +209,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
 
             {settings.waterReminders && settings.enabled && (
               <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs text-zinc-300">
-                <span className="text-[11px] text-zinc-400">Інтервал нагадувань:</span>
+                <span className="text-[11px] text-zinc-400">Інтервал:</span>
                 <div className="flex items-center gap-1.5">
                   {[1.5, 2, 3].map((hrs) => (
                     <button
@@ -220,7 +222,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
                           : 'bg-white/5 text-zinc-400 hover:text-white'
                       }`}
                     >
-                      {hrs} год
+                      {hrs} h
                     </button>
                   ))}
                 </div>
@@ -236,9 +238,9 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
                   <UtensilsCrossed className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="font-bold text-xs text-zinc-200 block">Розклад страв</span>
+                  <span className="font-bold text-xs text-zinc-200 block">{t('daily_menu', 'Розклад страв')}</span>
                   <span className="text-[10px] text-zinc-400">
-                    Нагадування про сніданок, обід та вечерю
+                    {t('breakfast', 'Сніданок')}, {t('lunch', 'Обід')}, {t('dinner', 'Вечеря')}
                   </span>
                 </div>
               </div>
@@ -265,7 +267,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
             {settings.mealReminders && settings.enabled && (
               <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5">
                 <div className="p-2 rounded-xl bg-white/5 border border-white/5 text-center">
-                  <span className="text-[9px] text-zinc-400 block">Сніданок</span>
+                  <span className="text-[9px] text-zinc-400 block">{t('breakfast', 'Сніданок')}</span>
                   <input
                     type="time"
                     value={settings.mealTimes.breakfast}
@@ -279,7 +281,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
                   />
                 </div>
                 <div className="p-2 rounded-xl bg-white/5 border border-white/5 text-center">
-                  <span className="text-[9px] text-zinc-400 block">Обід</span>
+                  <span className="text-[9px] text-zinc-400 block">{t('lunch', 'Обід')}</span>
                   <input
                     type="time"
                     value={settings.mealTimes.lunch}
@@ -293,7 +295,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
                   />
                 </div>
                 <div className="p-2 rounded-xl bg-white/5 border border-white/5 text-center">
-                  <span className="text-[9px] text-zinc-400 block">Вечеря</span>
+                  <span className="text-[9px] text-zinc-400 block">{t('dinner', 'Вечеря')}</span>
                   <input
                     type="time"
                     value={settings.mealTimes.dinner}
@@ -318,10 +320,10 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
               </div>
               <div>
                 <span className="font-bold text-xs text-zinc-200 block">
-                  Вечірній чек-ін Flex Bank
+                  {t('weekly_flex_bank', 'Weekly Flex Bank')}
                 </span>
                 <span className="text-[10px] text-zinc-400">
-                  Щодня о {settings.eveningTime || '20:30'} з підсумком калорій
+                  {settings.eveningTime || '20:30'} • {t('flex_bank_desc', 'Підсумок калорій')}
                 </span>
               </div>
             </div>
@@ -352,9 +354,9 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
                 <Volume2 className="w-4 h-4" />
               </div>
               <div>
-                <span className="font-bold text-xs text-zinc-200 block">Звуковий сигнал</span>
+                <span className="font-bold text-xs text-zinc-200 block">Zen Audio</span>
                 <span className="text-[10px] text-zinc-400">
-                  Приємний дзен-сигнал сповіщення
+                  {t('notifications_subtitle', 'Приємний дзен-сигнал сповіщення')}
                 </span>
               </div>
             </div>
@@ -386,7 +388,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
             className="w-full py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
           >
             <Bell className="w-3.5 h-3.5 text-amber-400" />
-            <span>Надіслати тестове сповіщення</span>
+            <span>{t('notifications_test_btn', 'Надіслати тестове сповіщення')}</span>
           </button>
 
           <button
@@ -396,7 +398,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
             className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 hover:from-amber-300 hover:to-amber-400 transition-all active:scale-98 cursor-pointer"
           >
             <CheckCircle2 className="w-4 h-4" />
-            <span>Зберегти налаштування</span>
+            <span>{t('notifications_save_btn', 'Зберегти налаштування')}</span>
           </button>
 
           {testSentToast && (

@@ -181,7 +181,7 @@ export const ProfileScreen: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-white tracking-tight">
-                  {user.isRegistered ? user.name : 'Гість (локальний профіль)'}
+                  {user.isRegistered ? user.name : t('guest_profile')}
                 </h3>
                 {user.isPro ? (
                   <button
@@ -200,7 +200,7 @@ export const ProfileScreen: React.FC = () => {
                     onClick={() => setProModalOpen(true)}
                     className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-zinc-300 hover:text-amber-300 border border-white/10 hover:border-amber-400/40 transition-colors cursor-pointer"
                   >
-                    FREE (Отримати PRO)
+                    {t('free_badge_get_pro')}
                   </button>
                 )}
               </div>
@@ -220,7 +220,7 @@ export const ProfileScreen: React.FC = () => {
                 </div>
               ) : (
                 <p className="text-[11.5px] text-zinc-400 mt-1">
-                  Зареєструйтесь через пошту, щоб зберегти свій план та щоденник
+                  {t('profile_guest_hint')}
                 </p>
               )}
             </div>
@@ -231,7 +231,7 @@ export const ProfileScreen: React.FC = () => {
               type="button"
               onClick={logout}
               className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-rose-400 transition-colors"
-              title="Вийти з акаунта"
+              title="Logout"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -241,7 +241,7 @@ export const ProfileScreen: React.FC = () => {
         {!user.isRegistered ? (
           <div className="mt-4 pt-3.5 border-t border-white/10 flex items-center justify-between">
             <span className="text-xs text-zinc-300">
-              Бажаєте зберегти раціон у хмару?
+              {t('profile_cloud_save_prompt')}
             </span>
             <button
               type="button"
@@ -253,21 +253,21 @@ export const ProfileScreen: React.FC = () => {
               }}
             >
               <Sparkles className="w-3.5 h-3.5 text-zinc-950" />
-              <span>Зареєструватися</span>
+              <span>{t('profile_register_btn')}</span>
             </button>
           </div>
         ) : (
           /* БЕЗПЕКА ТА КОД ВХОДУ (За вказівкою Власника) */
           <div className="mt-4 pt-3 border-t border-white/10 space-y-2.5">
             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-              Безпека та Вхід
+              {t('profile_security_heading')}
             </span>
 
             {/* Вхід через Face ID */}
             <div className="flex items-center justify-between text-xs text-zinc-300">
               <span className="flex items-center gap-2">
                 <Fingerprint className="w-4 h-4 text-emerald-400" />
-                <span>Біометрія (Face ID / Touch ID)</span>
+                <span>{t('profile_biometrics')}</span>
               </span>
               <button
                 type="button"
@@ -288,14 +288,14 @@ export const ProfileScreen: React.FC = () => {
             <div className="flex items-center justify-between text-xs text-zinc-300">
               <span className="flex items-center gap-2">
                 <KeyRound className="w-4 h-4 text-amber-400" />
-                <span>PIN-код для входу ({user.pinCode ? '••••' : 'Не встановлено'})</span>
+                <span>{t('profile_pincode')} ({user.pinCode ? '••••' : t('profile_pin_not_set')})</span>
               </span>
               <button
                 type="button"
                 onClick={() => setPinInputOpen(!pinInputOpen)}
                 className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 underline"
               >
-                {user.pinCode ? 'Змінити' : 'Встановити'}
+                {user.pinCode ? t('profile_pin_change') : t('profile_pin_set')}
               </button>
             </div>
 
@@ -304,7 +304,7 @@ export const ProfileScreen: React.FC = () => {
                 <input
                   type="password"
                   maxLength={6}
-                  placeholder="Введіть 4 або 6 цифр PIN"
+                  placeholder={t('profile_pin_ph')}
                   value={newPin}
                   onChange={(e) => setNewPin(e.target.value)}
                   className="flex-1 bg-transparent border-none text-sm text-white font-mono focus:outline-none placeholder-zinc-500"
@@ -314,7 +314,7 @@ export const ProfileScreen: React.FC = () => {
                   onClick={handleSavePin}
                   className="px-3 py-1 rounded-xl bg-amber-400 text-zinc-950 text-xs font-bold"
                 >
-                  Зберегти
+                  {t('profile_pin_save')}
                 </button>
               </div>
             )}
@@ -324,25 +324,27 @@ export const ProfileScreen: React.FC = () => {
         {/* Кнопки керування тестуванням та підпискою */}
         <div className="mt-3.5 pt-3 border-t border-white/10 flex items-center gap-2">
           <button
+            id="btn-profile-manage-pro"
             type="button"
             onClick={() => setProModalOpen(true)}
             className="flex-1 py-2 px-3 rounded-xl bg-amber-400/15 hover:bg-amber-400/25 border border-amber-400/30 text-amber-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
           >
             <Crown className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>{user.isPro ? 'Тариф PRO (Активно)' : 'Оформити PRO'}</span>
+            <span>{user.isPro ? t('profile_pro_active') : t('profile_get_pro')}</span>
           </button>
 
           <button
+            id="btn-profile-reset-quiz"
             type="button"
             onClick={() => {
               resetToNewGuestUser();
               setWizardOpen(true);
             }}
             className="py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-            title="Скинути профіль та пройти анкету наново"
+            title={t('profile_test_quiz_tooltip')}
           >
             <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-            <span>Тест анкети</span>
+            <span>{t('profile_test_quiz')}</span>
           </button>
         </div>
       </div>
@@ -360,7 +362,7 @@ export const ProfileScreen: React.FC = () => {
           <div className="flex items-center gap-2">
             <Flame className="w-5 h-5 text-amber-400" />
             <h3 className="text-base font-bold text-white tracking-tight">
-              Блок «Мій План»
+              {t('profile_my_plan_block')}
             </h3>
           </div>
           <button
@@ -369,46 +371,46 @@ export const ProfileScreen: React.FC = () => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/10 hover:border-amber-400/40 text-xs font-semibold text-amber-300 transition-all active:scale-95"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>Перерахувати план</span>
+            <span>{t('profile_recalc_plan')}</span>
           </button>
         </div>
 
         <p className="text-xs text-zinc-400 leading-relaxed mb-3">
-          Індивідуальні ліміти калорій та БЖУ, які транслюються на головний екран:
+          {t('profile_plan_limits_desc')}
         </p>
 
         {/* 4 КОЛОНКИ ПЛАНУ */}
         <div className="grid grid-cols-4 gap-1.5 text-center">
           <div className="p-2.5 rounded-2xl bg-black/40 border border-amber-400/30 flex flex-col items-center">
-            <span className="text-[9.5px] font-bold text-amber-300 uppercase">Ліміт</span>
+            <span className="text-[9.5px] font-bold text-amber-300 uppercase">{t('profile_limit')}</span>
             <span className="text-base font-extrabold text-white mt-1">
               {dailyLog.targets.calories}
             </span>
-            <span className="text-[9px] text-zinc-400">ккал</span>
+            <span className="text-[9px] text-zinc-400">{t('calories')}</span>
           </div>
 
           <div className="p-2.5 rounded-2xl bg-black/40 border border-emerald-400/30 flex flex-col items-center">
-            <span className="text-[9.5px] font-bold text-emerald-300 uppercase">Протеїн</span>
+            <span className="text-[9.5px] font-bold text-emerald-300 uppercase">{t('profile_protein')}</span>
             <span className="text-base font-extrabold text-white mt-1">
               {dailyLog.targets.protein}
             </span>
-            <span className="text-[9px] text-zinc-400">грам</span>
+            <span className="text-[9px] text-zinc-400">{t('profile_gram')}</span>
           </div>
 
           <div className="p-2.5 rounded-2xl bg-black/40 border border-amber-500/30 flex flex-col items-center">
-            <span className="text-[9.5px] font-bold text-amber-400 uppercase">Жири</span>
+            <span className="text-[9.5px] font-bold text-amber-400 uppercase">{t('profile_fat')}</span>
             <span className="text-base font-extrabold text-white mt-1">
               {dailyLog.targets.fat}
             </span>
-            <span className="text-[9px] text-zinc-400">грам</span>
+            <span className="text-[9px] text-zinc-400">{t('profile_gram')}</span>
           </div>
 
           <div className="p-2.5 rounded-2xl bg-black/40 border border-indigo-400/30 flex flex-col items-center">
-            <span className="text-[9.5px] font-bold text-indigo-300 uppercase">Вуглеводи</span>
+            <span className="text-[9.5px] font-bold text-indigo-300 uppercase">{t('profile_carbs')}</span>
             <span className="text-base font-extrabold text-white mt-1">
               {dailyLog.targets.carbs}
             </span>
-            <span className="text-[9px] text-zinc-400">грам</span>
+            <span className="text-[9px] text-zinc-400">{t('profile_gram')}</span>
           </div>
         </div>
       </div>
@@ -422,7 +424,7 @@ export const ProfileScreen: React.FC = () => {
         }}
       >
         <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-3">
-          Системні налаштування
+          {t('profile_system_settings')}
         </span>
 
         <div className="space-y-2 text-xs">
@@ -453,11 +455,11 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-2.5">
               <Bell className="w-4 h-4 text-amber-400" />
-              <span className="font-semibold text-zinc-200">Розумні нагадування (Web Push)</span>
+              <span className="font-semibold text-zinc-200">{t('profile_smart_reminders')}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-lg border border-amber-400/20">
-                Вода • Їжа • Flex Bank
+                {t('profile_reminders_sub')}
               </span>
               <ChevronRight className="w-4 h-4 text-zinc-500" />
             </div>
@@ -471,7 +473,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-2.5">
               <Share2 className="w-4 h-4 text-emerald-400" />
-              <span className="font-semibold text-zinc-200">Поділитися днем (Stories / картка)</span>
+              <span className="font-semibold text-zinc-200">{t('profile_share_day')}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold text-emerald-300 bg-emerald-400/10 px-2 py-0.5 rounded-lg border border-emerald-400/20">
@@ -489,12 +491,12 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-2.5">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span className="font-semibold text-zinc-200">Алергії та Раціон (Вегетаріанство / Лактоза)</span>
+              <span className="font-semibold text-zinc-200">{t('profile_allergies_diet')}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold text-emerald-300 bg-emerald-400/10 px-2 py-0.5 rounded-lg border border-emerald-400/20">
-                {user.dietType === 'vegetarian' ? 'Вегетаріанство' : user.dietType === 'vegan' ? 'Веганство' : user.dietType === 'pescatarian' ? 'Пескетаріанство' : 'Стандарт'}
-                {user.allergens && user.allergens.length > 0 ? ` • ${user.allergens.length} алерг.` : ''}
+                {user.dietType === 'vegetarian' ? t('w_diet_veg_title', 'Вегетаріанство') : user.dietType === 'vegan' ? t('w_diet_vegan_title', 'Веганство') : user.dietType === 'pescatarian' ? t('w_diet_pesco_title', 'Пескетаріанство') : t('w_diet_standard_title', 'Стандарт')}
+                {user.allergens && user.allergens.length > 0 ? ` • ${user.allergens.length}` : ''}
               </span>
               <ChevronRight className="w-4 h-4 text-zinc-500" />
             </div>
@@ -503,14 +505,14 @@ export const ProfileScreen: React.FC = () => {
           <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <Download className="w-4 h-4 text-emerald-400" />
-              <span className="font-semibold text-zinc-200">Експорт щоденника (JSON / CSV)</span>
+              <span className="font-semibold text-zinc-200">{t('profile_export_diary')}</span>
             </div>
             <button
               type="button"
-              onClick={() => alert('Експорт даних щоденника збережено.')}
-              className="text-xs text-zinc-400 hover:text-white underline"
+              onClick={handleExportData}
+              className="text-xs text-zinc-400 hover:text-white underline cursor-pointer"
             >
-              Завантажити
+              {t('profile_download')}
             </button>
           </div>
         </div>
@@ -525,10 +527,10 @@ export const ProfileScreen: React.FC = () => {
         }}
       >
         <h4 className="text-sm font-bold text-white tracking-tight mb-1">
-          6 переваг NUTRIQ перед конкурентами
+          {t('profile_6_features', '6 переваг NUTRIQ перед конкурентами')}
         </h4>
         <p className="text-[11px] text-zinc-400 mb-3">
-          Працюють непомітно, не перевантажуючи головний екран
+          {t('profile_6_features_sub', 'Працюють непомітно, не перевантажуючи головний екран')}
         </p>
 
         <div className="space-y-2 text-xs">
@@ -604,7 +606,7 @@ export const ProfileScreen: React.FC = () => {
               </div>
               <div>
                 <span className="font-bold text-zinc-200 block text-xs">True Fat Trend</span>
-                <span className="text-[10px] text-zinc-400">Графік чистого жиру без коливань води</span>
+                <span className="text-[10px] text-zinc-400">{t('my_weight_subtitle', 'Графік чистого жиру без коливань води')}</span>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-zinc-600" />
@@ -624,7 +626,7 @@ export const ProfileScreen: React.FC = () => {
         <div className="flex items-center gap-2 mb-3">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           <h4 className="text-xs font-black tracking-wider uppercase text-zinc-300">
-            Правова інформація та безпека (GDPR)
+            {t('legal_compliance_sub', 'Правова інформація та безпека (GDPR)')}
           </h4>
         </div>
 
@@ -641,8 +643,8 @@ export const ProfileScreen: React.FC = () => {
                 <Lock className="w-3.5 h-3.5" />
               </div>
               <div>
-                <span className="font-bold text-zinc-200 block text-xs">Політика конфіденційності</span>
-                <span className="text-[10px] text-zinc-400">Стандарт GDPR (EU 2016/679), захист даних</span>
+                <span className="font-bold text-zinc-200 block text-xs">{t('privacy_policy', 'Політика конфіденційності')}</span>
+                <span className="text-[10px] text-zinc-400">{t('privacy_policy_sub', 'Стандарт GDPR (EU 2016/679), захист даних')}</span>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-zinc-500" />
@@ -660,8 +662,8 @@ export const ProfileScreen: React.FC = () => {
                 <FileText className="w-3.5 h-3.5" />
               </div>
               <div>
-                <span className="font-bold text-zinc-200 block text-xs">Умови використання</span>
-                <span className="text-[10px] text-zinc-400">Медичний дисклеймер, правила тріалу та PRO</span>
+                <span className="font-bold text-zinc-200 block text-xs">{t('terms_of_service', 'Умови використання')}</span>
+                <span className="text-[10px] text-zinc-400">{t('terms_sub', 'Медичний дисклеймер, правила тріалу та PRO')}</span>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-zinc-500" />
@@ -679,12 +681,12 @@ export const ProfileScreen: React.FC = () => {
                 <Download className="w-3.5 h-3.5" />
               </div>
               <div>
-                <span className="font-bold text-zinc-200 block text-xs">Експорт моїх даних (JSON)</span>
-                <span className="text-[10px] text-zinc-400">Завантажити копію щоденника та профілю</span>
+                <span className="font-bold text-zinc-200 block text-xs">{t('export_data', 'Експорт моїх даних (JSON)')}</span>
+                <span className="text-[10px] text-zinc-400">{t('export_data_sub', 'Завантажити копію щоденника та профілю')}</span>
               </div>
             </div>
             <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
-              Завантажити
+              {t('profile_download', 'Завантажити')}
             </span>
           </button>
 
@@ -700,12 +702,12 @@ export const ProfileScreen: React.FC = () => {
                 <Trash2 className="w-3.5 h-3.5" />
               </div>
               <div>
-                <span className="font-bold text-rose-300 block text-xs">Видалити акаунт та всі дані</span>
-                <span className="text-[10px] text-zinc-500">Право бути забутим (GDPR ст. 17)</span>
+                <span className="font-bold text-rose-300 block text-xs">{t('delete_account', 'Видалити акаунт та всі дані')}</span>
+                <span className="text-[10px] text-zinc-500">{t('delete_account_sub', 'Право бути забутим (GDPR ст. 17)')}</span>
               </div>
             </div>
             <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">
-              Стерти
+              {t('profile_erase_badge', 'Стерти')}
             </span>
           </button>
         </div>
@@ -775,7 +777,7 @@ export const ProfileScreen: React.FC = () => {
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-emerald-400" />
             <h4 className="text-xs font-black tracking-wider uppercase text-emerald-300">
-              Анонімна продуктова аналітика (GDPR)
+              {t('profile_telemetry_title', 'Анонімна продуктова аналітика (GDPR)')}
             </h4>
           </div>
           <span className="text-[9.5px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
@@ -784,15 +786,15 @@ export const ProfileScreen: React.FC = () => {
         </div>
 
         <p className="text-[11px] text-zinc-300 mb-3 leading-relaxed">
-          Детермінована локальна телеметрія конверсій (онбординг, підміна їжі, сканер штрих-кодів, розрахунок води). Жодні персональні дані (PII) не збираються. Повний контроль за стандартом GDPR ст. 15, 17, 20.
+          {t('profile_telemetry_desc', 'Детермінована локальна телеметрія конверсій. Жодні персональні дані (PII) не збираються. Повний контроль за стандартом GDPR ст. 15, 17, 20.')}
         </p>
 
         {/* Статус та перемикач */}
         <div className="p-3 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between mb-3">
           <div>
-            <span className="text-xs font-bold text-zinc-200 block">Збір локальної телеметрії</span>
+            <span className="text-xs font-bold text-zinc-200 block">{t('profile_telemetry_toggle', 'Збір локальної телеметрії')}</span>
             <span className="text-[10px] text-zinc-400">
-              {telemetryStats.isEnabled ? 'Активно (анонімно на пристрої)' : 'Вимкнено користувачем'}
+              {telemetryStats.isEnabled ? t('profile_telemetry_active', 'Активно (анонімно на пристрої)') : t('profile_telemetry_disabled', 'Вимкнено користувачем')}
             </span>
           </div>
           <button
@@ -814,13 +816,13 @@ export const ProfileScreen: React.FC = () => {
         {/* Метрики подій */}
         <div className="grid grid-cols-2 gap-2 mb-3 text-[11px]">
           <div className="p-2.5 rounded-2xl bg-black/40 border border-white/5">
-            <span className="text-zinc-500 block text-[10px] font-bold">Зафіксовано подій:</span>
+            <span className="text-zinc-500 block text-[10px] font-bold">{t('profile_telemetry_events', 'Зафіксовано подій:')}</span>
             <span className="text-emerald-400 font-black text-sm block">
               {telemetryStats.totalEvents} / 100
             </span>
           </div>
           <div className="p-2.5 rounded-2xl bg-black/40 border border-white/5">
-            <span className="text-zinc-500 block text-[10px] font-bold">Остання активність:</span>
+            <span className="text-zinc-500 block text-[10px] font-bold">{t('profile_telemetry_last_activity', 'Остання активність:')}</span>
             <span className="text-zinc-300 font-semibold block truncate">
               {telemetryStats.lastEventTimestamp
                 ? new Date(telemetryStats.lastEventTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -838,7 +840,7 @@ export const ProfileScreen: React.FC = () => {
             className="py-2.5 px-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-bold text-zinc-200 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
           >
             <FileText className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Журнал (JSON)</span>
+            <span>{t('profile_telemetry_log_btn', 'Журнал (JSON)')}</span>
           </button>
 
           <button
@@ -848,7 +850,7 @@ export const ProfileScreen: React.FC = () => {
             className="py-2.5 px-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-bold text-zinc-200 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-blue-400" />
-            <span>Завантажити</span>
+            <span>{t('profile_download', 'Завантажити')}</span>
           </button>
         </div>
 
@@ -860,7 +862,7 @@ export const ProfileScreen: React.FC = () => {
             className="w-full mt-2 py-2 text-[11px] font-bold text-zinc-500 hover:text-rose-400 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <Trash2 className="w-3 h-3" />
-            <span>Очистити буфер телеметрії</span>
+            <span>{t('profile_telemetry_clear', 'Очистити буфер телеметрії')}</span>
           </button>
         )}
       </div>
@@ -873,9 +875,9 @@ export const ProfileScreen: React.FC = () => {
               <Trash2 className="w-6 h-6" />
             </div>
             <div className="text-center space-y-1">
-              <h3 className="text-base font-black text-white">Видалити акаунт та всі дані?</h3>
+              <h3 className="text-base font-black text-white">{t('profile_confirm_delete_title', 'Видалити акаунт та всі дані?')}</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Це безповоротно видалить ваш персональний план, історію ваги, збережені страви та покупки з пристрою відповідно до ст. 17 GDPR.
+                {t('profile_confirm_delete_desc', 'Це безповоротно видалить ваш персональний план, історію ваги, збережені страви та покупки з пристрою відповідно до ст. 17 GDPR.')}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2 pt-2">
@@ -884,7 +886,7 @@ export const ProfileScreen: React.FC = () => {
                 onClick={() => setConfirmDeleteOpen(false)}
                 className="py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold text-zinc-300 cursor-pointer"
               >
-                Скасувати
+                {t('cancel', 'Скасувати')}
               </button>
               <button
                 id="btn-confirm-delete-action"
@@ -892,7 +894,7 @@ export const ProfileScreen: React.FC = () => {
                 onClick={handleConfirmDelete}
                 className="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-black text-white shadow-lg shadow-rose-600/30 cursor-pointer"
               >
-                Так, видалити все
+                {t('profile_confirm_delete_btn', 'Так, видалити все')}
               </button>
             </div>
           </div>
@@ -903,14 +905,14 @@ export const ProfileScreen: React.FC = () => {
       {exportToast && (
         <div className="fixed bottom-24 inset-x-4 max-w-sm mx-auto z-50 p-3 rounded-2xl bg-emerald-500 text-zinc-950 font-bold text-xs flex items-center justify-center gap-2 shadow-2xl animate-fadeIn">
           <CheckCircle2 className="w-4 h-4" />
-          <span>Файл персональних даних (JSON) завантажено!</span>
+          <span>{t('profile_export_toast', 'Файл персональних даних (JSON) завантажено!')}</span>
         </div>
       )}
 
       {deletedToast && (
         <div className="fixed bottom-24 inset-x-4 max-w-sm mx-auto z-50 p-3 rounded-2xl bg-rose-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-2xl animate-fadeIn">
           <Trash2 className="w-4 h-4" />
-          <span>Всі дані та акаунт безповоротно видалено з пристрою.</span>
+          <span>{t('profile_deleted_toast', 'Всі дані та акаунт безповоротно видалено з пристрою.')}</span>
         </div>
       )}
 
@@ -999,7 +1001,7 @@ export const ProfileScreen: React.FC = () => {
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div className="flex items-center gap-2">
                 <Activity className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-sm font-black text-white">Журнал телеметрії (GDPR JSON)</h3>
+                <h3 className="text-sm font-black text-white">{t('profile_telemetry_log_btn', 'Журнал телеметрії (GDPR JSON)')}</h3>
               </div>
               <button
                 id="btn-close-telemetry-viewer"
@@ -1019,14 +1021,14 @@ export const ProfileScreen: React.FC = () => {
 
             <div className="flex justify-between items-center pt-2 border-t border-white/10">
               <span className="text-[10px] text-zinc-400">
-                Записів: {telemetryStats.totalEvents} • Локально
+                {t('profile_telemetry_events', 'Записів:')} {telemetryStats.totalEvents} • Local
               </span>
               <button
                 type="button"
                 onClick={() => setTelemetryViewerOpen(false)}
                 className="py-2 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold text-zinc-300 cursor-pointer"
               >
-                Закрити
+                {t('close', 'Закрити')}
               </button>
             </div>
           </div>

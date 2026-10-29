@@ -15,6 +15,7 @@ import {
 } from '../services/allergenService';
 import { useUserStore } from '../store/userStore';
 import { useNutritionStore } from '../store/nutritionStore';
+import { useTranslation } from '../store/languageStore';
 
 interface DietaryRestrictionsModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const DietaryRestrictionsModal: React.FC<DietaryRestrictionsModalProps> =
   isOpen,
   onClose
 }) => {
+  const { t } = useTranslation();
   const { user, updateMetrics } = useUserStore();
   const { generateMenuForTargets, dailyLog } = useNutritionStore();
 
@@ -81,37 +83,37 @@ export const DietaryRestrictionsModal: React.FC<DietaryRestrictionsModalProps> =
   const dietOptions: { id: DietType; label: string; desc: string; icon: string }[] = [
     {
       id: 'standard',
-      label: 'Всеїдний (Стандарт)',
-      desc: 'Без обмежень: м\'ясо, птиця, риба, молочні та рослинні продукти',
+      label: t('w_diet_standard_title', '🥩 Всеїдний (Стандарт)'),
+      desc: t('w_diet_standard_desc', "Без обмежень: м'ясо, птиця, риба, молочні та рослинні продукти"),
       icon: '🥩'
     },
     {
       id: 'vegetarian',
-      label: 'Вегетаріанство',
-      desc: 'Без м\'яса та птиці. Дозволені яйця, молочні продукти та рослинна їжа',
+      label: t('w_diet_veg_title', '🌱 Вегетаріанство'),
+      desc: t('w_diet_veg_desc', "Без м'яса та птиці. Дозволені яйця, молочні продукти"),
       icon: '🥗'
     },
     {
       id: 'vegan',
-      label: 'Веганство (Суто рослинне)',
-      desc: 'Виключно рослинна їжа: без м\'яса, риби, яєць та молочних продуктів',
+      label: t('w_diet_vegan_title', '🌿 Веганство (Суто рослинне)'),
+      desc: t('w_diet_vegan_desc', "Виключно рослинна їжа: без м'яса, риби, яєць та молочних"),
       icon: '🌱'
     },
     {
       id: 'pescatarian',
-      label: 'Пескетаріанство',
-      desc: 'Риба та морепродукти дозволені, м\'ясо та птиця виключені',
+      label: t('w_diet_pesco_title', '🐟 Пескетаріанство'),
+      desc: t('w_diet_pesco_desc', "Риба та морепродукти дозволені, м'ясо виключено"),
       icon: '🐟'
     }
   ];
 
-  const standardAllergenList: StandardAllergen[] = [
-    'lactose',
-    'gluten',
-    'nuts',
-    'eggs',
-    'seafood',
-    'soy'
+  const standardAllergenList: { id: StandardAllergen; labelKey: string; subKey: string }[] = [
+    { id: 'lactose', labelKey: 'w_allergen_lactose', subKey: 'lactose' },
+    { id: 'gluten', labelKey: 'w_allergen_gluten', subKey: 'gluten' },
+    { id: 'nuts', labelKey: 'w_allergen_nuts', subKey: 'nuts' },
+    { id: 'eggs', labelKey: 'w_allergen_eggs', subKey: 'eggs' },
+    { id: 'seafood', labelKey: 'w_allergen_seafood', subKey: 'seafood' },
+    { id: 'soy', labelKey: 'w_allergen_soy', subKey: 'soy' }
   ];
 
   return (
@@ -136,13 +138,13 @@ export const DietaryRestrictionsModal: React.FC<DietaryRestrictionsModalProps> =
             </div>
             <div>
               <h3 className="font-extrabold text-base text-white tracking-tight flex items-center gap-2">
-                <span>Алергії та Раціон</span>
+                <span>{t('dietary_modal_title', 'Алергії та Раціон')}</span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   AI Guard
                 </span>
               </h3>
               <p className="text-xs text-zinc-400">
-                Авто-захист від небезпечних продуктів та підбір раціону
+                {t('dietary_modal_subtitle', 'Авто-захист від небезпечних продуктів та підбір раціону')}
               </p>
             </div>
           </div>
@@ -162,7 +164,7 @@ export const DietaryRestrictionsModal: React.FC<DietaryRestrictionsModalProps> =
           <div>
             <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
               <Leaf className="w-3.5 h-3.5 text-emerald-400" />
-              <span>1. Тип харчування</span>
+              <span>{t('w_diet_section', '1. Тип харчування')}</span>
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -198,11 +200,11 @@ export const DietaryRestrictionsModal: React.FC<DietaryRestrictionsModalProps> =
           <div>
             <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-              <span>2. Алергії та харчові непереносимості</span>
+              <span>{t('w_allergens_section', '2. Алергії та харчові непереносимості')}</span>
             </span>
 
             <div className="grid grid-cols-2 gap-2">
-              {standardAllergenList.map((key) => {
+              {standardAllergenList.map(({ id: key, labelKey }) => {
                 const meta = ALLERGEN_META[key];
                 const isSelected = allergens.includes(key);
 
@@ -221,10 +223,7 @@ export const DietaryRestrictionsModal: React.FC<DietaryRestrictionsModalProps> =
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-base shrink-0">{meta.icon}</span>
                       <div className="truncate">
-                        <span className="font-bold text-xs block truncate">{meta.labelUk.split(' ')[0]}</span>
-                        <span className="text-[9.5px] text-zinc-400 truncate block">
-                          {key === 'lactose' ? 'молочка' : key === 'gluten' ? 'пшениця' : key === 'nuts' ? 'горіхи' : key === 'eggs' ? 'яйця' : key === 'seafood' ? 'риба' : 'тофу'}
-                        </span>
+                        <span className="font-bold text-xs block truncate">{t(labelKey as any, meta.labelUk)}</span>
                       </div>
                     </div>
 
@@ -246,17 +245,17 @@ export const DietaryRestrictionsModal: React.FC<DietaryRestrictionsModalProps> =
           {/* 3. КАСТОМНІ АЛЕРГІЇ (НАПРИКЛАД: ЯБЛУКА, МЕД) */}
           <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2">
             <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block">
-              3. Індивідуальні алергени (впишіть свій)
+              {t('w_custom_allergies_label', '3. Індивідуальні алергени (впишіть свій)')}
             </span>
             <p className="text-[10px] text-zinc-400">
-              Комп'ютер перевірятиме будь-яку страву на наявність цих інгредієнтів (наприклад: яблуко, мед, полуниця)
+              {t('dietary_modal_subtitle', 'Авто-захист від небезпечних продуктів')}
             </p>
 
             <form onSubmit={handleAddCustomAllergy} className="flex gap-2">
               <input
                 id="input-custom-allergy"
                 type="text"
-                placeholder="Введіть продукт (наприклад: яблуко)"
+                placeholder={t('w_custom_allergies_ph', 'Введіть продукт...')}
                 value={customInput}
                 onChange={(e) => setCustomInput(e.target.value)}
                 className="flex-1 px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-400 text-xs"
@@ -267,7 +266,7 @@ export const DietaryRestrictionsModal: React.FC<DietaryRestrictionsModalProps> =
                 className="px-3 py-2 rounded-xl bg-emerald-500 text-zinc-950 font-bold text-xs flex items-center gap-1 hover:bg-emerald-400 transition-all cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                <span>Додати</span>
+                <span>{t('w_custom_allergies_add', 'Додати')}</span>
               </button>
             </form>
 
@@ -302,7 +301,7 @@ export const DietaryRestrictionsModal: React.FC<DietaryRestrictionsModalProps> =
             className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-zinc-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 hover:from-emerald-400 hover:to-emerald-500 transition-all active:scale-98 cursor-pointer"
           >
             <CheckCircle2 className="w-4 h-4" />
-            <span>Зберегти та оновити раціон</span>
+            <span>{t('dietary_save_btn', 'Зберегти та оновити раціон')}</span>
           </button>
 
           {saveToast && (

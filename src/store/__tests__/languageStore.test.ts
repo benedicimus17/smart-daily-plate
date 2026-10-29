@@ -137,4 +137,43 @@ describe('LanguageStore & i18n Engine', () => {
     expect(store.t('grocery_cat_meat_fish')).toBe("М'ясо та риба");
     expect(store.t('grocery_cat_dairy')).toBe('Молочне та яйця');
   });
+
+  it('translates Block 4 (Profile, DietaryRestrictions, Notifications, Legal & GDPR) in Spanish, English and Ukrainian', () => {
+    const store = useLanguageStore.getState();
+
+    // Spanish
+    store.setLanguage('es');
+    expect(store.t('guest_profile')).toBe('Invitado (perfil local)');
+    expect(store.t('profile_security_heading')).toBe('Seguridad y Acceso');
+    expect(store.t('profile_biometrics')).toBe('Biometría (Face ID / Touch ID)');
+    expect(store.t('profile_pincode')).toBe('PIN de acceso');
+    expect(store.t('profile_my_plan_block')).toBe('Sección «Mi Plan»');
+    expect(store.t('profile_recalc_plan')).toBe('Recalcular plan');
+    expect(store.t('profile_system_settings')).toBe('Ajustes del sistema');
+    expect(store.t('profile_smart_reminders')).toBe('Recordatorios inteligentes (Web Push)');
+    expect(store.t('profile_telemetry_title')).toBe('Analítica de producto anónima (RGPD)');
+    expect(store.t('profile_confirm_delete_title')).toBe('¿Eliminar cuenta y todos los datos?');
+    expect(store.t('notifications_title')).toBe('Recordatorios inteligentes');
+    expect(store.t('dietary_modal_title')).toBe('Alergias y Dieta');
+
+    // English
+    store.setLanguage('en');
+    expect(store.t('guest_profile')).toBe('Guest (local profile)');
+    expect(store.t('profile_security_heading')).toBe('Security & Access');
+    expect(store.t('profile_biometrics')).toBe('Biometrics (Face ID / Touch ID)');
+    expect(store.t('profile_pincode')).toBe('PIN Code');
+    expect(store.t('profile_my_plan_block')).toBe('"My Plan" Targets');
+    expect(store.t('profile_telemetry_title')).toBe('Anonymous Product Analytics (GDPR)');
+    expect(store.t('notifications_title')).toBe('Smart Reminders');
+    expect(store.t('dietary_modal_title')).toBe('Diet & Allergens');
+
+    // Ukrainian
+    store.setLanguage('uk');
+    expect(store.t('guest_profile')).toBe('Гість (локальний профіль)');
+    expect(store.t('profile_security_heading')).toBe('Безпека та Вхід');
+    expect(store.t('profile_my_plan_block')).toBe('Блок «Мій План»');
+    expect(store.t('profile_telemetry_title')).toBe('Анонімна продуктова аналітика (GDPR)');
+    expect(store.t('notifications_title')).toBe('Розумні нагадування');
+    expect(store.t('dietary_modal_title')).toBe('Алергії та Раціон');
+  });
 });

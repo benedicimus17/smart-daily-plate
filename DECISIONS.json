@@ -5,10 +5,10 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-29T22:50:00",
+    "last_updated": "2026-10-29T23:25:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 8.4: Pre-Flight Audit Block 3 — TrueFatTrend (Weight Trend) & Smart Grocery List Spanish Localization & Polish",
-    "sprint_goal": "Повна локалізація та аудит екранів 'Моя вага / Тренд жиру' (TrueFatTrend.tsx) та 'Список покупок' (SmartGroceryList.tsx, groceryGenerator.ts) під ринок Іспанії (ES) з підтримкою EN та UK. Пресети 4 відділів Mercadona, 1-тап базові покупки, 131/131 тестів Vitest та нуль помилок."
+    "current_sprint": "Stage 8.5: Pre-Flight Audit Block 4 — Profile, DietaryRestrictions, Notifications, Legal & GDPR Spanish Localization & Polish",
+    "sprint_goal": "Повна локалізація та аудит екрану Профілю, Безпеки, Налаштувань, Дієтичних обмежень, Розумних сповіщень та Правових документів (GDPR / EU) під ринок Іспанії (ES) з підтримкою EN та UK. 132/132 тестів Vitest та 0 помилок у консолі."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
@@ -19,10 +19,10 @@
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-29T22:50:00",
+    "verified_at": "2026-10-29T23:25:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage8_4_weight_and_grocery_audit.md",
-    "tests_passed": "131/131",
+    "report_artifact": "qa_report_stage8_5_profile_legal_pro_audit.md",
+    "tests_passed": "132/132",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -546,6 +546,11 @@
       "timestamp": "2026-10-29T22:50:00",
       "author": "Founder, CEO & QA Auditor",
       "entry": "Затвердження та розгортання Блоку 3 Передпольотного аудиту (Stage 8.4: TrueFatTrend & SmartGroceryList Spanish Localization & Polish): 1) Повна інтеграція useTranslation() у TrueFatTrend.tsx: локалізація карток 'Mi peso', 'Progreso real sin retención de agua ni sal', фільтра води, карток 'En la báscula hoy' (73.4 kg) та 'Grasa real' (74.5 kg), адаптивний графік EMA за 7 днів з датами під локаль, плейсхолдер ранкової ваги та тост збереження; 2) Оновлено SmartGroceryList.tsx та groceryGenerator.ts: усунуто український хардкод дефолтних покупок через getDefaultGroceryItems(lang) для іспанського супермаркету Mercadona (pechuga de pollo, salmón, chuletón, huevos camperos, yogur griego, queso cottage, espárragos, aguacates Hass, arándanos, avena integral, quinoa), локалізовано 4 відділи через getLocalizedCategories(t), додано 1-тап базові покупки для Іспанії (вода, лимони, олія AOVE, кава), модальну форму дописування товару та генератор списку для WhatsApp/Telegram; 3) Розширено translations.ts на 35+ ключів для 6 мов (131/131 тестів Vitest passed, чиста збірка Vite за 2.66с); 4) Проведено E2E аудит у реальному браузері (agent-browser, 390x844): знято скріншоти audit_stage8_4_weight_trend_es.png, audit_stage8_4_grocery_list_es.png, audit_stage8_4_grocery_add_form_es.png, audit_stage8_4_grocery_copied_es.png, 0 помилок у консолі."
+    },
+    {
+      "timestamp": "2026-10-29T23:25:00",
+      "author": "Founder, CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Блоку 4 Передпольотного аудиту (Stage 8.5: Profile, DietaryRestrictions, Notifications, Legal & GDPR Spanish Localization & Polish): 1) Повна інтеграція useTranslation() у ProfileScreen.tsx: статус гостя, Face ID/Touch ID, PIN-код, блок 'Sección «Mi Plan»', 6 переваг NUTRIQ, GDPR Art. 17 (право бути забутим) та Art. 20 (експорт даних), локальна анонімна телеметрія конверсій та діалоги підтвердження видалення; 2) Оновлено DietaryRestrictionsModal.tsx: локалізовано 4 типи харчування (standard, vegetarian, vegan, pescatarian), 6 базових алергенів (lactose, gluten, nuts, eggs, seafood, soy) та форму індивідуальних продуктів; 3) Оновлено NotificationSettingsModal.tsx: майстер-перемикач сповіщень зі статусами браузера, трекер води, розклад сніданку/обіду/вечері, вечірній чек-ін Flex Bank та тестове сповіщення; 4) Оновлено LegalModal.tsx: повноцінна тримовна реалізація (ES / EN / UK) Політики конфіденційності (GDPR 2016/679) та Умов використання (Terms of Service) з медичним застереженням та 1-клік скасуванням тріалу; 5) Розширено translations.ts на 65+ ключів для всіх 6 мов, додано тести локалізації (132/132 vitest passed, чиста збірка Vite за 2.77с); 6) Проведено E2E аудит у реальному браузері (Playwright Chrome, 390x844): знято скріншоти audit_stage8_5_profile_es.png, audit_stage8_5_dietary_modal_es.png, audit_stage8_5_notification_modal_es.png, audit_stage8_5_legal_modal_es.png, 0 помилок у консолі."
     }
   ]
 }
