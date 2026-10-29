@@ -5,10 +5,10 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-26T22:10:00",
+    "last_updated": "2026-10-29T20:53:00",
     "code_freeze_active": true,
-    "current_sprint": "Stage 8.1: Android TWA Project & Digital Keystore Generation",
-    "sprint_goal": "Створення офіційного сховища ключів release.keystore (термін дії до 2054 року), синхронізація реального SHA-256 відбитка з assetlinks.json та налаштування нативного проекту Android Studio (Google AndroidBrowserHelper 2.5.0) для вивантаження підписаного пакета .aab у Google Play Console."
+    "current_sprint": "Stage 8.2: Pre-Flight Audit Block 1 — Onboarding (ES/EN/UK) & Initial User Flow Polish",
+    "sprint_goal": "Повна локалізація перших 60 секунд користувацького досвіду (візард MyPlanWizard.tsx та шапка Header.tsx) на 3 ключові мови: іспанська (дефолт для старту в Іспанії), англійська та українська. Інтеграція верхнього перемикача мов (ES | EN | UK), 100% переклад усіх 10 запитань та кнопок без хардкоду, верифікація E2E проходження онбордингу та нуль помилок."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
@@ -19,10 +19,10 @@
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-26T22:10:00",
+    "verified_at": "2026-10-29T20:53:00",
     "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage8_1_android_bundle_twa_readiness.md",
-    "tests_passed": "128/128",
+    "report_artifact": "qa_report_stage8_2_onboarding_es_audit.md",
+    "tests_passed": "129/129",
     "console_errors": 0,
     "production_url": "https://smart-daily-plate.vercel.app"
   },
@@ -531,6 +531,11 @@
       "timestamp": "2026-10-26T22:10:00",
       "author": "Founder, CEO & QA Auditor",
       "entry": "Затвердження та розгортання Етапу 8.1 (Android TWA Project & Digital Keystore Generation): 1) Згенеровано 2048-бітний RSA ключ release.keystore з терміном дії до 2054 року в android/keystore/release.keystore; 2) Витягнуто точний SHA-256 відбиток (D4:C2:8B:F0:...) та синхронізовано його з public/.well-known/assetlinks.json; 3) Розгорнуто повноцінний нативний проєкт Android Studio (TWA) у папці android/ з підтримкою бібліотеки Google AndroidBrowserHelper 2.5.0, авто-верифікацією intent-filter, Splash Screen та іконками; 4) Складено покрокову інструкцію для створення .aab у android/README_PLAY_STORE.md."
+    },
+    {
+      "timestamp": "2026-10-29T20:53:00",
+      "author": "Founder, CEO & QA Auditor",
+      "entry": "Затвердження та розгортання Блоку 1 Передпольотного аудиту (Stage 8.2: Onboarding ES/EN/UK Localization & Initial User Flow Polish): 1) Повна інтеграція useTranslation() у MyPlanWizard.tsx та 100% локалізація 10 кроків онбордингу без жодного залишку хардкоду; 2) У верхню панель візарда інтегровано преміальний швидкий перемикач мов (ES | EN | UK) з миттєвою реактивністю інтерфейсу; 3) Адаптовано шапку Header.tsx: переклад календаря (DOM..SÁB), дат на іспанську (Jueves, 29 de octubre) та вітання (¡Hola, Invitado! / Balance de calorías); 4) Розширено словник translations.ts для 6 мов (понад 110 нових ключів онбордингу та контролів); 5) Додано юніт-тести перевірки локалізації (129/129 passed vitest, чиста збірка Vite за 2.80с); 6) Проведено E2E аудит у реальному браузері (agent-browser, 390x844): зафіксовано скріншоти audit_stage8_2_wizard_step1_es.png, audit_stage8_2_wizard_step1_en.png, audit_stage8_2_wizard_dietary_es.png, audit_stage8_2_wizard_step10_es.png, audit_stage8_2_dashboard_es.png, 0 помилок у консолі."
     }
   ]
 }

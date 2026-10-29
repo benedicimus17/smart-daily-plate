@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useUserStore } from '../store/userStore';
 import { useNutritionStore } from '../store/nutritionStore';
+import { useTranslation } from '../store/languageStore';
 import { calculatePersonalPlan } from '../math/planCalculator';
 import { Gender, ActivityLevel, NutritionGoal, WeightLossPace } from '../types/user';
 import {
@@ -32,8 +33,9 @@ interface MyPlanWizardProps {
 export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onCompleted }) => {
   const { user, savePlanAndRegister } = useUserStore();
   const { updateTargets, generateMenuForTargets } = useNutritionStore();
+  const { t, lang, setLanguage } = useTranslation();
 
-  // Номер поточного питання: 1..9
+  // Номер поточного питання: 1..10
   const [questionIndex, setQuestionIndex] = useState<number>(1);
 
   // Параметри
@@ -129,7 +131,9 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
     setTimeout(() => {
       const inputStr = email.trim();
       const effectiveEmail = inputStr || 'test.user@nutriq.app';
-      const effectiveName = inputStr || (gender === 'female' ? 'Анна' : 'Олексій');
+      const effectiveName = inputStr || (gender === 'female' 
+        ? (lang === 'es' ? 'Elena' : lang === 'en' ? 'Emma' : 'Анна') 
+        : (lang === 'es' ? 'Carlos' : lang === 'en' ? 'Alex' : 'Олексій'));
 
       savePlanAndRegister(
         {
@@ -150,7 +154,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
         {
           name: effectiveName,
           email: effectiveEmail,
-          phone: user.phone || '+380501234567',
+          phone: user.phone || '+34600123456',
           password: ''
         }
       );
@@ -203,7 +207,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
         },
         plan.targets,
         {
-          name: 'Гість',
+          name: t('guest', 'Гість'),
           email: '',
           phone: '',
           password: ''
@@ -229,14 +233,14 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
       {/* Фонове атмосферне світіння */}
       <div className="fixed top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Верхня панель: Навігація назад та Закриття */}
+      {/* Верхня панель: Навігація назад, швидкий перемикач мови та Закриття */}
       <div className="w-full max-w-md mx-auto flex items-center justify-between pt-2 pb-4 shrink-0 relative z-10">
         {questionIndex > 1 ? (
           <button
             type="button"
             onClick={handleBack}
             className="w-10 h-10 rounded-full bg-white/[0.05] hover:bg-white/10 border border-white/10 flex items-center justify-center text-zinc-300 hover:text-white transition-all active:scale-90 cursor-pointer"
-            title="Назад"
+            title={t('wizard_back', 'Назад')}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -244,12 +248,55 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           <div className="w-10 h-10" />
         )}
 
+        {/* Швидкий перемикач мови (ES | EN | UK) */}
+        <div 
+          id="wizard-language-switcher"
+          className="flex items-center gap-1 bg-black/60 border border-white/15 p-1 rounded-full text-xs font-semibold backdrop-blur-md shadow-md"
+        >
+          <button
+            id="wizard-lang-es"
+            type="button"
+            onClick={() => setLanguage('es')}
+            className={`px-3 py-1 rounded-full transition-all cursor-pointer text-[11px] font-extrabold uppercase tracking-wider ${
+              lang === 'es'
+                ? 'bg-amber-400 text-zinc-950 shadow-sm'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            ES
+          </button>
+          <button
+            id="wizard-lang-en"
+            type="button"
+            onClick={() => setLanguage('en')}
+            className={`px-3 py-1 rounded-full transition-all cursor-pointer text-[11px] font-extrabold uppercase tracking-wider ${
+              lang === 'en'
+                ? 'bg-amber-400 text-zinc-950 shadow-sm'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            EN
+          </button>
+          <button
+            id="wizard-lang-uk"
+            type="button"
+            onClick={() => setLanguage('uk')}
+            className={`px-3 py-1 rounded-full transition-all cursor-pointer text-[11px] font-extrabold uppercase tracking-wider ${
+              lang === 'uk'
+                ? 'bg-amber-400 text-zinc-950 shadow-sm'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            UK
+          </button>
+        </div>
+
         <button
           id="wizard-close-x-btn"
           type="button"
           onClick={onClose}
           className="w-10 h-10 rounded-full bg-white/[0.05] hover:bg-white/10 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-all active:scale-90 cursor-pointer"
-          title="Закрити"
+          title={t('wizard_close', 'Закрити')}
         >
           <X className="w-5 h-5" />
         </button>
@@ -264,10 +311,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           <div className="space-y-6 animate-fadeIn">
             <div className="text-center space-y-1.5">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Чого ви прагнете досягти?
+                {t('w_q1_title', 'Чого ви прагнете досягти?')}
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400">
-                Оберіть головний вектор для розрахунку вашого раціону
+                {t('w_q1_subtitle', 'Оберіть головний вектор для розрахунку вашого раціону')}
               </p>
             </div>
 
@@ -275,26 +322,26 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
               {[
                 {
                   id: 'lose_weight',
-                  title: 'Схуднути',
-                  desc: 'Спалити зайвий підшкірний жир без повернення ваги',
+                  title: t('w_goal_lose_weight_title', 'Схуднути'),
+                  desc: t('w_goal_lose_weight_desc', 'Спалити зайвий підшкірний жир без повернення ваги'),
                   color: 'border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/10'
                 },
                 {
                   id: 'recomp',
-                  title: 'Рельєф і тонус',
-                  desc: 'Підсушити тіло та зберегти пружну м’язову форму',
+                  title: t('w_goal_recomp_title', 'Рельєф і тонус'),
+                  desc: t('w_goal_recomp_desc', 'Підсушити тіло та зберегти пружну м’язову форму'),
                   color: 'border-emerald-400/40 hover:border-emerald-400 hover:bg-emerald-400/10'
                 },
                 {
                   id: 'maintain',
-                  title: 'Підтримка ваги',
-                  desc: 'Їсти в балансі та зафіксувати поточну форму',
+                  title: t('w_goal_maintain_title', 'Підтримка ваги'),
+                  desc: t('w_goal_maintain_desc', 'Їсти в балансі та зафіксувати поточну форму'),
                   color: 'border-indigo-400/40 hover:border-indigo-400 hover:bg-indigo-400/10'
                 },
                 {
                   id: 'gain',
-                  title: 'Набір маси',
-                  desc: 'Збільшити об’єм сухої м’язової маси',
+                  title: t('w_goal_gain_title', 'Набір маси'),
+                  desc: t('w_goal_gain_desc', 'Збільшити об’єм сухої м’язової маси'),
                   color: 'border-amber-500/40 hover:border-amber-500 hover:bg-amber-500/10'
                 }
               ].map((item) => (
@@ -322,10 +369,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           <div className="space-y-6 animate-fadeIn">
             <div className="text-center space-y-1.5">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Ваша стать
+                {t('w_q2_title', 'Ваша стать')}
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400">
-                Для коректного підрахунку базового метаболізму
+                {t('w_q2_subtitle', 'Для коректного підрахунку базового метаболізму')}
               </p>
             </div>
 
@@ -339,7 +386,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                 }`}
               >
                 <div className="text-3xl mb-2">🌸</div>
-                <div className="text-lg font-bold text-white">Жінка</div>
+                <div className="text-lg font-bold text-white">{t('w_gender_female', 'Жінка')}</div>
               </button>
 
               <button
@@ -351,7 +398,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                 }`}
               >
                 <div className="text-3xl mb-2">⚡</div>
-                <div className="text-lg font-bold text-white">Чоловік</div>
+                <div className="text-lg font-bold text-white">{t('w_gender_male', 'Чоловік')}</div>
               </button>
             </div>
           </div>
@@ -364,10 +411,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           <div className="space-y-6 animate-fadeIn">
             <div className="text-center space-y-1.5">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Скільки вам повних років?
+                {t('w_q3_title', 'Скільки вам повних років?')}
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400">
-                Введіть число цифрами
+                {t('w_q3_subtitle', 'Введіть число цифрами')}
               </p>
             </div>
 
@@ -387,7 +434,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                   autoFocus
                 />
                 <span className="block text-center text-xs font-semibold text-zinc-400 mt-2">
-                  років
+                  {t('w_age_unit', 'років')}
                 </span>
               </div>
             </div>
@@ -399,7 +446,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                 onClick={handleNext}
                 className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-sm tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-amber-400/25 active:scale-[0.98] transition-all cursor-pointer"
               >
-                <span>Продовжити</span>
+                <span>{t('w_btn_continue', 'Продовжити')}</span>
               </button>
             </div>
           </div>
@@ -412,17 +459,17 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           <div className="space-y-6 animate-fadeIn">
             <div className="text-center space-y-1.5">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Ваша вага та зріст
+                {t('w_q4_title', 'Ваша вага та зріст')}
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400">
-                Введіть точні значення для формули Міффліна-Сан Жеора
+                {t('w_q4_subtitle', 'Введіть точні значення для формули Міффліна-Сан Жеора')}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div className="flex flex-col items-center">
                 <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block mb-2">
-                  Вага (кг)
+                  {t('w_weight_label', 'Вага (кг)')}
                 </label>
                 <input
                   id="wizard-weight-input"
@@ -440,7 +487,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
 
               <div className="flex flex-col items-center">
                 <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block mb-2">
-                  Зріст (см)
+                  {t('w_height_label', 'Зріст (см)')}
                 </label>
                 <input
                   id="wizard-height-input"
@@ -458,7 +505,9 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
             </div>
 
             <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-xs text-zinc-300 text-center">
-              💡 Базовий метаболізм (BMR): <strong className="text-amber-300 font-bold">{plan.bmr} ккал</strong> — щоденні мінімальні енерговитрати у спокої.
+              💡 {t('w_bmr_hint', 'Базовий метаболізм (BMR):')}{' '}
+              <strong className="text-amber-300 font-bold">{plan.bmr} {t('w_unit_kcal', 'ккал')}</strong> —{' '}
+              {t('w_bmr_desc', 'щоденні мінімальні енерговитрати у спокої.')}
             </div>
 
             <div className="pt-2">
@@ -468,7 +517,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                 onClick={handleNext}
                 className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-sm tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-amber-400/25 active:scale-[0.98] transition-all cursor-pointer"
               >
-                <span>Продовжити</span>
+                <span>{t('w_btn_continue', 'Продовжити')}</span>
               </button>
             </div>
           </div>
@@ -481,10 +530,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           <div className="space-y-5 animate-fadeIn">
             <div className="text-center space-y-1.5">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Скільки ви рухаєтесь щодня?
+                {t('w_q5_title', 'Скільки ви рухаєтесь щодня?')}
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400">
-                Займаєтесь спортом? Скільки приблизно ходите пішки?
+                {t('w_q5_subtitle', 'Займаєтесь спортом? Скільки приблизно ходите пішки?')}
               </p>
             </div>
 
@@ -492,23 +541,23 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
               {[
                 {
                   id: 'sedentary',
-                  title: 'Малорухливий спосіб',
-                  desc: 'Сидяча робота, до 5 000 кроків, без регулярного спорту'
+                  title: t('w_act_sedentary_title', 'Малорухливий спосіб'),
+                  desc: t('w_act_sedentary_desc', 'Сидяча робота, до 5 000 кроків, без регулярного спорту')
                 },
                 {
                   id: 'light',
-                  title: 'Легка активність',
-                  desc: '6 000–8 000 кроків або 1–2 легкі тренування на тиждень'
+                  title: t('w_act_light_title', 'Легка активність'),
+                  desc: t('w_act_light_desc', '6 000–8 000 кроків або 1–2 легкі тренування на тиждень')
                 },
                 {
                   id: 'moderate',
-                  title: 'Помірна активність',
-                  desc: '9 000–12 000 кроків або 3–4 тренування (оптимально)'
+                  title: t('w_act_moderate_title', 'Помірна активність'),
+                  desc: t('w_act_moderate_desc', '9 000–12 000 кроків або 3–4 тренування (оптимально)')
                 },
                 {
                   id: 'high',
-                  title: 'Висока активність',
-                  desc: '12 000+ кроків, щоденні важкі фізичні навантаження'
+                  title: t('w_act_high_title', 'Висока активність'),
+                  desc: t('w_act_high_desc', '12 000+ кроків, щоденні важкі фізичні навантаження')
                 }
               ].map((item) => (
                 <button
@@ -535,10 +584,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           <div className="space-y-6 animate-fadeIn">
             <div className="text-center space-y-1.5">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Чи вживаєте ви протеїн?
+                {t('w_q6_title', 'Чи вживаєте ви протеїн?')}
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400">
-                Спортивні шейки, протеїнові батончики або інші добавки
+                {t('w_q6_subtitle', 'Спортивні шейки, протеїнові батончики або інші добавки')}
               </p>
             </div>
 
@@ -552,8 +601,8 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                 }`}
               >
                 <div className="text-3xl mb-2">🥤</div>
-                <div className="text-base font-bold text-white">Так</div>
-                <div className="text-xs text-zinc-400 mt-1">Шейки або батончики</div>
+                <div className="text-base font-bold text-white">{t('w_protein_yes_title', 'Так')}</div>
+                <div className="text-xs text-zinc-400 mt-1">{t('w_protein_yes_desc', 'Шейки або батончики')}</div>
               </button>
 
               <button
@@ -565,8 +614,8 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                 }`}
               >
                 <div className="text-3xl mb-2">🥗</div>
-                <div className="text-base font-bold text-white">Ні</div>
-                <div className="text-xs text-zinc-400 mt-1">Лише звичайна їжа</div>
+                <div className="text-base font-bold text-white">{t('w_protein_no_title', 'Ні')}</div>
+                <div className="text-xs text-zinc-400 mt-1">{t('w_protein_no_desc', 'Лише звичайна їжа')}</div>
               </button>
             </div>
           </div>
@@ -579,10 +628,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           <div className="space-y-6 animate-fadeIn">
             <div className="text-center space-y-1.5">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Який ритм їжі вам зручніший?
+                {t('w_q7_title', 'Який ритм їжі вам зручніший?')}
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400">
-                Система розподілить калораж по прийомах протягом доби
+                {t('w_q7_subtitle', 'Система розподілить калораж по прийомах протягом доби')}
               </p>
             </div>
 
@@ -595,9 +644,9 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                   eatingRhythm === '3_meals' ? 'border-amber-400 ring-2 ring-amber-400/70 bg-white/[0.04]' : 'border-white/10'
                 }`}
               >
-                <div className="text-base font-bold text-amber-300">🍽️ 3 прийоми на день</div>
+                <div className="text-base font-bold text-amber-300">{t('w_rhythm_3_title', '🍽️ 3 прийоми на день')}</div>
                 <div className="text-xs text-zinc-300 mt-1">
-                  Сніданок, ситний обід та легка вечеря (Дзен-формат без перекусів)
+                  {t('w_rhythm_3_desc', 'Сніданок, ситний обід та легка вечеря (Дзен-формат без перекусів)')}
                 </div>
               </button>
 
@@ -609,9 +658,9 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                   eatingRhythm === '5_meals' ? 'border-emerald-400 ring-2 ring-emerald-400/70 bg-white/[0.04]' : 'border-white/10'
                 }`}
               >
-                <div className="text-base font-bold text-emerald-300">🍱 5 дробових прийомів</div>
+                <div className="text-base font-bold text-emerald-300">{t('w_rhythm_5_title', '🍱 5 дробових прийомів')}</div>
                 <div className="text-xs text-zinc-300 mt-1">
-                  Сніданок, перший перекус, обід, полуденок та вечеря кожні 3–3.5 години
+                  {t('w_rhythm_5_desc', 'Сніданок, перший перекус, обід, полуденок та вечеря кожні 3–3.5 години')}
                 </div>
               </button>
             </div>
@@ -625,10 +674,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
           <div className="space-y-6 animate-fadeIn">
             <div className="text-center space-y-1.5">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Оберіть темп досягнення цілі
+                {t('w_q8_title', 'Оберіть темп досягнення цілі')}
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400">
-                Швидкість зміни маси тіла
+                {t('w_q8_subtitle', 'Швидкість зміни маси тіла')}
               </p>
             </div>
 
@@ -641,9 +690,9 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                   pace === 'steady' ? 'border-amber-400 ring-2 ring-amber-400/70 bg-white/[0.04]' : 'border-white/10'
                 }`}
               >
-                <div className="text-base font-bold text-amber-300">🌿 Поступово (Золотий стандарт)</div>
+                <div className="text-base font-bold text-amber-300">{t('w_pace_steady_title', '🌿 Поступово (Золотий стандарт)')}</div>
                 <div className="text-xs text-zinc-300 mt-1">
-                  Комфортний збалансований дефіцит без голоду, зривів та стресу для нервової системи.
+                  {t('w_pace_steady_desc', 'Комфортний збалансований дефіцит без голоду, зривів та стресу для нервової системи.')}
                 </div>
               </button>
 
@@ -655,9 +704,9 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                   pace === 'fast' ? 'border-rose-400 ring-2 ring-rose-400/70 bg-white/[0.04]' : 'border-white/10'
                 }`}
               >
-                <div className="text-base font-bold text-rose-300">⚡ Швидко (Максимальний темп)</div>
+                <div className="text-base font-bold text-rose-300">{t('w_pace_fast_title', '⚡ Швидко (Максимальний темп)')}</div>
                 <div className="text-xs text-zinc-300 mt-1">
-                  Максимально допустимий здоровий дефіцит калорій для якнайшвидшого результату.
+                  {t('w_pace_fast_desc', 'Максимально допустимий здоровий дефіцит калорій для якнайшвидшого результату.')}
                 </div>
               </button>
             </div>
@@ -672,27 +721,27 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
             <div className="text-center space-y-1">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-400/15 border border-emerald-400/30 text-emerald-300 text-xs font-bold mb-0.5">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Безпека та адаптація раціону</span>
+                <span>{t('w_q9_badge', 'Безпека та адаптація раціону')}</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Тип дієти та алергії
+                {t('w_q9_title', 'Тип дієти та алергії')}
               </h2>
               <p className="text-xs text-zinc-400">
-                Комп'ютер автоматично виключить заборонені продукти з вашого першого меню
+                {t('w_q9_subtitle', 'Компʼютер автоматично виключить заборонені продукти з вашого першого меню')}
               </p>
             </div>
 
             {/* ВИБІР ТИПУ ДІЄТИ */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider block">
-                Тип харчування
+                {t('w_diet_section', 'Тип харчування')}
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { id: 'standard', title: '🥩 Звичайний', desc: 'Мʼясо, птиця, риба, все' },
-                  { id: 'vegetarian', title: '🌱 Вегетаріанське', desc: 'Без мʼяса та птиці' },
-                  { id: 'vegan', title: '🌿 Веганське', desc: '100% рослинні продукти' },
-                  { id: 'pescatarian', title: '🐟 Пескетаріанське', desc: 'Риба, морепродукти' }
+                  { id: 'standard', title: t('w_diet_standard_title', '🥩 Звичайний'), desc: t('w_diet_standard_desc', 'Мʼясо, птиця, риба, все') },
+                  { id: 'vegetarian', title: t('w_diet_veg_title', '🌱 Вегетаріанське'), desc: t('w_diet_veg_desc', 'Без мʼяса та птиці') },
+                  { id: 'vegan', title: t('w_diet_vegan_title', '🌿 Веганське'), desc: t('w_diet_vegan_desc', '100% рослинні продукти') },
+                  { id: 'pescatarian', title: t('w_diet_pesco_title', '🐟 Пескетаріанське'), desc: t('w_diet_pesco_desc', 'Риба, морепродукти') }
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -716,15 +765,23 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                  Алергії та непереносимості
+                  {t('w_allergens_section', 'Алергії та непереносимості')}
                 </label>
-                <span className="text-[10px] text-zinc-500">Оберіть усі, що є</span>
+                <span className="text-[10px] text-zinc-500">{t('w_allergens_hint', 'Оберіть усі, що є')}</span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {(Object.keys(ALLERGEN_META) as StandardAllergen[]).map((key) => {
                   const meta = ALLERGEN_META[key];
                   const isSelected = allergens.includes(key);
+                  const allergenName = 
+                    key === 'lactose' ? t('w_allergen_lactose', 'Лактоза') :
+                    key === 'gluten' ? t('w_allergen_gluten', 'Глютен') :
+                    key === 'nuts' ? t('w_allergen_nuts', 'Горіхи') :
+                    key === 'eggs' ? t('w_allergen_eggs', 'Яйця') :
+                    key === 'seafood' ? t('w_allergen_seafood', 'Морепродукти') :
+                    t('w_allergen_soy', 'Соя');
+
                   return (
                     <button
                       key={key}
@@ -740,10 +797,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                       <span className="text-lg shrink-0">{meta.icon}</span>
                       <div className="min-w-0">
                         <div className="text-[11px] font-bold truncate leading-tight">
-                          {key === 'lactose' ? 'Лактоза' : key === 'gluten' ? 'Глютен' : key === 'nuts' ? 'Горіхи' : key === 'eggs' ? 'Яйця' : key === 'seafood' ? 'Морепродукти' : 'Соя'}
+                          {allergenName}
                         </div>
                         <div className="text-[9px] text-zinc-500 leading-none">
-                          {isSelected ? 'Виключити 🚫' : 'Дозволено'}
+                          {isSelected ? t('w_allergen_exclude', 'Виключити 🚫') : t('w_allergen_allowed', 'Дозволено')}
                         </div>
                       </div>
                     </button>
@@ -755,7 +812,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
             {/* ВЛАСНІ АЛЕРГІЇ / ВИКЛЮЧЕННЯ */}
             <div className="space-y-2 pt-1">
               <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider block">
-                Специфічні продукти (наприклад: яблука, мед, селера)
+                {t('w_custom_allergies_label', 'Специфічні продукти (наприклад: яблука, мед, селера)')}
               </label>
               <div className="flex gap-2">
                 <input
@@ -769,7 +826,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                       handleAddCustomAllergy();
                     }
                   }}
-                  placeholder="Введіть продукт..."
+                  placeholder={t('w_custom_allergies_ph', 'Введіть продукт...')}
                   className="flex-1 px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400/60"
                 />
                 <button
@@ -779,7 +836,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                   className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs text-zinc-200 font-bold flex items-center gap-1 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Додати</span>
+                  <span>{t('w_custom_allergies_add', 'Додати')}</span>
                 </button>
               </div>
 
@@ -810,7 +867,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
               onClick={handleNext}
               className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs tracking-wide shadow-lg shadow-amber-400/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
             >
-              <span>Продовжити до розрахунку калорій</span>
+              <span>{t('w_btn_calculate', 'Продовжити до розрахунку калорій')}</span>
               <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
@@ -824,48 +881,48 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
             <div className="text-center space-y-1">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-xs font-bold mb-1">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Ваш персональний розрахунок готовий</span>
+                <span>{t('w_q10_badge', 'Ваш персональний розрахунок готовий')}</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Твій ліміт — {plan.targetCalories} ккал
+                {t('w_q10_limit', 'Твій ліміт —')} {plan.targetCalories} {t('w_unit_kcal', 'ккал')}
               </h2>
               <p className="text-xs text-zinc-400">
-                Витрати тіла (TDEE): ~{plan.maintenanceCalories} ккал
+                {t('w_q10_tdee', 'Витрати тіла (TDEE): ~')}{plan.maintenanceCalories} {t('w_unit_kcal', 'ккал')}
               </p>
             </div>
 
             {/* 4 КОЛОНКИ МАКРОСІВ */}
             <div className="grid grid-cols-4 gap-2 text-center pt-1">
               <div className="p-2.5 rounded-2xl bg-black/50 border border-amber-400/50 flex flex-col items-center shadow-lg">
-                <span className="text-[9.5px] font-bold text-amber-300 uppercase">Калорії</span>
+                <span className="text-[9.5px] font-bold text-amber-300 uppercase">{t('w_macro_calories', 'Калорії')}</span>
                 <span className="text-base font-extrabold text-white mt-1">
                   {plan.targets.calories}
                 </span>
-                <span className="text-[9px] text-zinc-400">ккал</span>
+                <span className="text-[9px] text-zinc-400">{t('w_unit_kcal', 'ккал')}</span>
               </div>
 
               <div className="p-2.5 rounded-2xl bg-black/50 border border-emerald-400/50 flex flex-col items-center shadow-lg">
-                <span className="text-[9.5px] font-bold text-emerald-300 uppercase">Протеїн</span>
+                <span className="text-[9.5px] font-bold text-emerald-300 uppercase">{t('w_macro_protein', 'Протеїн')}</span>
                 <span className="text-base font-extrabold text-white mt-1">
                   {plan.targets.protein}
                 </span>
-                <span className="text-[9px] text-zinc-400">грам</span>
+                <span className="text-[9px] text-zinc-400">{t('w_unit_g', 'грам')}</span>
               </div>
 
               <div className="p-2.5 rounded-2xl bg-black/50 border border-amber-500/50 flex flex-col items-center shadow-lg">
-                <span className="text-[9.5px] font-bold text-amber-400 uppercase">Жири</span>
+                <span className="text-[9.5px] font-bold text-amber-400 uppercase">{t('w_macro_fat', 'Жири')}</span>
                 <span className="text-base font-extrabold text-white mt-1">
                   {plan.targets.fat}
                 </span>
-                <span className="text-[9px] text-zinc-400">грам</span>
+                <span className="text-[9px] text-zinc-400">{t('w_unit_g', 'грам')}</span>
               </div>
 
               <div className="p-2.5 rounded-2xl bg-black/50 border border-indigo-400/50 flex flex-col items-center shadow-lg">
-                <span className="text-[9.5px] font-bold text-indigo-300 uppercase">Вуглеводи</span>
+                <span className="text-[9.5px] font-bold text-indigo-300 uppercase">{t('w_macro_carbs', 'Вуглеводи')}</span>
                 <span className="text-base font-extrabold text-white mt-1">
                   {plan.targets.carbs}
                 </span>
-                <span className="text-[9px] text-zinc-400">грам</span>
+                <span className="text-[9px] text-zinc-400">{t('w_unit_g', 'грам')}</span>
               </div>
             </div>
 
@@ -874,10 +931,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
               <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-200">
                 <div className="flex items-center gap-1.5 font-bold mb-1">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span>Порада нутриціолога проти йо-йо ефекту</span>
+                  <span>{t('w_yoyo_title', 'Порада нутриціолога проти йо-йо ефекту')}</span>
                 </div>
                 <p className="text-[11px] leading-relaxed text-zinc-300">
-                  {plan.nutritionistAdvice.message}
+                  {t('w_yoyo_desc', plan.nutritionistAdvice.message)}
                 </p>
               </div>
             )}
@@ -886,10 +943,10 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
             <div className="pt-2 border-t border-white/10 space-y-2.5">
               <div className="text-center">
                 <h3 className="text-sm font-bold text-white">
-                  Зберегти результат
+                  {t('w_save_title', 'Зберегти результат')}
                 </h3>
                 <p className="text-[11px] text-zinc-400 mt-0.5">
-                  Введіть пошту (або будь-які тестові слова для перевірки) чи зайдіть як гість
+                  {t('w_save_subtitle', 'Введіть пошту (або будь-які тестові слова для перевірки) чи зайдіть як гість')}
                 </p>
               </div>
 
@@ -901,7 +958,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                     type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email або будь-які два слова для тесту"
+                    placeholder={t('w_email_ph', 'Email або будь-які два слова для тесту')}
                     className="w-full pl-9 pr-3.5 py-3 rounded-2xl bg-black/50 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400/60"
                   />
                 </div>
@@ -913,7 +970,7 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                   className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs tracking-wide shadow-lg shadow-amber-400/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
-                  <span>{isSubmitting ? 'Збереження...' : 'Зберегти розрахунок та перейти до меню'}</span>
+                  <span>{isSubmitting ? t('w_btn_saving', 'Збереження...') : t('w_btn_save_menu', 'Зберегти розрахунок та перейти до меню')}</span>
                 </button>
 
                 <button
@@ -923,17 +980,17 @@ export const MyPlanWizard: React.FC<MyPlanWizardProps> = ({ isOpen, onClose, onC
                   disabled={isSubmitting}
                   className="w-full py-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white font-bold text-xs transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span>Пропустити та зайти як гість</span>
+                  <span>{t('w_btn_guest', 'Пропустити та зайти як гість')}</span>
                 </button>
 
                 <p className="text-[10px] text-zinc-500 text-center leading-tight px-1 pt-1">
-                  Натискаючи кнопку, ви погоджуєтесь з{' '}
+                  {t('w_terms_agree', 'Натискаючи кнопку, ви погоджуєтесь з')}{' '}
                   <button
                     type="button"
                     onClick={() => setLegalOpen(true)}
                     className="text-amber-400/90 underline hover:text-amber-300 cursor-pointer"
                   >
-                    Умовами використання та Політикою конфіденційності (GDPR)
+                    {t('w_terms_link', 'Умовами використання та Політикою конфіденційності (GDPR)')}
                   </button>
                 </p>
               </form>

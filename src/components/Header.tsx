@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, RotateCcw, Crown, Lock, Share2 } from 'lucide-react';
 import { useNutritionStore } from '../store/nutritionStore';
 import { useUserStore } from '../store/userStore';
+import { useTranslation } from '../store/languageStore';
 
 interface HeaderProps {
   date: string;
@@ -28,6 +29,10 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { selectedDate, setSelectedDate } = useNutritionStore();
   const { user, resetToNewGuestUser } = useUserStore();
+  const { t, lang } = useTranslation();
+  
+  const dateLocale = lang === 'es' ? 'es-ES' : lang === 'en' ? 'en-US' : lang === 'de' ? 'de-DE' : lang === 'fr' ? 'fr-FR' : lang === 'it' ? 'it-IT' : 'uk-UA';
+
   // weekOffset: 0 - поточний тиждень, -1 - попередній тиждень, -2 - два тижні тому, etc.
   const [weekOffset, setWeekOffset] = useState<number>(0);
 
@@ -39,20 +44,29 @@ export const Header: React.FC<HeaderProps> = ({
   const monday = new Date(baseDate);
   monday.setDate(baseDate.getDate() + daysToMonday + weekOffset * 7);
 
+  const shortNamesMap: Record<string, string[]> = {
+    es: ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'],
+    en: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'],
+    uk: ['НД', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'],
+    de: ['SO', 'MO', 'DI', 'MI', 'DO', 'FR', 'SA'],
+    fr: ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'],
+    it: ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB']
+  };
+  const shortNames = shortNamesMap[lang] || shortNamesMap.es;
+
   // Створюємо масив з 7 днів тижня
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
     const dateStr = formatLocalDate(d);
     const isToday = dateStr === formatLocalDate(new Date());
-    const shortNames = ['НД', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
     const shortName = shortNames[d.getDay()];
     return {
       date: dateStr,
       shortName,
       dayNum: d.getDate(),
       isToday,
-      monthName: d.toLocaleDateString('uk-UA', { month: 'short' })
+      monthName: d.toLocaleDateString(dateLocale, { month: 'short' })
     };
   });
 
@@ -67,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const selectedDateObj = new Date(selectedDate + 'T12:00:00');
-  const selectedFormatted = selectedDateObj.toLocaleDateString('uk-UA', {
+  const selectedFormatted = selectedDateObj.toLocaleDateString(dateLocale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long'
@@ -116,13 +130,13 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         <h1 className="text-[26px] sm:text-[28px] font-bold tracking-[-0.02em] text-[#F7F9F7] leading-tight">
-          Today’s Balance
+          {t('calorie_budget', 'Today’s Balance')}
         </h1>
         <p className="text-[13px] text-[#A2B2A7] font-normal tracking-tight mt-0.5">
           {capitalizedSelected}
         </p>
         <p className="text-[13px] text-[#C5D1C8] font-medium tracking-tight leading-snug">
-          Hello, {user.name || 'Alistair'}!
+          {t('greeting_hello', 'Hello')}, {user.name || (lang === 'es' ? 'Invitado' : 'Alistair')}!
         </p>
 
         {/* Панель швидкого тестування (Новий користувач + Статус FREE / PRO) */}
@@ -138,7 +152,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="Скинути стан користувача для повторного проходження анкети"
           >
             <RotateCcw className="w-3 h-3 text-amber-400" />
-            <span>Тест нового юзера</span>
+            <span>{t('test_user_btn', 'Тест нового юзера')}</span>
           </button>
 
           <button
