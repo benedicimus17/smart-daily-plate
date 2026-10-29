@@ -93,4 +93,48 @@ describe('LanguageStore & i18n Engine', () => {
     expect(store.t('swap_badge_reality')).toBe('Реальне життя • Швидка підміна');
     expect(store.t('chef_mode_barcode')).toBe('Штрих-код');
   });
+
+  it('translates Block 3 (TrueFatTrend & SmartGroceryList) in Spanish, English and Ukrainian', () => {
+    const store = useLanguageStore.getState();
+
+    // Spanish (Spain release default)
+    store.setLanguage('es');
+    expect(store.t('my_weight_title')).toBe('Mi peso');
+    expect(store.t('why_scale_lies')).toBe('¿Por qué la báscula miente?');
+    expect(store.t('water_filter')).toBe('Filtro de agua');
+    expect(store.t('real_fat')).toBe('Grasa real');
+    expect(store.t('weight_saved_toast')).toBe('¡Peso guardado! Tendencia real recalculada.');
+    expect(store.t('grocery_title')).toBe('Compras de la semana');
+    expect(store.t('grocery_subtitle')).toBe('Organizado por 4 secciones de supermercado');
+    expect(store.t('grocery_collected_cart')).toBe('En el carrito');
+    expect(store.t('grocery_cat_meat_fish')).toBe('Carnicería y Pescado');
+    expect(store.t('grocery_cat_dairy')).toBe('Lácteos y Huevos');
+    expect(store.t('grocery_cat_produce')).toBe('Frutas y Verduras');
+    expect(store.t('grocery_cat_staples')).toBe('Despensa y Granos');
+    expect(store.t('grocery_cat_other')).toBe('Otros y Bebidas');
+    expect(store.t('grocery_sync_btn')).toBe('Sincronizar');
+    expect(store.t('grocery_copy_btn')).toBe('Copiar lista');
+
+    // English
+    store.setLanguage('en');
+    expect(store.t('my_weight_title')).toBe('My Weight');
+    expect(store.t('why_scale_lies')).toBe('Why does the bathroom scale lie?');
+    expect(store.t('water_filter')).toBe('Water Filter');
+    expect(store.t('real_fat')).toBe('True body fat');
+    expect(store.t('weight_saved_toast')).toBe('Weight saved! True trend recalculated.');
+    expect(store.t('grocery_title')).toBe('Weekly Grocery List');
+    expect(store.t('grocery_cat_meat_fish')).toBe('Meat & Seafood');
+    expect(store.t('grocery_cat_dairy')).toBe('Dairy & Eggs');
+
+    // Ukrainian
+    store.setLanguage('uk');
+    expect(store.t('my_weight_title')).toBe('Моя вага');
+    expect(store.t('why_scale_lies')).toBe('Чому щоденні ваги показують неправду?');
+    expect(store.t('water_filter')).toBe('Фільтр води');
+    expect(store.t('real_fat')).toBe('Справжній жир');
+    expect(store.t('weight_saved_toast')).toBe('Вагу збережено! Справжній тренд перераховано.');
+    expect(store.t('grocery_title')).toBe('Покупки на тиждень');
+    expect(store.t('grocery_cat_meat_fish')).toBe("М'ясо та риба");
+    expect(store.t('grocery_cat_dairy')).toBe('Молочне та яйця');
+  });
 });

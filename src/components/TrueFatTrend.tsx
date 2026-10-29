@@ -6,8 +6,21 @@ import { useTranslation } from '../store/languageStore';
 
 export const TrueFatTrend: React.FC = () => {
   const { user } = useUserStore();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const baseline = user?.weightKg && user.weightKg > 30 ? user.weightKg : 74;
+  const kgUnit = t('kg_unit', 'kg');
+  const localeCode =
+    lang === 'es'
+      ? 'es-ES'
+      : lang === 'uk'
+      ? 'uk-UA'
+      : lang === 'de'
+      ? 'de-DE'
+      : lang === 'fr'
+      ? 'fr-FR'
+      : lang === 'it'
+      ? 'it-IT'
+      : 'en-US';
 
   // Генеруємо 7-денну реалістичну історію на базі ваги користувача
   const initialEntries: WeightEntry[] = useMemo(() => {
@@ -39,7 +52,7 @@ export const TrueFatTrend: React.FC = () => {
     const val = parseFloat(inputWeight);
     if (!val || val <= 0) return;
 
-    const todayStr = new Intl.DateTimeFormat('uk-UA', { day: '2-digit', month: '2-digit' }).format(new Date());
+    const todayStr = new Intl.DateTimeFormat(localeCode, { day: '2-digit', month: '2-digit' }).format(new Date());
     setEntries(prev => [...prev, { date: todayStr, rawWeightKg: val }]);
     setInputWeight('');
     setAddedToast(true);
@@ -83,11 +96,11 @@ export const TrueFatTrend: React.FC = () => {
               {t('scale_today')}
             </span>
             <div className="text-2xl font-black text-white mt-0.5">
-              {latest.rawWeightKg} <span className="text-xs font-semibold text-zinc-500">кг</span>
+              {latest.rawWeightKg} <span className="text-xs font-semibold text-zinc-500">{kgUnit}</span>
             </div>
             <div className="text-[10.5px] font-semibold text-amber-300/90 mt-1">
               {latest.waterRetentionDeltaKg > 0
-                ? `+${latest.waterRetentionDeltaKg} кг ${t('water_retention')}`
+                ? `+${latest.waterRetentionDeltaKg} ${kgUnit} ${t('water_retention')}`
                 : t('normal_water')}
             </div>
           </div>
@@ -98,10 +111,10 @@ export const TrueFatTrend: React.FC = () => {
               <TrendingDown className="w-3.5 h-3.5" /> {t('real_fat')}
             </span>
             <div className="text-2xl font-black text-emerald-400 mt-0.5">
-              {latest.emaWeightKg} <span className="text-xs font-semibold text-emerald-500/70">кг</span>
+              {latest.emaWeightKg} <span className="text-xs font-semibold text-emerald-500/70">{kgUnit}</span>
             </div>
             <div className="text-[10.5px] text-zinc-300 font-semibold mt-1">
-              {weeklyDelta <= 0 ? `${weeklyDelta} кг` : `+${weeklyDelta} кг`}
+              {weeklyDelta <= 0 ? `${weeklyDelta} ${kgUnit}` : `+${weeklyDelta} ${kgUnit}`}
             </div>
           </div>
         </div>
@@ -133,7 +146,7 @@ export const TrueFatTrend: React.FC = () => {
                         : 'bg-emerald-600/60 hover:bg-emerald-500/80'
                     }`}
                     style={{ height: `${heightPercent}%` }}
-                    title={`Ваги: ${item.rawWeightKg} кг • Справжня вага: ${item.emaWeightKg} кг`}
+                    title={`${t('true_weight_tooltip_scale', 'Ваги')}: ${item.rawWeightKg} ${kgUnit} • ${t('true_weight_tooltip_true', 'Справжня вага')}: ${item.emaWeightKg} ${kgUnit}`}
                   />
                   <span className="text-[9px] text-zinc-500 mt-1 font-semibold">{item.date}</span>
                 </div>
@@ -150,7 +163,7 @@ export const TrueFatTrend: React.FC = () => {
             step="0.1"
             value={inputWeight}
             onChange={(e) => setInputWeight(e.target.value)}
-            placeholder={`Ранкова вага натщесерце (наприклад ${baseline})`}
+            placeholder={t('morning_weight_ph_dynamic', `Ранкова вага натщесерце (наприклад ${baseline})`).replace('{val}', String(baseline))}
             className="flex-1 px-3.5 py-2.5 text-xs font-bold rounded-xl bg-black/60 border border-white/15 text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
           />
           <button
@@ -167,7 +180,7 @@ export const TrueFatTrend: React.FC = () => {
         {addedToast && (
           <div className="absolute inset-x-4 bottom-3 py-2 px-3 rounded-xl bg-emerald-500 text-zinc-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xl animate-fadeIn">
             <CheckCircle2 className="w-4 h-4" />
-            <span>Вагу збережено! Справжній тренд перераховано.</span>
+            <span>{t('weight_saved_toast', 'Вагу збережено! Справжній тренд перераховано.')}</span>
           </div>
         )}
       </div>

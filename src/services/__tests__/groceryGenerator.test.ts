@@ -122,6 +122,16 @@ describe('groceryGenerator', () => {
       expect(text).toContain('⬜ Куряче філе — ~500 г');
       expect(text).toContain('✅ Яйця курячі — 1 десяток');
       expect(text).toContain('Куплено: 1 з 2 товарів');
+
+      const textEs = generateShareableGroceryText(sampleItems, 'es');
+      expect(textEs).toContain('NUTRIQ — LISTA DE LA COMPRA PARA EL SUPERMERCADO');
+      expect(textEs).toContain('CARNICERÍA Y PESCADO:');
+      expect(textEs).toContain('Comprados: 1 de 2 artículos');
+
+      const textEn = generateShareableGroceryText(sampleItems, 'en');
+      expect(textEn).toContain('NUTRIQ — GROCERY SHOPPING LIST');
+      expect(textEn).toContain('MEAT & SEAFOOD:');
+      expect(textEn).toContain('Purchased: 1 of 2 items');
     });
   });
 });
