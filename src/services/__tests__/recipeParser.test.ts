@@ -104,4 +104,12 @@ describe('Recipe Parser Service (1-Click TikTok / Reels / Web)', () => {
     expect(saladVideo.title).toContain('салат');
     expect(saladVideo.macrosPerServing.calories).toBeLessThan(200);
   });
+
+  it('коректно парсить розмовний текст з шумом та сполучниками та/і', () => {
+    const noisyText = 'Приготуй будь ласка: 250г яловичина; потім додай 2 яйця + 1 банан та 20г мед';
+    const parsed = parseSmartDish(noisyText);
+    expect(parsed.totalWeightGrams).toBe(510);
+    expect(parsed.ingredients).toHaveLength(4);
+    expect(parsed.totalMacros.calories).toBeGreaterThan(600);
+  });
 });

@@ -714,8 +714,6 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   onSaveToRecipeBook,
   onOpenProModal
 }) => {
-  if (!isOpen) return null;
-
   const { t } = useTranslation();
   const { user, setProStatus } = useUserStore();
   const isProUser = Boolean(user.isPro);
@@ -771,6 +769,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   const [isParsing, setIsParsing] = useState(false);
   const [parsedRecipe, setParsedRecipe] = useState<ParsedRecipe | null>(null);
   const [addedMealSlot, setAddedMealSlot] = useState<MealType | null>(null);
+  const [parserServings, setParserServings] = useState<number>(1);
 
   // Стан для Розумного тексту
   const [smartInputText, setSmartInputText] = useState('Тости з бананом');
@@ -963,12 +962,23 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     }, 900);
   };
 
-  // Робота AI Парсера (Stage 6.0: Multi-Modal Whisper + OCR + Edge Gateway)
+  // Робота AI Парсера (Stage 6.0: Multi-Modal Whisper + OCR + Live Metadata Gateway)
   const handleParseVideo = async (urlToParse?: string, hint?: string) => {
     setIsParsing(true);
     setAddedMealSlot(null);
-    const effectiveUrl = urlToParse !== undefined ? urlToParse : parserUrl;
-    const effectiveHint = hint !== undefined ? hint : videoDishHint;
+    const rawInput = (urlToParse !== undefined ? urlToParse : parserUrl).trim();
+    let effectiveHint = (hint !== undefined ? hint : videoDishHint).trim();
+
+    // Витягуємо URL з можливого тексту повідомлення (наприклад, "Tarta de queso https://vm.tiktok.com/...")
+    let effectiveUrl = rawInput;
+    const urlMatch = rawInput.match(/https?:\/\/[^\s]+/i);
+    if (urlMatch) {
+      effectiveUrl = urlMatch[0];
+      const surroundingText = rawInput.replace(effectiveUrl, '').trim();
+      if (surroundingText && !effectiveHint) {
+        effectiveHint = surroundingText;
+      }
+    }
 
     try {
       const res = await parseVideoRecipeWithAi({
@@ -976,7 +986,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
         dishHint: effectiveHint,
         audioTranscript: videoAiTab === 'whisper' ? audioTranscript : undefined,
         frameOcrText: videoAiTab === 'ocr' ? frameOcrText : undefined,
-        servings: 2
+        servings: parserServings
       });
 
       setIsParsing(false);
@@ -991,14 +1001,14 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     }
   };
 
-  const handleAddParsedToSlot = (slot: MealType) => {
+  const executeAddParsedToSlot = (slot: MealType, customName?: string) => {
     if (!parsedRecipe) return;
     const defaultTime = slot === 'breakfast' ? '08:30' :
                         slot === 'lunch' ? '13:00' :
                         slot === 'snack' ? '16:30' : '19:30';
 
     onAddDishToDay(slot, {
-      name: parsedRecipe.title,
+      name: customName || parsedRecipe.title,
       weightGrams: Math.round(parsedRecipe.totalWeightGrams / parsedRecipe.servings),
       macros: parsedRecipe.macrosPerServing,
       timestamp: defaultTime
@@ -1011,9 +1021,40 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     }, 900);
   };
 
+  const handleAddParsedToSlot = (slot: MealType) => {
+    if (!parsedRecipe) return;
+    const conflicts = detectDietaryConflicts(
+      parsedRecipe.title,
+      parsedRecipe.ingredients ? parsedRecipe.ingredients.map(i => i.name) : undefined,
+      user
+    );
+
+    if (conflicts.length > 0) {
+      setAllergenConflictState({
+        isOpen: true,
+        dishName: parsedRecipe.title,
+        conflicts,
+        onProceed: () => {
+          executeAddParsedToSlot(slot);
+          setAllergenConflictState((prev) => ({ ...prev, isOpen: false }));
+        },
+        onReplace: (suggestion) => {
+          executeAddParsedToSlot(slot, `${parsedRecipe.title} (${suggestion})`);
+          setAllergenConflictState((prev) => ({ ...prev, isOpen: false }));
+        }
+      });
+      return;
+    }
+
+    executeAddParsedToSlot(slot);
+  };
+
   // Робота Розумного тексту (Natural Language)
   const handleSmartTextRecognize = () => {
     const parsed = parseSmartDish(smartInputText, parseFloat(smartWeight) || 210);
+    if (parsed.totalWeightGrams > 0 && parsed.ingredients && parsed.ingredients.length > 1) {
+      setSmartWeight(String(parsed.totalWeightGrams));
+    }
     setSmartCalculated(parsed.macrosPerServing);
   };
 
@@ -1076,7 +1117,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     }, 850);
   };
 
-  const handleAddSmartTextDish = () => {
+  const executeAddSmartTextDish = (customName?: string) => {
     const macros = smartCalculated || {
       calories: Math.round((parseFloat(smartWeight) || 200) * 1.8),
       protein: Math.round((parseFloat(smartWeight) || 200) * 0.12),
@@ -1085,7 +1126,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     };
 
     onAddDishToDay(smartMealType, {
-      name: smartInputText.trim() || 'Корисна страва',
+      name: customName || smartInputText.trim() || 'Корисна страва',
       weightGrams: parseFloat(smartWeight) || 200,
       macros,
       timestamp: smartTime
@@ -1093,6 +1134,32 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
 
     onClose();
   };
+
+  const handleAddSmartTextDish = () => {
+    const dishName = smartInputText.trim() || 'Корисна страва';
+    const conflicts = detectDietaryConflicts(dishName, undefined, user);
+
+    if (conflicts.length > 0) {
+      setAllergenConflictState({
+        isOpen: true,
+        dishName,
+        conflicts,
+        onProceed: () => {
+          executeAddSmartTextDish();
+          setAllergenConflictState((prev) => ({ ...prev, isOpen: false }));
+        },
+        onReplace: (suggestion) => {
+          executeAddSmartTextDish(`${dishName} (${suggestion})`);
+          setAllergenConflictState((prev) => ({ ...prev, isOpen: false }));
+        }
+      });
+      return;
+    }
+
+    executeAddSmartTextDish();
+  };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 animate-fadeIn">
@@ -1103,6 +1170,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
         onClick={onClose}
       />
       <div
+        id="chef-hub-modal"
         className="w-full max-w-sm rounded-[32px] bg-[#101612]/98 border border-white/10 text-white relative z-10 max-h-[92vh] flex flex-col shadow-[0_25px_60px_rgba(0,0,0,0.9)] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -1686,9 +1754,9 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
               <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/25 text-xs text-amber-200 flex items-start gap-2.5">
                 <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-extrabold text-amber-300">Multi-Modal AI Engine (Stage 6.0)</div>
+                  <div className="font-extrabold text-amber-300">{t('chef_ai_title')}</div>
                   <div className="text-[11px] text-amber-200/80 mt-0.5">
-                    Розбір рецептів через Whisper Audio API, OCR-текст з відеокадрів або пряме посилання на відео (TikTok, Reels, Shorts).
+                    {t('chef_ai_desc')}
                   </div>
                 </div>
               </div>
@@ -1705,7 +1773,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                   }`}
                 >
                   <Link2 className="w-3 h-3" />
-                  <span>URL відео</span>
+                  <span>{t('chef_ai_tab_url')}</span>
                 </button>
 
                 <button
@@ -1719,7 +1787,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                   }`}
                 >
                   <Mic className="w-3 h-3" />
-                  <span>Whisper аудіо</span>
+                  <span>{t('chef_ai_tab_whisper')}</span>
                 </button>
 
                 <button
@@ -1733,7 +1801,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                   }`}
                 >
                   <Video className="w-3 h-3" />
-                  <span>OCR кадри</span>
+                  <span>{t('chef_ai_tab_ocr')}</span>
                 </button>
               </div>
 
@@ -1743,7 +1811,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                   {/* Зразки */}
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-                      Швидкі приклади:
+                      {t('chef_ai_quick_examples')}
                     </label>
                     <div className="flex flex-wrap gap-1.5">
                       <button
@@ -1798,31 +1866,48 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                   <div className="space-y-2">
                     <div>
                       <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1">
-                        Посилання на відео (TikTok / Reels / YouTube):
+                        {t('chef_ai_url_label')}
                       </label>
                       <input
                         id="input-parser-video-url"
                         type="text"
                         value={parserUrl}
                         onChange={(e) => setParserUrl(e.target.value)}
-                        placeholder="https://www.tiktok.com/@..."
+                        placeholder="https://www.tiktok.com/@... або вставте посилання з описом"
                         className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1 flex items-center justify-between">
-                        <span>Назва страви з відео (якщо коротке посилання):</span>
-                        <span className="text-[9.5px] text-zinc-500 font-normal">необов’язково</span>
-                      </label>
-                      <input
-                        id="input-parser-dish-hint"
-                        type="text"
-                        value={videoDishHint}
-                        onChange={(e) => setVideoDishHint(e.target.value)}
-                        placeholder="Наприклад: крепси з м'ясом, вівсянка, шаурма..."
-                        className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
-                      />
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1 flex items-center justify-between">
+                          <span>{t('chef_ai_dish_hint_label')}</span>
+                          <span className="text-[9.5px] text-zinc-500 font-normal">{t('chef_ai_optional')}</span>
+                        </label>
+                        <input
+                          id="input-parser-dish-hint"
+                          type="text"
+                          value={videoDishHint}
+                          onChange={(e) => setVideoDishHint(e.target.value)}
+                          placeholder="Наприклад: крепси з м'ясом, вівсянка, шаурма..."
+                          className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                      <div className="w-20">
+                        <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1">
+                          Порції:
+                        </label>
+                        <select
+                          value={parserServings}
+                          onChange={(e) => setParserServings(Number(e.target.value))}
+                          className="w-full px-2 py-2 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-amber-300 focus:outline-none focus:border-amber-400"
+                        >
+                          <option value={1}>1</option>
+                          <option value={2}>2</option>
+                          <option value={3}>3</option>
+                          <option value={4}>4</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1833,14 +1918,14 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                 <div className="space-y-2.5 animate-fadeIn">
                   <div className="flex items-center justify-between">
                     <label className="text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider block">
-                      Транскрипція мови шефа (Whisper AI):
+                      {t('chef_ai_whisper_label')}
                     </label>
                     <button
                       type="button"
                       onClick={() => setAudioTranscript('- 200г Куряче філе\n- 50г Твердий сир\n- 150г Відварений рис\n- 10г Оливкова олія')}
                       className="text-[9.5px] font-bold text-amber-300 hover:underline"
                     >
-                      Вставити зразок
+                      {t('chef_ai_whisper_sample')}
                     </button>
                   </div>
                   <textarea
@@ -1859,14 +1944,14 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                 <div className="space-y-2.5 animate-fadeIn">
                   <div className="flex items-center justify-between">
                     <label className="text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider block">
-                      Текст та написи з відеокадрів (Vision OCR):
+                      {t('chef_ai_ocr_label')}
                     </label>
                     <button
                       type="button"
                       onClick={() => setFrameOcrText('- 120г Лосось свіжий\n- 80г Авокадо хасс\n- 100г Хрусткий салатний мікс')}
                       className="text-[9.5px] font-bold text-amber-300 hover:underline"
                     >
-                      Вставити зразок
+                      {t('chef_ai_ocr_sample')}
                     </button>
                   </div>
                   <textarea
@@ -1888,7 +1973,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                 className="w-full py-2.5 rounded-xl font-black text-xs text-zinc-950 bg-gradient-to-r from-amber-400 to-amber-500 shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-zinc-950" />
-                <span>{isParsing ? 'AI-розпізнавання та розрахунок...' : 'Розпізнати КБЖВ через ШІ'}</span>
+                <span>{isParsing ? t('chef_ai_btn_parsing') : t('chef_ai_btn_parse')}</span>
               </button>
 
               {/* Результат розпізнавання */}
@@ -1913,7 +1998,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                       <h4 className="text-xs font-bold text-white mt-1">{parsedRecipe.title}</h4>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] text-zinc-400 block">1 порція</span>
+                      <span className="text-[10px] text-zinc-400 block">{t('chef_ai_1_serving')}</span>
                       <span className="text-sm font-black text-amber-300">{parsedRecipe.macrosPerServing.calories} ккал</span>
                     </div>
                   </div>
@@ -1935,24 +2020,43 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                     </span>
                   </div>
 
+                  {/* Розпізнані інгредієнти */}
+                  {parsedRecipe.ingredients && parsedRecipe.ingredients.length > 0 && (
+                    <div className="space-y-1.5 p-2.5 rounded-xl bg-white/5 border border-white/10">
+                      <div className="text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center justify-between">
+                        <span>{t('chef_ai_detected_ingredients')}</span>
+                        <span className="font-mono text-zinc-400">{parsedRecipe.totalWeightGrams}г</span>
+                      </div>
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                        {parsedRecipe.ingredients.map((ing, idx) => (
+                          <div key={idx} className="flex justify-between items-center text-[11px] text-zinc-300">
+                            <span>• {ing.name} ({ing.amountGrams}г)</span>
+                            <span className="text-zinc-400 font-mono">{ing.macros.calories} ккал</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Кнопки додавання */}
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-                      Додати порцію в розклад:
+                      {t('chef_ai_add_to_schedule')}
                     </label>
                     <div className="grid grid-cols-4 gap-1.5">
                       {(['breakfast', 'lunch', 'snack', 'dinner'] as MealType[]).map((slot) => {
                         const labels: Record<MealType, string> = {
-                          breakfast: 'Сніданок',
-                          lunch: 'Обід',
-                          snack: 'Перекус',
-                          dinner: 'Вечеря'
+                          breakfast: t('breakfast'),
+                          lunch: t('lunch'),
+                          snack: t('snack'),
+                          dinner: t('dinner')
                         };
                         const isAdded = addedMealSlot === slot;
 
                         return (
                           <button
                             key={slot}
+                            id={`btn-add-parsed-${slot}`}
                             type="button"
                             onClick={() => handleAddParsedToSlot(slot)}
                             className={`py-2 rounded-xl text-[10.5px] font-bold transition-all flex flex-col items-center justify-center active:scale-95 ${
@@ -1989,31 +2093,32 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
           )}
 
           {/* ========================================================= */}
-          {/* РЕЖИМ 3: ВІЛЬНИЙ РОЗУМНИЙ ТЕКСТ (NATURAL LANGUAGE) */}
+          {/* РЕЖИМ 4: ВІЛЬНИЙ РОЗУМНИЙ ТЕКСТ (NATURAL LANGUAGE) */}
           {/* ========================================================= */}
           {activeTab === 'smart_text' && (
             <div className="space-y-3.5 animate-fadeIn">
               <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/20 text-xs text-amber-200">
-                Напишіть звичну назву страви (наприклад, <em>«тости з авокадо»</em> або <em>«вівсянка з бананом»</em>). Система сама розпізнає та порахує КБЖВ.
+                Напишіть звичну назву страви або список інгредієнтів через кому чи з нового рядка (наприклад: <em>«200г курки, 100г рису, 15г олії, 2 яйця»</em> або <em>«тости з авокадо»</em>).
               </div>
 
               <div>
                 <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1">
-                  Назва страви:
+                  {t('chef_smart_dish_name')}
                 </label>
-                <input
-                  type="text"
+                <textarea
+                  id="smart-recipe-textarea"
+                  rows={2}
                   value={smartInputText}
                   onChange={(e) => setSmartInputText(e.target.value)}
                   onBlur={handleSmartTextRecognize}
-                  placeholder="Наприклад: Тости з авокадо та яйцем пашот"
+                  placeholder={t('chef_smart_dish_ph')}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block text-[10.5px] font-bold text-zinc-300 mb-1">Вага (г):</label>
+                  <label className="block text-[10.5px] font-bold text-zinc-300 mb-1">{t('chef_smart_weight')}</label>
                   <input
                     type="number"
                     value={smartWeight}
@@ -2022,20 +2127,20 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10.5px] font-bold text-zinc-300 mb-1">Категорія:</label>
+                  <label className="block text-[10.5px] font-bold text-zinc-300 mb-1">{t('chef_smart_category')}</label>
                   <select
                     value={smartMealType}
                     onChange={(e) => setSmartMealType(e.target.value as MealType)}
                     className="w-full px-2 py-2 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white focus:outline-none"
                   >
-                    <option value="breakfast">Сніданок</option>
-                    <option value="snack">Перекус</option>
-                    <option value="lunch">Обід</option>
-                    <option value="dinner">Вечеря</option>
+                    <option value="breakfast">{t('breakfast')}</option>
+                    <option value="snack">{t('snack')}</option>
+                    <option value="lunch">{t('lunch')}</option>
+                    <option value="dinner">{t('dinner')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10.5px] font-bold text-zinc-300 mb-1">Час:</label>
+                  <label className="block text-[10.5px] font-bold text-zinc-300 mb-1">{t('chef_smart_time')}</label>
                   <input
                     type="time"
                     value={smartTime}
@@ -2052,13 +2157,13 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                 className="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-amber-300 flex items-center justify-center gap-1.5 transition-all"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Авторозрахунок КБЖВ страви</span>
+                <span>{t('chef_smart_btn_autocalc')}</span>
               </button>
 
               {smartCalculated && (
                 <div className="p-3 rounded-2xl bg-black/40 border border-amber-400/30 text-xs space-y-1.5">
                   <div className="flex justify-between items-center text-zinc-300 font-bold">
-                    <span>Розраховано на {smartWeight}г:</span>
+                    <span>{t('chef_smart_calculated_for')} {smartWeight}г:</span>
                     <span className="text-amber-300 text-sm font-black">{smartCalculated.calories} ккал</span>
                   </div>
                   <div className="text-[11px] text-zinc-400">
@@ -2074,7 +2179,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                 className="w-full py-2.5 rounded-xl font-black text-xs text-zinc-950 bg-gradient-to-r from-amber-400 to-amber-500 shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all"
               >
                 <Plus className="w-4 h-4 text-zinc-950 stroke-[3]" />
-                <span>Додати в розклад на {smartTime}</span>
+                <span>{t('chef_smart_btn_add')} {smartTime}</span>
               </button>
             </div>
           )}

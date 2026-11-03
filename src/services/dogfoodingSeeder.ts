@@ -421,7 +421,10 @@ export function generateSevenDayDogfoodingData(targets = { calories: 2150, prote
 
   const weeklyBalanceCalories = Math.max(0, weeklyTargetCalories - weeklyConsumedCalories);
   const remainingDays = flexDays.filter(d => !d.isCompleted).length || 1;
-  const adjustedDailyBudget = Math.round((targets.calories * remainingDays + Math.min(350, weeklyBalanceCalories)) / remainingDays);
+  const rawDailyBudget = Math.round((weeklyTargetCalories - weeklyConsumedCalories) / remainingDays);
+  const safeFloor = Math.max(1200, targets.calories - 450);
+  const safeCeil = targets.calories + 450;
+  const adjustedDailyBudget = Math.max(safeFloor, Math.min(safeCeil, rawDailyBudget));
 
   const weeklyBank: WeeklyFlexBank = {
     weekStartDate: dates[0],

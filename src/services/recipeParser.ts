@@ -5,23 +5,37 @@ import { resolveCrossLingualEntity } from './foodOntology';
 
 /**
  * Одиниці вимірювання та їх приблизна вага в грамах
- */
-const UNIT_CONVERSIONS: Record<string, number> = {
-  'г': 1,
-  'гр': 1,
-  'g': 1,
-  'грам': 1,
-  'кг': 1000,
-  'kg': 1000,
-  'мл': 1,
-  'ml': 1,
-  'л': 1000,
-  'ст.л': 15,
-  'ст.л.': 15,
-  'ч.л': 5,
-  'ч.л.': 5,
-  'шт': 60,
-  'шт.': 60,
+  */
+export const UNIT_CONVERSIONS: Record<string, number> = {
+  'г': 1, 'гр': 1, 'g': 1, 'gram': 1, 'grams': 1, 'gramo': 1, 'gramos': 1, 'gr': 1,
+  'кг': 1000, 'kg': 1000, 'kilo': 1000, 'kilos': 1000,
+  'мл': 1, 'ml': 1,
+  'л': 1000, 'l': 1000, 'liter': 1000, 'litro': 1000,
+  'ст.л': 15, 'ст.л.': 15, 'ст л': 15, 'ст. л.': 15, 'ст л.': 15,
+  'столова ложка': 15, 'столові ложки': 15, 'столових ложок': 15, 'столову ложку': 15,
+  'tbsp': 15, 'tablespoon': 15, 'tablespoons': 15,
+  'cucharada': 15, 'cucharadas': 15, 'cda': 15, 'cdas': 15,
+  'ч.л': 5, 'ч.л.': 5, 'ч л': 5, 'ч. л.': 5,
+  'чайна ложка': 5, 'чайні ложки': 5, 'чайних ложок': 5, 'чайну ложку': 5,
+  'tsp': 5, 'teaspoon': 5, 'teaspoons': 5,
+  'cucharadita': 5, 'cucharaditas': 5, 'cdta': 5, 'cdtas': 5,
+  'cup': 200, 'cups': 200, 'склянка': 200, 'склянки': 200, 'стакан': 200, 'taza': 200, 'tazas': 200,
+  'slice': 35, 'slices': 35, 'скибка': 35, 'скибки': 35, 'шматок': 35, 'шматочки': 35, 'rebanada': 35, 'rebanadas': 35, 'loncha': 35, 'lonchas': 35,
+  'шт': -1, 'шт.': -1, 'штука': -1, 'штуки': -1, 'штук': -1,
+  'pcs': -1, 'pc': -1, 'piece': -1, 'pieces': -1,
+  'ud': -1, 'uds': -1, 'unidad': -1, 'unidades': -1
+};
+
+export const PIECE_WEIGHTS: Record<string, number> = {
+  'яйц': 60, 'яєц': 60, 'huev': 60, 'egg': 60,
+  'банан': 120, 'platan': 120, 'plátan': 120, 'banan': 120,
+  'яблук': 150, 'manzan': 150, 'appl': 150,
+  'авокад': 150, 'aguacat': 150, 'avocad': 150,
+  'помідор': 100, 'томат': 100, 'tomat': 100,
+  'огірок': 100, 'огірк': 100, 'pepin': 100, 'cucumb': 100,
+  'картопл': 130, 'patat': 130, 'papa': 130, 'potat': 130,
+  'круасан': 60, 'croiss': 60,
+  'тортиль': 40, 'tortill': 40
 };
 
 /**
@@ -33,22 +47,44 @@ export function findBestMatch(query: string): FoodItem {
   // 0. Крос-мовний семантичний онтологічний резолвер (ES, EN, UK, FR, IT, DE, PL)
   const crossEntity = resolveCrossLingualEntity(q);
   if (crossEntity) {
-    if (crossEntity.id === 'minced_meat') return COMMON_FOODS.find(f => f.id === 'ground_meat')!;
-    if (crossEntity.id === 'tortilla') return COMMON_FOODS.find(f => f.id === 'tortilla_espanola')!;
-    if (crossEntity.id === 'jamon') return COMMON_FOODS.find(f => f.id === 'jamon_iberico')!;
-    if (crossEntity.id === 'gazpacho') return COMMON_FOODS.find(f => f.id === 'gazpacho_andaluz')!;
-    if (crossEntity.id === 'baguette') return COMMON_FOODS.find(f => f.id === 'baguette_tradition')!;
-    if (crossEntity.id === 'pasta_fagioli') return COMMON_FOODS.find(f => f.id === 'pasta_fagioli')!;
-    if (crossEntity.id === 'chicken') return COMMON_FOODS.find(f => f.id === 'chicken_breast')!;
-    if (crossEntity.id === 'beef_steak') return COMMON_FOODS.find(f => f.id === 'beef_lean')!;
-    if (crossEntity.id === 'salmon') return COMMON_FOODS.find(f => f.id === 'salmon')!;
-    if (crossEntity.id === 'tuna') return COMMON_FOODS.find(f => f.id === 'tuna_canned')!;
-    if (crossEntity.id === 'croissant') return COMMON_FOODS.find(f => f.id === 'croissant')!;
-    if (crossEntity.id === 'pizza') return COMMON_FOODS.find(f => f.id === 'pizza')!;
-    if (crossEntity.id === 'burger') return COMMON_FOODS.find(f => f.id === 'big_mac')!;
-    if (crossEntity.id === 'eggs') return COMMON_FOODS.find(f => f.id === 'eggs')!;
-    if (crossEntity.id === 'syrniki') return COMMON_FOODS.find(f => f.id === 'syrniki_dish')!;
-    if (crossEntity.id === 'yogurt_protein') return COMMON_FOODS.find(f => f.id === 'yogur_proteico_hacendado')!;
+    if (crossEntity.id === 'minced_meat') return COMMON_FOODS.find(f => f.id === 'ground_meat') || COMMON_FOODS[0];
+    if (crossEntity.id === 'tortilla') return COMMON_FOODS.find(f => f.id === 'tortilla_espanola') || COMMON_FOODS[0];
+    if (crossEntity.id === 'jamon') return COMMON_FOODS.find(f => f.id === 'jamon_iberico') || COMMON_FOODS[0];
+    if (crossEntity.id === 'gazpacho') return COMMON_FOODS.find(f => f.id === 'gazpacho_andaluz') || COMMON_FOODS[0];
+    if (crossEntity.id === 'baguette') return COMMON_FOODS.find(f => f.id === 'baguette_tradition') || COMMON_FOODS[0];
+    if (crossEntity.id === 'pasta_fagioli') return COMMON_FOODS.find(f => f.id === 'pasta_fagioli') || COMMON_FOODS[0];
+    if (crossEntity.id === 'chicken') return COMMON_FOODS.find(f => f.id === 'chicken_breast') || COMMON_FOODS[0];
+    if (crossEntity.id === 'beef_steak') return COMMON_FOODS.find(f => f.id === 'beef_lean') || COMMON_FOODS[0];
+    if (crossEntity.id === 'salmon') return COMMON_FOODS.find(f => f.id === 'salmon') || COMMON_FOODS[0];
+    if (crossEntity.id === 'tuna') return COMMON_FOODS.find(f => f.id === 'tuna_canned') || COMMON_FOODS[0];
+    if (crossEntity.id === 'croissant') return COMMON_FOODS.find(f => f.id === 'croissant') || COMMON_FOODS[0];
+    if (crossEntity.id === 'pizza') return COMMON_FOODS.find(f => f.id === 'pizza') || COMMON_FOODS[0];
+    if (crossEntity.id === 'burger') return COMMON_FOODS.find(f => f.id === 'big_mac') || COMMON_FOODS[0];
+    if (crossEntity.id === 'eggs') return COMMON_FOODS.find(f => f.id === 'eggs') || COMMON_FOODS[0];
+    if (crossEntity.id === 'syrniki') return COMMON_FOODS.find(f => f.id === 'syrniki_dish') || COMMON_FOODS[0];
+    if (crossEntity.id === 'yogurt_protein') return COMMON_FOODS.find(f => f.id === 'yogur_proteico_hacendado') || COMMON_FOODS[0];
+    if (crossEntity.id === 'turkey') return COMMON_FOODS.find(f => f.id === 'turkey_breast') || COMMON_FOODS[0];
+    if (crossEntity.id === 'pasta') return COMMON_FOODS.find(f => f.id === 'pasta_durum') || COMMON_FOODS[0];
+    if (crossEntity.id === 'salad') return COMMON_FOODS.find(f => f.id === 'salad_fresh') || COMMON_FOODS[0];
+    if (crossEntity.id === 'rice') return COMMON_FOODS.find(f => f.id === 'rice_basmati') || COMMON_FOODS[0];
+    if (crossEntity.id === 'olive_oil') return COMMON_FOODS.find(f => f.id === 'olive_oil') || COMMON_FOODS[0];
+    if (crossEntity.id === 'butter') return COMMON_FOODS.find(f => f.id === 'butter') || COMMON_FOODS[0];
+    if (crossEntity.id === 'milk') return COMMON_FOODS.find(f => f.id === 'milk') || COMMON_FOODS[0];
+    if (crossEntity.id === 'cheese') return COMMON_FOODS.find(f => f.id === 'cheddar_cheese') || COMMON_FOODS[0];
+    if (crossEntity.id === 'bread') return COMMON_FOODS.find(f => f.id === 'toast_bread') || COMMON_FOODS[0];
+    if (crossEntity.id === 'potato') return COMMON_FOODS.find(f => f.id === 'potatoes') || COMMON_FOODS[0];
+    if (crossEntity.id === 'pork') return COMMON_FOODS.find(f => f.id === 'pork') || COMMON_FOODS[0];
+    if (crossEntity.id === 'avocado') return COMMON_FOODS.find(f => f.id === 'avocado') || COMMON_FOODS[0];
+    if (crossEntity.id === 'banana') return COMMON_FOODS.find(f => f.id === 'banana') || COMMON_FOODS[0];
+    if (crossEntity.id === 'apple') return COMMON_FOODS.find(f => f.id === 'apple') || COMMON_FOODS[0];
+    if (crossEntity.id === 'oats') return COMMON_FOODS.find(f => f.id === 'oats') || COMMON_FOODS[0];
+    if (crossEntity.id === 'broccoli') return COMMON_FOODS.find(f => f.id === 'broccoli') || COMMON_FOODS[0];
+    if (crossEntity.id === 'almonds') return COMMON_FOODS.find(f => f.id === 'almonds') || COMMON_FOODS[0];
+    if (crossEntity.id === 'tofu') return COMMON_FOODS.find(f => f.id === 'tofu') || COMMON_FOODS[0];
+    if (crossEntity.id === 'shrimp') return COMMON_FOODS.find(f => f.id === 'shrimp') || COMMON_FOODS[0];
+    if (crossEntity.id === 'sour_cream') return COMMON_FOODS.find(f => f.id === 'sour_cream_15') || COMMON_FOODS[0];
+    if (crossEntity.id === 'kefir') return COMMON_FOODS.find(f => f.id === 'kefir_1') || COMMON_FOODS[0];
+    if (crossEntity.id === 'honey') return COMMON_FOODS.find(f => f.id === 'honey') || COMMON_FOODS[0];
   }
 
   // 1. Фастфуд, випічка, снеки та особливі назви
@@ -158,11 +194,26 @@ export function findBestMatch(query: string): FoodItem {
   if (q.includes('вівсян') || q.includes('вівсянк')) {
     return COMMON_FOODS.find(f => f.id === 'oats')!;
   }
-  if (q.includes('олій') || q.includes('оливков')) {
+  if (q.includes('олі') || q.includes('оливков') || q.includes('aceite')) {
     return COMMON_FOODS.find(f => f.id === 'olive_oil')!;
   }
-  if (q.includes('масл')) {
+  if (q.includes('вершков') || q.includes('масл') || q.includes('mantequilla')) {
     return COMMON_FOODS.find(f => f.id === 'butter')!;
+  }
+  if (q.includes('молок') || q.includes('leche')) {
+    return COMMON_FOODS.find(f => f.id === 'milk')!;
+  }
+  if (q.includes('свинин') || q.includes('сало') || q.includes('cerdo')) {
+    return COMMON_FOODS.find(f => f.id === 'pork')!;
+  }
+  if (q.includes('брокол') || q.includes('broccoli') || q.includes('brócoli')) {
+    return COMMON_FOODS.find(f => f.id === 'broccoli')!;
+  }
+  if (q.includes('мед') || q.includes('miel')) {
+    return COMMON_FOODS.find(f => f.id === 'honey')!;
+  }
+  if (q.includes('тофу') || q.includes('tofu')) {
+    return COMMON_FOODS.find(f => f.id === 'tofu')!;
   }
   if (q.includes('арахіс')) {
     return COMMON_FOODS.find(f => f.id === 'peanut_butter')!;
@@ -222,7 +273,11 @@ export function findBestMatch(query: string): FoodItem {
  * Парсер окремого рядка інгредієнта
  */
 export function parseIngredientLine(line: string): ParsedIngredient {
-  const trimmed = line.trim().replace(/^[-•*]\s*/, '');
+  let trimmed = line.trim().replace(/^[-•*]\s*/, '').replace(/^\d+[.)]\s+/, '').trim();
+  // Очищення розмовного шуму та ввідних слів користувача ("приготуй будь ласка:", "потім додай", "та")
+  trimmed = trimmed
+    .replace(/^(?:(?:приготуй|будь ласка|візьми|додай|потім|також|та|і|порція|порції)\s*[:,\-]?\s*)+/gi, '')
+    .trim();
   if (!trimmed) {
     return {
       rawLine: line,
@@ -232,26 +287,53 @@ export function parseIngredientLine(line: string): ParsedIngredient {
     };
   }
 
-  // Наприклад: "250г куряче філе", "2 шт яйця", "15 мл олії"
-  const match = trimmed.match(/^([\d.,]+)\s*([a-zA-Zа-яА-ЯіІїЇєЄ.]+)?\s+(.+)$/i);
-
   let amountGrams = 100;
   let name = trimmed;
+  let num: number | null = null;
+  let unit = '';
 
-  if (match) {
-    const rawNum = parseFloat(match[1].replace(',', '.'));
-    const rawUnit = (match[2] || '').toLowerCase().trim();
-    name = match[3].trim();
+  const postMatch = trimmed.match(/^(.*?)\s*[-:]?\s*([\d.,]+)\s*([a-zA-Zа-яА-ЯіІїЇєЄ.]+)?$/i);
+  const preMatch = trimmed.match(/^([\d.,]+)\s*([a-zA-Zа-яА-ЯіІїЇєЄ.]+)?\s*(.*)$/i);
 
-    if (!isNaN(rawNum)) {
-      if (rawUnit && UNIT_CONVERSIONS[rawUnit]) {
-        amountGrams = Math.round(rawNum * UNIT_CONVERSIONS[rawUnit]);
-      } else if (rawUnit === 'яйця' || rawUnit === 'яйце' || rawUnit === 'яєць') {
-        amountGrams = Math.round(rawNum * 55);
-        name = `Куряче яйце ${name}`.trim();
-      } else {
-        amountGrams = Math.round(rawNum);
+  if (/^[\d.,]/.test(trimmed) && preMatch) {
+    num = parseFloat(preMatch[1].replace(',', '.'));
+    const firstWord = (preMatch[2] || '').toLowerCase().trim();
+    const rest = (preMatch[3] || '').trim();
+    const restWords = rest.split(/\s+/);
+    const secondWord = (restWords[0] || '').toLowerCase().trim();
+    const twoWords = `${firstWord} ${secondWord}`.trim();
+
+    if (UNIT_CONVERSIONS[twoWords]) {
+      unit = twoWords;
+      name = restWords.slice(1).join(' ').trim();
+    } else if (UNIT_CONVERSIONS[firstWord]) {
+      unit = firstWord;
+      name = rest;
+    } else {
+      unit = 'pcs';
+      name = `${firstWord} ${rest}`.trim();
+    }
+  } else if (postMatch && !isNaN(parseFloat(postMatch[2].replace(',', '.')))) {
+    num = parseFloat(postMatch[2].replace(',', '.'));
+    unit = (postMatch[3] || '').toLowerCase().trim();
+    name = postMatch[1].trim();
+  }
+
+  name = name.replace(/^(de|з|із|of)\s+/i, '').trim();
+
+  if (num !== null && !isNaN(num)) {
+    if (unit && UNIT_CONVERSIONS[unit] && UNIT_CONVERSIONS[unit] > 0) {
+      amountGrams = Math.round(num * UNIT_CONVERSIONS[unit]);
+    } else {
+      let pieceWeight = 80;
+      const lowerName = name.toLowerCase();
+      for (const [key, w] of Object.entries(PIECE_WEIGHTS)) {
+        if (lowerName.includes(key)) {
+          pieceWeight = w;
+          break;
+        }
       }
+      amountGrams = Math.round(num * pieceWeight);
     }
   }
 
@@ -278,8 +360,21 @@ export function parseIngredientLine(line: string): ParsedIngredient {
  * Розумний парсер для вільного тексту (розбивка складених страв)
  */
 export function parseSmartDish(dishName: string, totalWeightGrams: number = 210): ParsedRecipe {
-  const lower = dishName.toLowerCase().trim().replace(/['’`ʼ]/g, "'");
+  const clean = dishName.trim();
+  const lower = clean.toLowerCase().replace(/['’`ʼ]/g, "'");
   const validWeight = totalWeightGrams > 0 ? totalWeightGrams : 210;
+
+  // Якщо користувач ввів складений рецепт (переноси рядків, коми, крапки з комою, плюси чи кілька кількостей)
+  const isMultiIngredient = clean.includes('\n') ||
+    clean.includes(',') ||
+    clean.includes(';') ||
+    clean.includes('+') ||
+    /\s+(?:та|і|y|and)\s+\d/i.test(clean) ||
+    (clean.match(/\b\d+[\d.,]*\s*(g|г|гр|kg|кг|ml|мл|l|л|tbsp|tsp|ст\.?л|ч\.?л|шт|pcs|ud)/gi) || []).length > 1;
+
+  if (isMultiIngredient) {
+    return parseRecipeFromText('Власна страва', clean, 1);
+  }
 
   // 1. БІГ МАК / БУРГЕР
   if (lower.includes('біг мак') || lower.includes('бігмак') || lower.includes('бургер') || lower.includes('макдональд')) {
@@ -489,12 +584,18 @@ export function parseRecipeFromUrl(
   // 1. Якщо користувач вказав конкретну страву у підказці (найвищий пріоритет)
   const cleanPrompt = (contextPrompt || '').trim();
   if (cleanPrompt.length >= 2) {
-    const dish = parseSmartDish(cleanPrompt, 260);
+    const dish = parseSmartDish(cleanPrompt, 260 * effectiveServings);
     return {
       ...dish,
       title: `TikTok: ${dish.title}`,
       sourceUrl: url,
-      servings: effectiveServings
+      servings: effectiveServings,
+      macrosPerServing: {
+        calories: Math.round(dish.totalMacros.calories / effectiveServings),
+        protein: Math.round((dish.totalMacros.protein / effectiveServings) * 10) / 10,
+        fat: Math.round((dish.totalMacros.fat / effectiveServings) * 10) / 10,
+        carbs: Math.round((dish.totalMacros.carbs / effectiveServings) * 10) / 10,
+      }
     };
   }
 
@@ -506,26 +607,40 @@ export function parseRecipeFromUrl(
     .split(/[/_\-.]+/)
     .filter(p => p.length > 2 && !['www', 'tiktok', 'com', 'video', 'watch', 'reel', 'reels', 'shorts', 'youtube', 'instagram', 'vm'].includes(p));
 
-  const urlText = urlParts.join(' ');
+  // Відфільтровуємо технічні хеші та цифрові ID відео (наприклад 'zm8xyql', '7391823482')
+  const meaningfulWords = urlParts.filter(p => !/^\d+$/.test(p) && !/^[a-z0-9_-]{5,15}$/.test(p) && p.length > 2);
+  const urlText = meaningfulWords.join(' ');
 
   // Якщо в URL є назва страви, парсимо її
   if (urlText.length > 2) {
-    const dish = parseSmartDish(urlText, 260);
+    const dish = parseSmartDish(urlText, 260 * effectiveServings);
     return {
       ...dish,
       title: `TikTok: ${dish.title}`,
       sourceUrl: url,
-      servings: effectiveServings
+      servings: effectiveServings,
+      macrosPerServing: {
+        calories: Math.round(dish.totalMacros.calories / effectiveServings),
+        protein: Math.round((dish.totalMacros.protein / effectiveServings) * 10) / 10,
+        fat: Math.round((dish.totalMacros.fat / effectiveServings) * 10) / 10,
+        carbs: Math.round((dish.totalMacros.carbs / effectiveServings) * 10) / 10,
+      }
     };
   }
 
   // 3. Фоллбек для порожніх коротких посилань (vm.tiktok.com без тексту)
-  const defaultDish = parseSmartDish('Крепси з м\'ясом', 260);
+  const defaultDish = parseSmartDish('Крепси з м\'ясом', 260 * effectiveServings);
   return {
     ...defaultDish,
     title: 'TikTok: Домашні крепси з соковитим м’ясним фаршем',
     sourceUrl: url,
-    servings: effectiveServings
+    servings: effectiveServings,
+    macrosPerServing: {
+      calories: Math.round(defaultDish.totalMacros.calories / effectiveServings),
+      protein: Math.round((defaultDish.totalMacros.protein / effectiveServings) * 10) / 10,
+      fat: Math.round((defaultDish.totalMacros.fat / effectiveServings) * 10) / 10,
+      carbs: Math.round((defaultDish.totalMacros.carbs / effectiveServings) * 10) / 10,
+    }
   };
 }
 
@@ -539,10 +654,39 @@ export function parseRecipeFromText(
   sourceUrl?: string,
   customInstructions?: string[]
 ): ParsedRecipe {
-  const lines = rawText
-    .split('\n')
-    .map(l => l.trim())
-    .filter(l => l.length > 0);
+  const rawLines = rawText.split('\n');
+  const lines: string[] = [];
+
+  const isInstruction = (text: string) => {
+    const l = text.toLowerCase();
+    return (
+      l.includes('приготування') || l.includes('кроки') || l.includes('інструкція') || l.includes('спосіб') ||
+      l.includes('instructions') || l.includes('steps') || l.includes('directions') || l.includes('preparation') || l.includes('method') ||
+      l.includes('instrucciones') || l.includes('preparación') || l.includes('pasos') || l.includes('modo de preparación') ||
+      /^(paso\s*\d+|step\s*\d+|крок\s*\d+|\d+\.)\s+/i.test(l)
+    );
+  };
+
+  for (const rawLine of rawLines) {
+    const trimmed = rawLine.trim();
+    if (!trimmed) continue;
+
+    if (isInstruction(trimmed)) {
+      lines.push(trimmed);
+      continue;
+    }
+
+    // Розбиваємо рядки, які містять кілька інгредієнтів через кому, крапку з комою, плюс або сполучники (та, і, y, and)
+    if (trimmed.includes(',') || trimmed.includes(';') || trimmed.includes('+') || /\s+(?:та|і|y|and)\s+\d/i.test(trimmed)) {
+      const parts = trimmed.split(/[,;+]|\s+(?:та|і|y|and)\s+(?=\d)/i).map(p => p.trim()).filter(p => p.length > 0);
+      if (parts.length > 1 && parts.some(p => /\d/.test(p) || p.length > 3)) {
+        lines.push(...parts);
+        continue;
+      }
+    }
+
+    lines.push(trimmed);
+  }
 
   const ingredients: ParsedIngredient[] = [];
   const instructions: string[] = customInstructions ? [...customInstructions] : [];
@@ -550,8 +694,9 @@ export function parseRecipeFromText(
   let isInstructionSection = false;
 
   for (const line of lines) {
-    if (line.toLowerCase().includes('приготування') || line.toLowerCase().includes('кроки') || line.toLowerCase().includes('інструкція')) {
+    if (isInstruction(line)) {
       isInstructionSection = true;
+      instructions.push(line);
       continue;
     }
 

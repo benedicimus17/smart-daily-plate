@@ -19,6 +19,7 @@ export interface SmartSwapResult {
  */
 export function findSmartSwapCandidates(
   currentMeal: {
+    id?: string;
     name: string;
     macros: { calories: number; protein: number; fat: number; carbs: number };
     category?: MealType;
@@ -33,16 +34,21 @@ export function findSmartSwapCandidates(
 
   availableDishes.forEach(dish => {
     // 1. Виключаємо поточну страву та раніше відхилені
+    if (currentMeal.id && dish.id === currentMeal.id) return;
     if (dish.name.toLowerCase() === currentMeal.name.toLowerCase()) return;
+    if (dish.name.toLowerCase().includes(currentMeal.name.toLowerCase()) || currentMeal.name.toLowerCase().includes(dish.name.toLowerCase())) return;
     if (excludeIds.includes(dish.id)) return;
 
     // 2. Якщо задана категорія прийому їжі, віддаємо пріоритет спорідненим прийомам
     if (currentMeal.category) {
-      if (currentMeal.category === 'breakfast' && dish.category !== 'breakfast') return;
-      if (currentMeal.category === 'snack' && dish.category !== 'snack') return;
-      if ((currentMeal.category === 'lunch' || currentMeal.category === 'dinner') &&
-          dish.category !== 'lunch' && dish.category !== 'dinner') {
-        return;
+      const isStandardMealCategory = ['breakfast', 'lunch', 'dinner', 'snack'].includes(dish.category);
+      if (isStandardMealCategory) {
+        if (currentMeal.category === 'breakfast' && dish.category !== 'breakfast') return;
+        if (currentMeal.category === 'snack' && dish.category !== 'snack') return;
+        if ((currentMeal.category === 'lunch' || currentMeal.category === 'dinner') &&
+            dish.category !== 'lunch' && dish.category !== 'dinner') {
+          return;
+        }
       }
     }
 
@@ -88,6 +94,7 @@ export function findSmartSwapCandidates(
  */
 export function getNextSwapCandidate(
   currentMeal: {
+    id?: string;
     name: string;
     macros: { calories: number; protein: number; fat: number; carbs: number };
     category?: MealType;

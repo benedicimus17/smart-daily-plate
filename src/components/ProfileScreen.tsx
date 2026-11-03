@@ -60,7 +60,7 @@ export const ProfileScreen: React.FC = () => {
     deleteAccountAndAllData,
     exportUserData
   } = useUserStore();
-  const { dailyLog, historyLogs, seedSevenDayDogfoodingData } = useNutritionStore();
+  const { dailyLog, weeklyBank, historyLogs, seedSevenDayDogfoodingData } = useNutritionStore();
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -961,7 +961,7 @@ export const ProfileScreen: React.FC = () => {
         onClose={() => setNotificationModalOpen(false)}
         currentWaterMl={dailyLog.waterMl}
         targetWaterMl={Math.round((user.weightKg || 70) * 30)}
-        flexBankKcal={350}
+        flexBankKcal={weeklyBank.weeklyBalanceCalories}
         remainingTodayKcal={Math.max(0, dailyLog.targets.calories - dailyLog.totals.calories)}
       />
 
@@ -982,7 +982,7 @@ export const ProfileScreen: React.FC = () => {
           carbsTarget: dailyLog.targets.carbs,
           waterMl: dailyLog.waterMl,
           waterTargetMl: Math.round((user.weightKg || 70) * 30),
-          flexBankKcal: 350,
+          flexBankKcal: weeklyBank.weeklyBalanceCalories,
           cookLossGramsSaved: 85,
           format: 'story'
         }}

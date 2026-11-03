@@ -649,6 +649,7 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
 
       {/* 5. КНОПКА ДОДАВАННЯ СВОГО ПРИЙОМУ ЇЖІ АБО ПЕРЕКУСУ */}
       <button
+        id="btn-log-add-custom-slot"
         type="button"
         onClick={() => setQuickAddConfig({ mealType: 'snack', initialTime: '11:00' })}
         className="w-full py-3.5 rounded-2xl bg-white/[0.04] border border-dashed border-white/20 hover:border-amber-400/50 text-xs font-bold text-zinc-300 hover:text-amber-300 flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"

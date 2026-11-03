@@ -20,7 +20,7 @@ export interface DiningPlateItem {
 export interface DiningRestaurantPreset {
   id: string;
   name: string;
-  category: 'italian' | 'burger' | 'asian' | 'steak' | 'cafe';
+  category: 'italian' | 'burger' | 'asian' | 'steak' | 'cafe' | 'spanish' | 'tapas';
   description: string;
   defaultMacros: Macros;
   estimatedWeightGrams: number;

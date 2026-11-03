@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Check, ChefHat, Sparkles, Scale, Clock, RefreshCw, Crown, ArrowLeftRight } from 'lucide-react';
 import { MealEntry, MealType, Macros } from '../types/nutrition';
 import { getNextSwapCandidate, SmartSwapResult } from '../services/smartSwapEngine';
@@ -322,24 +322,37 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
   onSwapDish,
   onOpenProModal
 }) => {
+  const { t } = useTranslation();
+  const { user } = useUserStore();
+  const isProUser = Boolean(user.isPro);
+
+  const [isEditingTime, setIsEditingTime] = useState(false);
+  const [timeValue, setTimeValue] = useState(entry?.timestamp || '08:30');
+  const [showSwapPanel, setShowSwapPanel] = useState(false);
+  const [excludedSwapIds, setExcludedSwapIds] = useState<string[]>([]);
+  const [currentSwapCandidate, setCurrentSwapCandidate] = useState<SmartSwapResult | null>(null);
+  const [realitySwapOpen, setRealitySwapOpen] = useState(false);
+
+  useEffect(() => {
+    if (entry?.timestamp) {
+      setTimeValue(entry.timestamp);
+    }
+    if (!isOpen) {
+      setShowSwapPanel(false);
+      setCurrentSwapCandidate(null);
+      setIsEditingTime(false);
+      setRealitySwapOpen(false);
+    }
+  }, [isOpen, entry?.id, entry?.timestamp]);
+
   if (!isOpen || !entry || !mealType) return null;
 
-  const { t } = useTranslation();
   const mealLabels: Record<MealType, string> = {
     breakfast: t('breakfast'),
     lunch: t('lunch'),
     dinner: t('dinner'),
     snack: t('snack')
   };
-
-  const { user } = useUserStore();
-  const isProUser = Boolean(user.isPro);
-
-  const [isEditingTime, setIsEditingTime] = useState(false);
-  const [timeValue, setTimeValue] = useState(entry.timestamp || '08:30');
-  const [showSwapPanel, setShowSwapPanel] = useState(false);
-  const [excludedSwapIds, setExcludedSwapIds] = useState<string[]>([]);
-  const [currentSwapCandidate, setCurrentSwapCandidate] = useState<SmartSwapResult | null>(null);
 
   const handleInitSmartSwap = () => {
     const candidate = getNextSwapCandidate(
@@ -468,8 +481,6 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
     }
     setIsEditingTime(false);
   };
-
-  const [realitySwapOpen, setRealitySwapOpen] = useState(false);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn">
@@ -649,9 +660,10 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
               </button>
             ) : !showSwapPanel ? (
               <button
+                id="btn-dish-detail-smart-swap"
                 type="button"
                 onClick={handleInitSmartSwap}
-                className="w-full py-2.5 rounded-2xl bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/40 text-amber-300 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm"
+                className="w-full py-2.5 rounded-2xl bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/40 text-amber-300 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4 stroke-[2.2] text-amber-400" />
                 <span>{t('dish_smart_swap_btn_label')}</span>
@@ -698,18 +710,20 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
 
                     <div className="grid grid-cols-2 gap-2">
                       <button
+                        id="btn-apply-smart-swap"
                         type="button"
                         onClick={handleApplySwap}
-                        className="py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all"
+                        className="py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer"
                       >
                         <Check className="w-3.5 h-3.5 stroke-[3]" />
                         <span>{t('dish_swap_apply_btn')}</span>
                       </button>
 
                       <button
+                        id="btn-next-smart-swap"
                         type="button"
                         onClick={handleNextSwap}
-                        className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-zinc-200 font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all"
+                        className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-zinc-200 font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
                       >
                         <RefreshCw className="w-3 h-3 text-amber-400" />
                         <span>{t('dish_swap_next_btn')}</span>

@@ -306,7 +306,7 @@ export const App: React.FC = () => {
               carbsTarget: dailyLog.targets.carbs,
               waterMl: dailyLog.waterMl,
               waterTargetMl: Math.round((user.weightKg || 70) * 30),
-              flexBankKcal: 350,
+              flexBankKcal: weeklyBank.weeklyBalanceCalories,
               cookLossGramsSaved: 85,
               format: 'story'
             }}

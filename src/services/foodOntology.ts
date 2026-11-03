@@ -232,22 +232,231 @@ export const CANONICAL_FOOD_ONTOLOGY: CanonicalFoodEntity[] = [
       'salade',
       'insalata'
     ]
+  },
+  {
+    id: 'rice',
+    canonicalName: 'Рис / Arroz / Rice',
+    aliases: [
+      'рис', 'рису', 'рисовий', 'басматі',
+      'arroz', 'arroz blanco', 'arroz integral', 'arroz basmati',
+      'rice', 'white rice', 'brown rice', 'basmati rice',
+      'riz', 'reis', 'ryż'
+    ]
+  },
+  {
+    id: 'olive_oil',
+    canonicalName: 'Олія / Aceite / Olive Oil',
+    aliases: [
+      'олія', 'олії', 'олію', 'олією', 'оливкова олія', 'соняшникова олія',
+      'aceite', 'aceite de oliva', 'aceite de girasol', 'aove',
+      'olive oil', 'vegetable oil', 'oil', 'sunflower oil',
+      'huile', 'olio', 'öl', 'oliwa'
+    ]
+  },
+  {
+    id: 'butter',
+    canonicalName: 'Масло / Mantequilla / Butter',
+    aliases: [
+      'вершкове масло', 'масло вершкове',
+      'mantequilla', 'mantequilla con sal', 'mantequilla sin sal',
+      'butter', 'unsalted butter', 'salted butter',
+      'beurre', 'burro', 'masło'
+    ]
+  },
+  {
+    id: 'milk',
+    canonicalName: 'Молоко / Leche / Milk',
+    aliases: [
+      'молоко', 'молока', 'молоком',
+      'leche', 'leche entera', 'leche semidesnatada', 'leche desnatada',
+      'milk', 'whole milk', 'skim milk',
+      'lait', 'latte', 'milch', 'mleko'
+    ]
+  },
+  {
+    id: 'cheese',
+    canonicalName: 'Сир твердий / Queso / Cheese',
+    aliases: [
+      'твердий сир', 'сир чеддер', 'сир гауда', 'сир пармезан',
+      'queso', 'queso curado', 'queso manchego', 'queso semicurado', 'queso cheddar',
+      'cheese', 'cheddar', 'gouda', 'parmesan',
+      'fromage', 'formaggio', 'käse', 'ser'
+    ]
+  },
+  {
+    id: 'bread',
+    canonicalName: 'Хліб / Pan / Bread',
+    aliases: [
+      'хліб', 'хліба', 'тост', 'булка', 'булочка',
+      'pan', 'pan blanco', 'pan integral', 'pan de molde', 'tostada', 'tostadas',
+      'bread', 'toast', 'whole wheat bread', 'white bread',
+      'pain', 'pane', 'brot', 'chleb'
+    ]
+  },
+  {
+    id: 'potato',
+    canonicalName: 'Картопля / Patata / Potato',
+    aliases: [
+      'картопля', 'картоплі', 'картоплю', 'картопляний', 'пюре',
+      'patata', 'patatas', 'papa', 'papas', 'patatas asadas',
+      'potato', 'potatoes', 'baked potato',
+      'pomme de terre', 'patate', 'kartoffel', 'ziemniak'
+    ]
+  },
+  {
+    id: 'pork',
+    canonicalName: 'Свинина / Cerdo / Pork',
+    aliases: [
+      'свинина', 'свинини', 'свинячий', 'вирізка свинна',
+      'cerdo', 'lomo', 'lomo de cerdo', 'solomillo de cerdo', 'costillas',
+      'pork', 'pork loin', 'pork tenderloin', 'pork chop',
+      'porc', 'maiale', 'schweinefleisch', 'wieprzowina'
+    ]
+  },
+  {
+    id: 'avocado',
+    canonicalName: 'Авокадо / Aguacate / Avocado',
+    aliases: [
+      'авокадо', 'авокадо хасс',
+      'aguacate', 'aguacates', 'aguacate hass',
+      'avocado', 'hass avocado',
+      'avocat', 'awokado'
+    ]
+  },
+  {
+    id: 'banana',
+    canonicalName: 'Банан / Plátano / Banana',
+    aliases: [
+      'банан', 'банани', 'банана', 'бананів',
+      'platano', 'plátano', 'platanos', 'plátanos',
+      'banana', 'bananas',
+      'banane'
+    ]
+  },
+  {
+    id: 'apple',
+    canonicalName: 'Яблуко / Manzana / Apple',
+    aliases: [
+      'яблуко', 'яблука', 'яблук', 'яблучний',
+      'manzana', 'manzanas',
+      'apple', 'apples',
+      'pomme', 'mela', 'apfel', 'jabłko'
+    ]
+  },
+  {
+    id: 'oats',
+    canonicalName: 'Вівсянка / Avena / Oats',
+    aliases: [
+      'вівсянка', 'вівсяні пластівці', 'вівсянки', 'вівсянку',
+      'avena', 'copos de avena', 'avena integral',
+      'oats', 'oatmeal', 'rolled oats',
+      'haferflocken', 'flocons d\'avoine', 'owsianka'
+    ]
+  },
+  {
+    id: 'broccoli',
+    canonicalName: 'Броколі / Brócoli / Broccoli',
+    aliases: [
+      'броколі', 'броколи',
+      'brocoli', 'brócoli',
+      'broccoli',
+      'brokuł'
+    ]
+  },
+  {
+    id: 'almonds',
+    canonicalName: 'Мигдаль / Almendras / Almonds',
+    aliases: [
+      'мигдаль', 'мигдалю',
+      'almendra', 'almendras',
+      'almond', 'almonds',
+      'amande', 'mandorla', 'mandel', 'migdały'
+    ]
+  },
+  {
+    id: 'tofu',
+    canonicalName: 'Тофу / Tofu',
+    aliases: [
+      'тофу', 'соєвий тофу',
+      'tofu', 'tofu firme',
+      'soya tofu'
+    ]
+  },
+  {
+    id: 'shrimp',
+    canonicalName: 'Креветки / Gambas / Shrimp',
+    aliases: [
+      'креветка', 'креветки', 'креветок', 'тигрові креветки',
+      'gamba', 'gambas', 'langostino', 'langostinos', 'camaron', 'camarones',
+      'shrimp', 'prawns', 'king prawns',
+      'crevette', 'gambero', 'krewetka'
+    ]
+  },
+  {
+    id: 'sour_cream',
+    canonicalName: 'Сметана / Nata / Sour cream',
+    aliases: [
+      'сметана', 'сметани', 'сметану',
+      'crema agria', 'nata agria',
+      'sour cream',
+      'crème fraîche', 'śmietana'
+    ]
+  },
+  {
+    id: 'kefir',
+    canonicalName: 'Кефір / Kéfir / Kefir',
+    aliases: [
+      'кефір', 'кефіру',
+      'kefir', 'kéfir'
+    ]
+  },
+  {
+    id: 'honey',
+    canonicalName: 'Мед / Miel / Honey',
+    aliases: [
+      'мед', 'меду', 'медовий',
+      'miel',
+      'honey',
+      'honig', 'miód'
+    ]
   }
 ];
 
 /**
  * Searches the canonical food ontology for any user input query across all languages.
- * Returns the matching canonical food entity or null.
+ * Token-based semantic matching with exact-phrase priority to prevent false positives.
  */
 export function resolveCrossLingualEntity(query: string): CanonicalFoodEntity | null {
   const q = query.toLowerCase().trim();
   if (!q) return null;
 
+  // Split query into individual clean tokens
+  const qTokens = q.split(/[\s,./\(\)\-_+]+/).filter(t => t.length > 0);
+
+  // Phase 1: High priority exact match or exact multi-word phrase
   for (const entity of CANONICAL_FOOD_ONTOLOGY) {
     for (const alias of entity.aliases) {
-      // Check full word match or stem match (minimum 3 chars)
-      if (alias.length >= 3 && (q.includes(alias) || alias.includes(q))) {
-        return entity;
+      const a = alias.toLowerCase().trim();
+      // Exact match with query
+      if (q === a) return entity;
+      // Multi-word phrase contained in query with boundary
+      if (a.includes(' ') && q.includes(a)) return entity;
+    }
+  }
+
+  // Phase 2: Token-level matching
+  for (const entity of CANONICAL_FOOD_ONTOLOGY) {
+    for (const alias of entity.aliases) {
+      const a = alias.toLowerCase().trim();
+      if (!a.includes(' ')) {
+        for (const token of qTokens) {
+          // Exact token match (e.g. token 'pan' matches alias 'pan', but never matches 'ricotta pancakes')
+          if (token === a) return entity;
+          // Stem matching only for tokens and aliases >= 4 chars to prevent short word false matches
+          if (a.length >= 4 && token.length >= 4) {
+            if (token.startsWith(a) || a.startsWith(token)) return entity;
+          }
+        }
       }
     }
   }

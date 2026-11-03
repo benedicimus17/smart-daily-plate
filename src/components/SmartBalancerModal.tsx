@@ -126,7 +126,7 @@ export const SmartBalancerModal: React.FC<SmartBalancerModalProps> = ({
               <ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-indigo-300 transition-colors" />
             </div>
             <p className="text-[11px] text-zinc-300 mt-1 pl-6">
-              Залишити страву без змін. Списати +{excessCalories} ккал із тижневого буфера (+350 ккал). Ваш темп не постраждає!
+              Залишити страву без змін. Списати +{excessCalories} ккал із тижневого банку (Weekly Flex Bank). Ваш темп не постраждає!
             </p>
           </div>
         </div>

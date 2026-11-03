@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { DailyLog, Macros, MealType, MealEntry } from '../types/nutrition';
-import { WeeklyFlexBank } from '../types/weeklyFlex';
+import { WeeklyFlexBank, DayBankStatus } from '../types/weeklyFlex';
+import { calculateWeeklyFlexBank } from '../math/weeklyFlex';
 import { ParsedRecipe } from '../types/recipe';
 import { CookLossDish } from '../types/cookLoss';
 import { generateDailyMealsForTargets } from '../services/menuGenerator';
@@ -334,25 +335,6 @@ const tomorrowMeals: DailyLog['meals'] = {
   }
 };
 
-const initialWeeklyBank: WeeklyFlexBank = {
-  weekStartDate: '2026-10-19',
-  weekEndDate: '2026-10-25',
-  weeklyTargetCalories: 15050,
-  weeklyConsumedCalories: 14700,
-  weeklyBalanceCalories: 350,
-  adjustedDailyBudgetForRemainingDays: 2200,
-  bankHealthStatus: 'safe',
-  days: [
-    { date: '2026-10-19', dayName: 'Пн', targetCalories: 2150, consumedCalories: 1255, balanceCalories: 895, isCompleted: false, isToday: true },
-    { date: '2026-10-20', dayName: 'Вт', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
-    { date: '2026-10-21', dayName: 'Ср', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
-    { date: '2026-10-22', dayName: 'Чт', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
-    { date: '2026-10-23', dayName: 'Пт', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
-    { date: '2026-10-24', dayName: 'Сб', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
-    { date: '2026-10-25', dayName: 'Нд', targetCalories: 2150, consumedCalories: 0, balanceCalories: 2150, isCompleted: false, isToday: false },
-  ]
-};
-
 const getTodayDateStr = () => {
   const d = new Date();
   const y = d.getFullYear();
@@ -430,11 +412,93 @@ const createLogForDate = (dateStr: string): DailyLog => {
   };
 };
 
+export function buildWeeklyFlexBank(
+  currentDateStr: string,
+  historyLogs: Record<string, DailyLog>,
+  currentDailyLog: DailyLog,
+  dailyTargetCalories: number = 2150
+): WeeklyFlexBank {
+  const parts = currentDateStr.split('-').map(Number);
+  const curr = new Date(parts[0], parts[1] - 1, parts[2]);
+  const dayOfWeek = curr.getDay();
+  const distToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  const monday = new Date(curr);
+  monday.setDate(curr.getDate() + distToMonday);
+
+  // Support language-aware day names
+  let savedLang = 'uk';
+  try {
+    const rawLocale = typeof localStorage !== 'undefined' ? localStorage.getItem('nutriq-locale-storage-v1') : null;
+    if (rawLocale) {
+      const parsed = JSON.parse(rawLocale);
+      if (parsed?.state?.lang) savedLang = parsed.state.lang;
+    }
+  } catch {
+    // default uk
+  }
+
+  const dayNames = savedLang === 'es'
+    ? ['L', 'M', 'X', 'J', 'V', 'S', 'D']
+    : savedLang === 'en'
+    ? ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+    : ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
+  const weekDays: DayBankStatus[] = [];
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const dStr = `${y}-${m}-${day}`;
+
+    let consumed = 0;
+    let target = dailyTargetCalories;
+
+    if (dStr === currentDateStr) {
+      consumed = currentDailyLog.totals.calories;
+      target = currentDailyLog.targets.calories || dailyTargetCalories;
+    } else if (historyLogs[dStr]) {
+      consumed = historyLogs[dStr].totals.calories;
+      target = historyLogs[dStr].targets.calories || dailyTargetCalories;
+    }
+
+    const isToday = dStr === currentDateStr;
+    const isCompleted = dStr < currentDateStr && consumed > 0;
+
+    weekDays.push({
+      date: dStr,
+      dayName: dayNames[i],
+      targetCalories: target,
+      consumedCalories: consumed,
+      balanceCalories: target - consumed,
+      isCompleted,
+      isToday
+    });
+  }
+
+  const weekStartDate = weekDays[0].date;
+  const weekEndDate = weekDays[6].date;
+
+  return calculateWeeklyFlexBank({
+    weekStartDate,
+    weekEndDate,
+    dailyTargetCalories,
+    days: weekDays
+  });
+}
+
 export const useNutritionStore = create<NutritionState>()(
   persist(
     (set, get) => {
       const todayStr = getTodayDateStr();
       const initialLog = defaultHistory[todayStr] || defaultHistory['2026-10-19'] || createLogForDate(todayStr);
+      const initialWeeklyBank = buildWeeklyFlexBank(
+        todayStr,
+        defaultHistory,
+        initialLog,
+        initialLog.targets.calories || 2150
+      );
 
       return {
         currentDate: todayStr,
@@ -451,13 +515,21 @@ export const useNutritionStore = create<NutritionState>()(
           if (!targetLog) {
             targetLog = createLogForDate(date);
           }
+          const updatedHistory = {
+            ...historyLogs,
+            [date]: targetLog
+          };
+          const updatedBank = buildWeeklyFlexBank(
+            date,
+            updatedHistory,
+            targetLog,
+            targetLog.targets.calories || 2150
+          );
           set({
             selectedDate: date,
             dailyLog: targetLog,
-            historyLogs: {
-              ...historyLogs,
-              [date]: targetLog
-            }
+            historyLogs: updatedHistory,
+            weeklyBank: updatedBank
           });
         },
 
@@ -488,12 +560,21 @@ export const useNutritionStore = create<NutritionState>()(
             totals: calculateTotals(updatedMeals)
           };
 
+          const updatedHistory = {
+            ...historyLogs,
+            [selectedDate]: updatedLog
+          };
+          const updatedBank = buildWeeklyFlexBank(
+            selectedDate,
+            updatedHistory,
+            updatedLog,
+            updatedLog.targets.calories || 2150
+          );
+
           set({
             dailyLog: updatedLog,
-            historyLogs: {
-              ...historyLogs,
-              [selectedDate]: updatedLog
-            }
+            historyLogs: updatedHistory,
+            weeklyBank: updatedBank
           });
         },
 
@@ -520,12 +601,21 @@ export const useNutritionStore = create<NutritionState>()(
             totals: calculateTotals(updatedMeals)
           };
 
+          const updatedHistory = {
+            ...historyLogs,
+            [selectedDate]: updatedLog
+          };
+          const updatedBank = buildWeeklyFlexBank(
+            selectedDate,
+            updatedHistory,
+            updatedLog,
+            updatedLog.targets.calories || 2150
+          );
+
           set({
             dailyLog: updatedLog,
-            historyLogs: {
-              ...historyLogs,
-              [selectedDate]: updatedLog
-            }
+            historyLogs: updatedHistory,
+            weeklyBank: updatedBank
           });
         },
 
@@ -566,12 +656,21 @@ export const useNutritionStore = create<NutritionState>()(
             totals: calculateTotals(updatedMeals)
           };
 
+          const updatedHistory = {
+            ...historyLogs,
+            [selectedDate]: updatedLog
+          };
+          const updatedBank = buildWeeklyFlexBank(
+            selectedDate,
+            updatedHistory,
+            updatedLog,
+            updatedLog.targets.calories || 2150
+          );
+
           set({
             dailyLog: updatedLog,
-            historyLogs: {
-              ...historyLogs,
-              [selectedDate]: updatedLog
-            }
+            historyLogs: updatedHistory,
+            weeklyBank: updatedBank
           });
         },
 
@@ -598,12 +697,21 @@ export const useNutritionStore = create<NutritionState>()(
             totals: calculateTotals(updatedMeals)
           };
 
+          const updatedHistory = {
+            ...historyLogs,
+            [selectedDate]: updatedLog
+          };
+          const updatedBank = buildWeeklyFlexBank(
+            selectedDate,
+            updatedHistory,
+            updatedLog,
+            updatedLog.targets.calories || 2150
+          );
+
           set({
             dailyLog: updatedLog,
-            historyLogs: {
-              ...historyLogs,
-              [selectedDate]: updatedLog
-            }
+            historyLogs: updatedHistory,
+            weeklyBank: updatedBank
           });
         },
 
@@ -643,12 +751,21 @@ export const useNutritionStore = create<NutritionState>()(
             totals: calculateTotals(updatedMeals)
           };
 
+          const updatedHistory = {
+            ...historyLogs,
+            [selectedDate]: updatedLog
+          };
+          const updatedBank = buildWeeklyFlexBank(
+            selectedDate,
+            updatedHistory,
+            updatedLog,
+            updatedLog.targets.calories || 2150
+          );
+
           set({
             dailyLog: updatedLog,
-            historyLogs: {
-              ...historyLogs,
-              [selectedDate]: updatedLog
-            }
+            historyLogs: updatedHistory,
+            weeklyBank: updatedBank
           });
         },
 
@@ -658,12 +775,20 @@ export const useNutritionStore = create<NutritionState>()(
             ...dailyLog,
             targets: { ...dailyLog.targets, ...newTargets }
           };
+          const updatedHistory = {
+            ...historyLogs,
+            [selectedDate]: updatedLog
+          };
+          const updatedBank = buildWeeklyFlexBank(
+            selectedDate,
+            updatedHistory,
+            updatedLog,
+            updatedLog.targets.calories || 2150
+          );
           set({
             dailyLog: updatedLog,
-            historyLogs: {
-              ...historyLogs,
-              [selectedDate]: updatedLog
-            }
+            historyLogs: updatedHistory,
+            weeklyBank: updatedBank
           });
         },
 
@@ -678,12 +803,20 @@ export const useNutritionStore = create<NutritionState>()(
             meals: newMeals,
             totals: calculateTotals(newMeals)
           };
+          const updatedHistory = {
+            ...historyLogs,
+            [selectedDate]: updatedLog
+          };
+          const updatedBank = buildWeeklyFlexBank(
+            selectedDate,
+            updatedHistory,
+            updatedLog,
+            updatedLog.targets.calories || 2150
+          );
           set({
             dailyLog: updatedLog,
-            historyLogs: {
-              ...historyLogs,
-              [selectedDate]: updatedLog
-            }
+            historyLogs: updatedHistory,
+            weeklyBank: updatedBank
           });
         },
 

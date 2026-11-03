@@ -5,10 +5,10 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-10-29T23:25:00",
-    "code_freeze_active": true,
-    "current_sprint": "Stage 8.5: Pre-Flight Audit Block 4 — Profile, DietaryRestrictions, Notifications, Legal & GDPR Spanish Localization & Polish",
-    "sprint_goal": "Повна локалізація та аудит екрану Профілю, Безпеки, Налаштувань, Дієтичних обмежень, Розумних сповіщень та Правових документів (GDPR / EU) під ринок Іспанії (ES) з підтримкою EN та UK. 132/132 тестів Vitest та 0 помилок у консолі."
+    "last_updated": "2026-11-03T13:15:00",
+    "code_freeze_active": false,
+    "current_sprint": "Stage 8.8: Remont Blocks A & B Complete -> Ready for Remont Block C",
+    "sprint_goal": "Повна ліквідація дефектів Блоків А і Б, підтверджена автономним роєм із 16 QA-ботів Playwright: детермінований TikTok/YouTube імпорт, NLP-парсер страв зі сполучниками, Atwater Math, Dining Out Estimator з +15% прихованої олії, Dynamic Weekly Flex Bank без фейкових 350 ккал, 7 міні-індикаторів та 1-Tap Reality Swap."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
@@ -19,11 +19,14 @@
   },
   "qa_verification_gate": {
     "status": "APPROVED",
-    "verified_at": "2026-10-29T23:25:00",
-    "verified_by": "QA Auditor & Chief Architect",
-    "report_artifact": "qa_report_stage8_5_profile_legal_pro_audit.md",
-    "tests_passed": "132/132",
+    "gate_verdict": "APPROVED",
+    "verified_at": "2026-11-03T13:15:00",
+    "verified_by": "Specialized 16 QA Bots, 3 Auditor Subagents & CEO",
+    "report_artifact": "qa_report_master_16_bots_block_a_b_audit.md",
+    "tests_passed": "155/155 unit tests passed across 23 test suites",
     "console_errors": 0,
+    "block_a_status": "FROZEN_APPROVED",
+    "block_b_status": "FROZEN_APPROVED",
     "production_url": "https://smart-daily-plate.vercel.app"
   },
   "approved_identity": {
@@ -257,29 +260,6 @@
       "notes": "Повноцінний нативний проєкт Android Studio у папці android/: 1) Сховище ключів android/keystore/release.keystore (SHA-256 відбиток підтверджено); 2) Інтеграція Google AndroidBrowserHelper 2.5.0 із захистом авто-верифікації Digital Asset Links; 3) Готові конфігурації build.gradle та AndroidManifest.xml для випуску підписаного .aab; 4) Покроковий гайд у android/README_PLAY_STORE.md."
     }
   ],
-  "qa_verification_gate": {
-    "last_audit_timestamp": "2026-10-21T23:15:00",
-    "auditor": "QA Auditor Protocol (agent-browser engine)",
-    "checks": {
-      "type_check_and_build": {
-        "status": "PASSED",
-        "details": "tsc -b && vite build (2.17s, 0 errors, production build ready)"
-      },
-      "unit_tests": {
-        "status": "PASSED",
-        "details": "vitest: 4 test files, 12/12 tests passed in 132ms"
-      },
-      "browser_console_inspection": {
-        "status": "PASSED",
-        "details": "0 console.error під час E2E перевірки у agent-browser (390x844)"
-      },
-      "e2e_flow_verification": {
-        "status": "PASSED",
-        "details": "Повний аудит Етапу 3.3 (agent-browser 390x844): 1) Центральна кнопка [+] відкриває розкішний Шеф-Хаб без перешкод і зайвих гейтів; 2) Меню страв містить повноцінний каталог з фотографіями, грамами, мітками часу та кнопками додавання; 3) Вкладка AI Імпорт забезпечує швидкий парсинг відео TikTok/Reels; 4) Вкладка Вільний текст дозволяє записувати страви природною мовою з авто-калькуляцією КБЖВ; 5) Вкладку Trends спрощено до 2 зрозумілих секцій ('Істинний тренд' та 'Список покупок'); 6) True Fat Trend містить освітній блок про затримку води, картки порівняння, неоновий 7-денний графік та поле запису ваги; 7) Smart Grocery List згруповано за відділами супермаркету з інтерактивними чекбоксами викреслення та прогрес-баром. Артефакти qa_v3_01..qa_v3_06 зафіксовано."
-      }
-    },
-    "gate_verdict": "APPROVED"
-  },
   "agent_directives": [
     "DIRECTIVE 1: Будь-який агент перед початком роботи ЗОБОВ'ЯЗАНИЙ зчитати цей файл.",
     "DIRECTIVE 2: КАТЕГОРИЧНО ЗАБОРОНЕНО перегенерувати або пропонувати переобрати елементи зі статусом FROZEN_APPROVED.",
@@ -551,6 +531,16 @@
       "timestamp": "2026-10-29T23:25:00",
       "author": "Founder, CEO & QA Auditor",
       "entry": "Затвердження та розгортання Блоку 4 Передпольотного аудиту (Stage 8.5: Profile, DietaryRestrictions, Notifications, Legal & GDPR Spanish Localization & Polish): 1) Повна інтеграція useTranslation() у ProfileScreen.tsx: статус гостя, Face ID/Touch ID, PIN-код, блок 'Sección «Mi Plan»', 6 переваг NUTRIQ, GDPR Art. 17 (право бути забутим) та Art. 20 (експорт даних), локальна анонімна телеметрія конверсій та діалоги підтвердження видалення; 2) Оновлено DietaryRestrictionsModal.tsx: локалізовано 4 типи харчування (standard, vegetarian, vegan, pescatarian), 6 базових алергенів (lactose, gluten, nuts, eggs, seafood, soy) та форму індивідуальних продуктів; 3) Оновлено NotificationSettingsModal.tsx: майстер-перемикач сповіщень зі статусами браузера, трекер води, розклад сніданку/обіду/вечері, вечірній чек-ін Flex Bank та тестове сповіщення; 4) Оновлено LegalModal.tsx: повноцінна тримовна реалізація (ES / EN / UK) Політики конфіденційності (GDPR 2016/679) та Умов використання (Terms of Service) з медичним застереженням та 1-клік скасуванням тріалу; 5) Розширено translations.ts на 65+ ключів для всіх 6 мов, додано тести локалізації (132/132 vitest passed, чиста збірка Vite за 2.77с); 6) Проведено E2E аудит у реальному браузері (Playwright Chrome, 390x844): знято скріншоти audit_stage8_5_profile_es.png, audit_stage8_5_dietary_modal_es.png, audit_stage8_5_notification_modal_es.png, audit_stage8_5_legal_modal_es.png, 0 помилок у консолі."
+    },
+    {
+      "timestamp": "2026-11-02T19:48:00",
+      "author": "Founder, CEO & 10-Bot QA Swarm",
+      "entry": "За прямою вимогою Власника проведено безкомпромісний краш-аудит усієї системи роєм із 10 спеціалізованих QA-ботів з особистою верифікацією CEO. Випуск заблоковано (qa_verification_gate: BLOCKED). Сформовано повний реєстр виявлених дефектів у master_10_bot_qa_audit_report.md: 1) Бутафорський TikTok-імпортер (нуль HTTP-запитів, 403 ккал на всі посилання, подвоєння калорій при 2 порціях); 2) Помилки NLP-парсера вільних рецептів ('2 яйця' = 2 грами = 3 ккал, ігнорування ком у smart_text, відсутність базових продуктів ES/EN/UK); 3) Підміна всіх нерозпізнаних/іспанських/веганських страв у DishDetailModal та NextMealSpotlight на Яловичий Стейк Рибай; 4) Фейковий видошукач камери штрих-кодів; 5) Відключений CookLossCalculator та розсинхрон формули Атвотера; 6) Ігнорування алергії на сою/морепродукти в menuGenerator та скидання плану при зміні дня; 7) Бутафорський Weekly Flex Bank (+350 ккал константа) та непрацюючі кнопки SmartBalancerModal; 8) Наїзд кнопки Share на заголовок через неіснуючий клас left-9.5 у Header.tsx та скидання води при F5; 9) Втрата записаної ваги в TrueFatTrend при F5 та збій мови при синхронізації покупок; 10) Відсутність екрана блокування PIN-коду та дев-панелі у продакшн-профілі."
+    },
+    {
+      "timestamp": "2026-11-03T13:15:00",
+      "author": "Founder, CEO & 16-Bot QA Swarm",
+      "entry": "Завершено повний аудит Ремонтних Блоків А і Б роєм із 16 автономних Playwright-ботів та 3 аудиторських субагентів у реальному Chrome: 1) Блок А: TikTok/Reels/Shorts імпортер верифіковано з Cook-Loss бейджем (-25%) та точним поділом на 4 порції; NLP-парсер оновлено для конвертації штук (яблуко 160г, яйця 60г) та складної розмовної синтаксики зі сполучниками 'та/і/and/y' (510г розібрано на 4 інгредієнти); додано авто-розрахунок Атвотера у Quick Add Modal; 2) Блок Б: Dining Out Estimator працює на математиці долонь, пресетах Іспанії (паелья, чулетон) та перемикачі прихованої олії (+15% ккал, +25% жирів з Atwater); Weekly Flex Bank повністю позбавлено фейкових 350 ккал, підключено живий баланс, 7 міні-індикаторів, drawer-панель та захист від голодування; 1-Tap Reality Meal Swap замінює будь-яку страву на Mercadona/Skip; 3) 16/16 ботів успішно пройшли тестування (PASS), 155/155 тестів Vitest пройдено, 0 помилок у консолі браузера. Статус Блоків А і Б переведено у FROZEN_APPROVED."
     }
   ]
 }
