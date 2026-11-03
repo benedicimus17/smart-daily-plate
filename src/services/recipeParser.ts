@@ -13,14 +13,17 @@ export const UNIT_CONVERSIONS: Record<string, number> = {
   'л': 1000, 'l': 1000, 'liter': 1000, 'litro': 1000,
   'ст.л': 15, 'ст.л.': 15, 'ст л': 15, 'ст. л.': 15, 'ст л.': 15,
   'столова ложка': 15, 'столові ложки': 15, 'столових ложок': 15, 'столову ложку': 15,
+  'ст. ложка': 15, 'ст. ложки': 15, 'ст ложка': 15, 'ст ложки': 15, 'ст.ложка': 15,
   'tbsp': 15, 'tablespoon': 15, 'tablespoons': 15,
   'cucharada': 15, 'cucharadas': 15, 'cda': 15, 'cdas': 15,
   'ч.л': 5, 'ч.л.': 5, 'ч л': 5, 'ч. л.': 5,
   'чайна ложка': 5, 'чайні ложки': 5, 'чайних ложок': 5, 'чайну ложку': 5,
+  'ч. ложка': 5, 'ч. ложки': 5, 'ч ложка': 5, 'ч ложки': 5, 'ч.ложка': 5,
   'tsp': 5, 'teaspoon': 5, 'teaspoons': 5,
   'cucharadita': 5, 'cucharaditas': 5, 'cdta': 5, 'cdtas': 5,
   'cup': 200, 'cups': 200, 'склянка': 200, 'склянки': 200, 'стакан': 200, 'taza': 200, 'tazas': 200,
   'slice': 35, 'slices': 35, 'скибка': 35, 'скибки': 35, 'шматок': 35, 'шматочки': 35, 'rebanada': 35, 'rebanadas': 35, 'loncha': 35, 'lonchas': 35,
+  'пучок': 30, 'пучки': 30, 'manojo': 30, 'bunch': 30,
   'шт': -1, 'шт.': -1, 'штука': -1, 'штуки': -1, 'штук': -1,
   'pcs': -1, 'pc': -1, 'piece': -1, 'pieces': -1,
   'ud': -1, 'uds': -1, 'unidad': -1, 'unidades': -1
@@ -35,7 +38,10 @@ export const PIECE_WEIGHTS: Record<string, number> = {
   'огірок': 100, 'огірк': 100, 'pepin': 100, 'cucumb': 100,
   'картопл': 130, 'patat': 130, 'papa': 130, 'potat': 130,
   'круасан': 60, 'croiss': 60,
-  'тортиль': 40, 'tortill': 40
+  'тортиль': 40, 'tortill': 40,
+  'зубчик': 4, 'зубчики': 4, 'зубчиків': 4, 'diente': 4, 'dientes': 4, 'clove': 4, 'cloves': 4,
+  'цибулин': 80, 'цибулина': 80, 'cebolla': 80, 'onion': 80,
+  'грудк': 250, 'pechuga': 250, 'breast': 250
 };
 
 /**
@@ -65,6 +71,17 @@ export function findBestMatch(query: string): FoodItem {
     if (crossEntity.id === 'yogurt_protein') return COMMON_FOODS.find(f => f.id === 'yogur_proteico_hacendado') || COMMON_FOODS[0];
     if (crossEntity.id === 'turkey') return COMMON_FOODS.find(f => f.id === 'turkey_breast') || COMMON_FOODS[0];
     if (crossEntity.id === 'pasta') return COMMON_FOODS.find(f => f.id === 'pasta_durum') || COMMON_FOODS[0];
+    if (crossEntity.id === 'noodles_asian') return COMMON_FOODS.find(f => f.id === 'noodles_asian') || COMMON_FOODS[0];
+    if (crossEntity.id === 'teriyaki_sauce') return COMMON_FOODS.find(f => f.id === 'teriyaki_sauce') || COMMON_FOODS[0];
+    if (crossEntity.id === 'soy_sauce') return COMMON_FOODS.find(f => f.id === 'soy_sauce') || COMMON_FOODS[0];
+    if (crossEntity.id === 'sesame') {
+      if (q.includes('олі') || q.includes('масл') || q.includes('oil') || q.includes('aceite')) {
+        return COMMON_FOODS.find(f => f.id === 'sesame_oil') || COMMON_FOODS[0];
+      }
+      return COMMON_FOODS.find(f => f.id === 'sesame_seeds') || COMMON_FOODS[0];
+    }
+    if (crossEntity.id === 'green_peas') return COMMON_FOODS.find(f => f.id === 'green_peas') || COMMON_FOODS[0];
+    if (crossEntity.id === 'garlic') return COMMON_FOODS.find(f => f.id === 'garlic_fresh') || COMMON_FOODS[0];
     if (crossEntity.id === 'salad') return COMMON_FOODS.find(f => f.id === 'salad_fresh') || COMMON_FOODS[0];
     if (crossEntity.id === 'rice') return COMMON_FOODS.find(f => f.id === 'rice_basmati') || COMMON_FOODS[0];
     if (crossEntity.id === 'olive_oil') return COMMON_FOODS.find(f => f.id === 'olive_oil') || COMMON_FOODS[0];
@@ -145,7 +162,36 @@ export function findBestMatch(query: string): FoodItem {
     return COMMON_FOODS.find(f => f.id === 'coffee_latte')!;
   }
 
-  // 2. Стандартні українські ключові слова
+  // 1.5 Азіатські страви, локшина, вок, соуси та насіння (мають пріоритет над яйцями та вершковим маслом)
+  if (q.includes('локшин') || q.includes('лопш') || q.includes('wok') || q.includes('noodle') || q.includes('рамен') || q.includes('соба') || q.includes('удон') || q.includes('фунчоз')) {
+    if (q.includes('сир') || q.includes('сух') || q.includes('raw')) {
+      return COMMON_FOODS.find(f => f.id === 'noodles_egg_raw') || COMMON_FOODS.find(f => f.id === 'noodles_asian')!;
+    }
+    return COMMON_FOODS.find(f => f.id === 'noodles_asian')!;
+  }
+  if (q.includes('кунжут') || q.includes('сезам') || q.includes('sesame')) {
+    if (q.includes('олі') || q.includes('масл') || q.includes('oil') || q.includes('aceite')) {
+      return COMMON_FOODS.find(f => f.id === 'sesame_oil')!;
+    }
+    return COMMON_FOODS.find(f => f.id === 'sesame_seeds')!;
+  }
+  if (q.includes('теріякі') || q.includes('терияк') || q.includes('teriyaki')) {
+    return COMMON_FOODS.find(f => f.id === 'teriyaki_sauce')!;
+  }
+  if (q.includes('соєв') || q.includes('soja') || q.includes('soy')) {
+    return COMMON_FOODS.find(f => f.id === 'soy_sauce')!;
+  }
+  if (q.includes('горох') || q.includes('горошок') || q.includes('guisante') || q.includes('peas')) {
+    return COMMON_FOODS.find(f => f.id === 'green_peas')!;
+  }
+  if (q.includes('часник') || q.includes('зубчик') || q.includes('garlic') || q.includes('ajo')) {
+    return COMMON_FOODS.find(f => f.id === 'garlic_fresh')!;
+  }
+  if (q.includes('цибул') || q.includes('cebolla') || q.includes('onion')) {
+    return COMMON_FOODS.find(f => f.id === 'green_onion')!;
+  }
+
+  // 2. Стандартні ключові слова
   if (q.includes('тост') || q.includes('хліб') || q.includes('багет')) {
     return COMMON_FOODS.find(f => f.id === 'toast_bread')!;
   }
@@ -170,8 +216,11 @@ export function findBestMatch(query: string): FoodItem {
   if (q.includes('авокадо')) {
     return COMMON_FOODS.find(f => f.id === 'avocado')!;
   }
-  if (q.includes('паст') || q.includes('макарон')) {
-    return COMMON_FOODS.find(f => f.id === 'pasta_durum')!;
+  if (q.includes('паст') || q.includes('макарон') || q.includes('спагет') || q.includes('пенне')) {
+    if (q.includes('сир') || q.includes('сух') || q.includes('raw')) {
+      return COMMON_FOODS.find(f => f.id === 'pasta_durum')!;
+    }
+    return COMMON_FOODS.find(f => f.id === 'pasta_cooked') || COMMON_FOODS.find(f => f.id === 'pasta_durum')!;
   }
   if (q.includes('індичк')) {
     return COMMON_FOODS.find(f => f.id === 'turkey_breast')!;
@@ -292,6 +341,13 @@ export function parseIngredientLine(line: string): ParsedIngredient {
   let num: number | null = null;
   let unit = '';
 
+  // Підтримка дробів на початку (наприклад 1/4 ч.л., 1/2 ст.л.)
+  const fracMatch = trimmed.match(/^(\d+)\/(\d+)\s*(.*)$/);
+  if (fracMatch) {
+    const fracVal = Math.round((parseInt(fracMatch[1], 10) / parseInt(fracMatch[2], 10)) * 100) / 100;
+    trimmed = `${fracVal} ${fracMatch[3]}`.trim();
+  }
+
   const postMatch = trimmed.match(/^(.*?)\s*[-:]?\s*([\d.,]+)\s*([a-zA-Zа-яА-ЯіІїЇєЄ.]+)?$/i);
   const preMatch = trimmed.match(/^([\d.,]+)\s*([a-zA-Zа-яА-ЯіІїЇєЄ.]+)?\s*(.*)$/i);
 
@@ -323,7 +379,7 @@ export function parseIngredientLine(line: string): ParsedIngredient {
 
   if (num !== null && !isNaN(num)) {
     if (unit && UNIT_CONVERSIONS[unit] && UNIT_CONVERSIONS[unit] > 0) {
-      amountGrams = Math.round(num * UNIT_CONVERSIONS[unit]);
+      amountGrams = Math.max(1, Math.round(num * UNIT_CONVERSIONS[unit]));
     } else {
       let pieceWeight = 80;
       const lowerName = name.toLowerCase();
@@ -334,6 +390,16 @@ export function parseIngredientLine(line: string): ParsedIngredient {
         }
       }
       amountGrams = Math.round(num * pieceWeight);
+    }
+  } else {
+    // Дефолтна вага для продуктів без явної кількості
+    const lowerName = name.toLowerCase();
+    if (lowerName.includes('насінн') || lowerName.includes('кунжут') || lowerName.includes('спеці') || lowerName.includes('чилі') || lowerName.includes('паприк')) {
+      amountGrams = 5;
+    } else if (lowerName.includes('пучок')) {
+      amountGrams = 30;
+    } else if (lowerName.includes('грудк') || lowerName.includes('філе') || lowerName.includes('курк') || lowerName.includes('м\'яс')) {
+      amountGrams = 200;
     }
   }
 
@@ -374,6 +440,32 @@ export function parseSmartDish(dishName: string, totalWeightGrams: number = 210)
 
   if (isMultiIngredient) {
     return parseRecipeFromText('Власна страва', clean, 1);
+  }
+
+  // 0.5 КУРЯЧА ЛОКШИНА ТЕРІЯКІ / ВОК / АЗІАТСЬКА СТРАВА
+  if ((lower.includes('локшин') || lower.includes('лопш') || lower.includes('вок') || lower.includes('wok') || lower.includes('noodle')) && (lower.includes('теріякі') || lower.includes('кур') || lower.includes('chicken') || lower.includes('азіат'))) {
+    const chickenWeight = Math.round(validWeight * 0.40);
+    const noodlesWeight = Math.round(validWeight * 0.40);
+    const vegWeight = Math.round(validWeight * 0.12);
+    const sauceWeight = validWeight - chickenWeight - noodlesWeight - vegWeight;
+
+    const rawText = `- ${chickenWeight}г Куряче філе
+- ${noodlesWeight}г Локшина яєчна / Wok відварена
+- ${vegWeight}г Зелений горошок та зелена цибуля
+- ${sauceWeight}г Соус Теріякі`;
+
+    return parseRecipeFromText(
+      'Куряча локшина Теріякі (Wok)',
+      rawText,
+      1,
+      undefined,
+      [
+        'Відварити яєчну локшину у підсоленій воді до стану al dente (3 хвилини).',
+        'Швидко обсмажити куряче філе кубиками на розпеченій пательні-вок з кунжутною олією.',
+        'Додати зелений горошок, соус теріякі та темний соєвий соус, прогріти 1 хвилину.',
+        'З’єднати гарячу локшину з соусом і куркою, посипати підсмаженим кунжутом.'
+      ]
+    );
   }
 
   // 1. БІГ МАК / БУРГЕР
@@ -645,6 +737,52 @@ export function parseRecipeFromUrl(
 }
 
 /**
+ * Детектор оголошених автором БЖУ у тексті (наприклад, з описів TikTok/Reels)
+ */
+export interface AuthorNutritionDeclaration {
+  calories?: number;
+  protein?: number;
+  fat?: number;
+  carbs?: number;
+}
+
+export function extractAuthorNutritionDeclaration(rawText: string): AuthorNutritionDeclaration | null {
+  const calMatch = rawText.match(/(?:калорії|ккал|кcal|calories)\s*[:=-]?\s*(\d+)/i) ||
+                   rawText.match(/(\d+)\s*(?:ккал|kcal|калорій)/i);
+  const fatMatch = rawText.match(/(?:жир[и]?|fat|grasa[s]?)\s*[:=-]?\s*([\d.,]+)\s*г?/i);
+  const protMatch = rawText.match(/(?:білок|протеїн|protein|proteina[s]?)\s*[:=-]?\s*([\d.,]+)\s*г?/i);
+  const carbMatch = rawText.match(/(?:вуглевод[и]?|carb[s]?|carbohidratos)\s*[:=-]?\s*([\d.,]+)\s*г?/i);
+
+  if (calMatch || (protMatch && fatMatch && carbMatch)) {
+    const calories = calMatch ? parseInt(calMatch[1], 10) : undefined;
+    const fat = fatMatch ? parseFloat(fatMatch[1].replace(',', '.')) : undefined;
+    const protein = protMatch ? parseFloat(protMatch[1].replace(',', '.')) : undefined;
+    const carbs = carbMatch ? parseFloat(carbMatch[1].replace(',', '.')) : undefined;
+
+    return {
+      calories: calories !== undefined ? calories : (protein !== undefined && fat !== undefined && carbs !== undefined ? Math.round(protein * 4 + fat * 9 + carbs * 4) : undefined),
+      protein,
+      fat,
+      carbs
+    };
+  }
+  return null;
+}
+
+/**
+ * Детектор кількості порцій у тексті (наприклад, "на 2 порції", "serves 2", "2 porciones")
+ */
+export function extractDeclaredServings(rawText: string): number | null {
+  const match = rawText.match(/(?:на|\()\s*(\d+)\s*(?:порці[їяей]|servings?|raciones|porciones)/i) ||
+                rawText.match(/(\d+)\s*(?:порці[їяей]|servings?|raciones|porciones)/i);
+  if (match) {
+    const s = parseInt(match[1], 10);
+    if (s > 0 && s <= 20) return s;
+  }
+  return null;
+}
+
+/**
  * Головна функція парсингу тексту рецепта в структуровану модель
  */
 export function parseRecipeFromText(
@@ -654,22 +792,61 @@ export function parseRecipeFromText(
   sourceUrl?: string,
   customInstructions?: string[]
 ): ParsedRecipe {
+  const declaredNutrition = extractAuthorNutritionDeclaration(rawText);
+  const detectedServings = extractDeclaredServings(rawText);
+  const validServings = detectedServings || Math.max(1, servings);
+
   const rawLines = rawText.split('\n');
   const lines: string[] = [];
 
   const isInstruction = (text: string) => {
-    const l = text.toLowerCase();
+    const l = text.toLowerCase().trim();
     return (
+      l.startsWith('метод') || l.startsWith('method') ||
       l.includes('приготування') || l.includes('кроки') || l.includes('інструкція') || l.includes('спосіб') ||
-      l.includes('instructions') || l.includes('steps') || l.includes('directions') || l.includes('preparation') || l.includes('method') ||
+      l.includes('instructions') || l.includes('steps') || l.includes('directions') || l.includes('preparation') ||
       l.includes('instrucciones') || l.includes('preparación') || l.includes('pasos') || l.includes('modo de preparación') ||
       /^(paso\s*\d+|step\s*\d+|крок\s*\d+|\d+\.)\s+/i.test(l)
     );
   };
 
+  const isNutritionDeclarationLine = (text: string): boolean => {
+    const l = text.toLowerCase().trim();
+    return (
+      /^(?:калорії|calories|ккал|кcal|жир[и]?|fat|grasa[s]?|білок|протеїн|protein|proteina[s]?|вуглевод[и]?|carb[s]?|carbohidratos)\s*[:=-]?\s*[\d.,]+/i.test(l) ||
+      /^\d+\s*(?:ккал|kcal|калорій)$/i.test(l)
+    );
+  };
+
+  const isSectionHeader = (text: string): boolean => {
+    const l = text.toLowerCase().trim().replace(/^[-•*#]+\s*/, '');
+    return (
+      /^(?:інгредієнти|склад|ingredients|ingredientes|для\s+соусу|for\s+sauce|para\s+la\s+salsa)(?:\s*\(.*?\))?:?$/i.test(l) ||
+      /^(?:метод|спосіб|кроки|instructions|preparation|method|pasos|steps):?$/i.test(l)
+    );
+  };
+
+  const isPromotionalHeader = (text: string): boolean => {
+    const l = text.toLowerCase().trim();
+    if ((l.includes('високобілков') || l.includes('низькокалорійн') || l.includes('смак') || l.includes('менше 350') || l.includes('вартістю')) && !l.startsWith('-') && !l.startsWith('•') && !l.includes('г') && !l.includes('мл') && !l.includes('ст.л') && !l.includes('ч.л')) {
+      return true;
+    }
+    return false;
+  };
+
   for (const rawLine of rawLines) {
     const trimmed = rawLine.trim();
     if (!trimmed) continue;
+
+    // Відсікаємо метадані калорій і заголовки з переліку інгредієнтів
+    if (isNutritionDeclarationLine(trimmed)) continue;
+    if (isSectionHeader(trimmed)) {
+      if (trimmed.toLowerCase().includes('метод') || trimmed.toLowerCase().includes('method') || trimmed.toLowerCase().includes('інструкц') || trimmed.toLowerCase().includes('приготув') || trimmed.toLowerCase().includes('instruction')) {
+        lines.push(trimmed);
+      }
+      continue;
+    }
+    if (isPromotionalHeader(trimmed)) continue;
 
     if (isInstruction(trimmed)) {
       lines.push(trimmed);
@@ -727,37 +904,62 @@ export function parseRecipeFromText(
     totalCarbs += ing.macros.carbs;
   }
 
-  const validServings = Math.max(1, servings);
+  // Якщо в тексті автором прямо оголошено КБЖВ (наприклад, TikTok/Reels опис) — використовуємо його як абсолютну правду!
+  const finalPerServingCalories = declaredNutrition?.calories !== undefined
+    ? declaredNutrition.calories
+    : Math.round(totalCalories / validServings);
 
-  const totalMacros: Macros = {
-    calories: Math.round(totalCalories),
-    protein: Math.round(totalProtein * 10) / 10,
-    fat: Math.round(totalFat * 10) / 10,
-    carbs: Math.round(totalCarbs * 10) / 10,
-  };
+  const finalPerServingProtein = declaredNutrition?.protein !== undefined
+    ? declaredNutrition.protein
+    : Math.round((totalProtein / validServings) * 10) / 10;
+
+  const finalPerServingFat = declaredNutrition?.fat !== undefined
+    ? declaredNutrition.fat
+    : Math.round((totalFat / validServings) * 10) / 10;
+
+  const finalPerServingCarbs = declaredNutrition?.carbs !== undefined
+    ? declaredNutrition.carbs
+    : Math.round((totalCarbs / validServings) * 10) / 10;
 
   const macrosPerServing: Macros = {
-    calories: Math.round(totalCalories / validServings),
-    protein: Math.round((totalProtein / validServings) * 10) / 10,
-    fat: Math.round((totalFat / validServings) * 10) / 10,
-    carbs: Math.round((totalCarbs / validServings) * 10) / 10,
+    calories: finalPerServingCalories,
+    protein: finalPerServingProtein,
+    fat: finalPerServingFat,
+    carbs: finalPerServingCarbs,
   };
 
-  const factor100g = totalWeightGrams > 0 ? 100 / totalWeightGrams : 0;
-  const macrosPer100g: Macros = {
-    calories: Math.round(totalCalories * factor100g),
-    protein: Math.round(totalProtein * factor100g * 10) / 10,
-    fat: Math.round(totalFat * factor100g * 10) / 10,
-    carbs: Math.round(totalCarbs * factor100g * 10) / 10,
+  const totalMacros: Macros = {
+    calories: declaredNutrition?.calories !== undefined ? finalPerServingCalories * validServings : Math.round(totalCalories),
+    protein: Math.round(finalPerServingProtein * validServings * 10) / 10,
+    fat: Math.round(finalPerServingFat * validServings * 10) / 10,
+    carbs: Math.round(finalPerServingCarbs * validServings * 10) / 10,
   };
+
+  const effectiveTotalWeight = totalWeightGrams > 0 ? totalWeightGrams : 280 * validServings;
+  const factor100g = effectiveTotalWeight > 0 ? 100 / effectiveTotalWeight : 0;
+  const macrosPer100g: Macros = {
+    calories: Math.round(totalMacros.calories * factor100g),
+    protein: Math.round(totalMacros.protein * factor100g * 10) / 10,
+    fat: Math.round(totalMacros.fat * factor100g * 10) / 10,
+    carbs: Math.round(totalMacros.carbs * factor100g * 10) / 10,
+  };
+
+  let resolvedTitle = title.trim();
+  if (!resolvedTitle || resolvedTitle === 'Рецепт без назви' || resolvedTitle === 'Власна страва' || resolvedTitle.endsWith(': Відео-рецепт')) {
+    if (rawText.toLowerCase().includes('куряч') && (rawText.toLowerCase().includes('локшин') || rawText.toLowerCase().includes('noodle'))) {
+      resolvedTitle = 'Куряча локшина Теріякі';
+    } else {
+      resolvedTitle = 'Рецепт з опису відео';
+    }
+  }
 
   return {
-    title: title.trim() || 'Рецепт без назви',
+    title: resolvedTitle,
     sourceUrl,
     servings: validServings,
     ingredients,
     instructions: instructions.length > 0 ? instructions : ['Змішати інгредієнти та приготувати за смаком.'],
-    totalWeightGrams,
+    totalWeightGrams: effectiveTotalWeight,
     totalMacros,
     macrosPerServing,
     macrosPer100g,

@@ -9,6 +9,7 @@ import { parseRecipeFromUrl, parseRecipeFromText, parseSmartDish } from './recip
 
 export interface VideoAiOptions {
   videoUrl?: string;
+  captionText?: string;
   audioTranscript?: string;
   frameOcrText?: string;
   dishHint?: string;
@@ -155,6 +156,7 @@ export async function fetchRealVideoMetadata(
 export async function parseVideoRecipeWithAi(options: VideoAiOptions): Promise<VideoAiResult> {
   const {
     videoUrl = '',
+    captionText = '',
     audioTranscript = '',
     frameOcrText = '',
     dishHint = '',
@@ -166,46 +168,47 @@ export async function parseVideoRecipeWithAi(options: VideoAiOptions): Promise<V
   const platform = detectVideoPlatform(videoUrl);
   const effectiveServings = Math.max(1, servings);
 
-  // Режим 1: Прямий аудіотранскрипт Whisper (найвища точність 98%)
-  if (audioTranscript && audioTranscript.trim().length > 5) {
-    const transcript = audioTranscript.trim();
+  // Режим 0: Прямий опис / текст рецепта з TikTok/Reels або аудіодоріжка — найвища точність 99%
+  const directText = (captionText || audioTranscript || frameOcrText || '').trim();
+  if (directText && directText.length > 5) {
     const recipe = parseRecipeFromText(
-      dishHint.trim() || `${platform}: Рецепт з аудіодоріжки`,
-      transcript,
+      dishHint.trim() || `${platform}: Відео-рецепт`,
+      directText,
       effectiveServings,
       videoUrl
     );
 
-    const hasMeat = isMeatOrFishCookLossCandidate(`${transcript} ${dishHint}`);
+    const hasMeat = isMeatOrFishCookLossCandidate(`${directText} ${dishHint}`);
+
+    const isWhisper = Boolean(audioTranscript && !captionText);
+    const confidence = captionText ? 0.99 : (isWhisper ? 0.98 : 0.95);
 
     return {
       success: true,
       recipe,
-      source: 'whisper_ai',
+      source: isWhisper ? 'whisper_ai' : 'ocr_vision',
       platform,
-      confidence: 0.98,
+      confidence,
       cookLossNote: hasMeat ? '-25% уварка вологи (Cook-Loss)' : undefined
     };
   }
 
-  // Режим 2: Розпізнаний текст з кадрів відео (OCR Vision 95%)
-  if (frameOcrText && frameOcrText.trim().length > 5) {
-    const ocr = frameOcrText.trim();
+  // Якщо у підказці введено багаторядковий або розширений рецепт
+  if (dishHint.trim().includes('\n') || dishHint.trim().includes(',') || (dishHint.trim().match(/\d+\s*(?:г|g|мл|ml|ст\.л|ч\.л)/i) && dishHint.trim().length > 15)) {
     const recipe = parseRecipeFromText(
-      dishHint.trim() || `${platform}: Рецепт з відеокадрів (OCR)`,
-      ocr,
+      `${platform}: Відео-рецепт`,
+      dishHint.trim(),
       effectiveServings,
       videoUrl
     );
-
-    const hasMeat = isMeatOrFishCookLossCandidate(`${ocr} ${dishHint}`);
+    const hasMeat = isMeatOrFishCookLossCandidate(dishHint);
 
     return {
       success: true,
       recipe,
-      source: 'ocr_vision',
+      source: 'local_neural',
       platform,
-      confidence: 0.95,
+      confidence: 0.98,
       cookLossNote: hasMeat ? '-25% уварка вологи (Cook-Loss)' : undefined
     };
   }
@@ -297,7 +300,7 @@ export async function parseVideoRecipeWithAi(options: VideoAiOptions): Promise<V
         platform,
         confidence: 0,
         source: 'local_neural',
-        error: 'Вкажіть назву або інгредієнти страви у полі підказки (наприклад: сирники або паста), оскільки відео не містить текстового опису'
+        error: 'TikTok блокує пряме зчитування тексту закритих відео через браузер. Будь ласка, вставте скопійований опис рецепта (інгредієнти) у поле нижче або оберіть назву страви.'
       };
     }
 

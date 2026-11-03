@@ -174,10 +174,44 @@ export const CANONICAL_FOOD_ONTOLOGY: CanonicalFoodEntity[] = [
     aliases: [
       'паст', 'макарон', 'спагет', 'пенне', 'карбонара', 'болоньєзе', 'past',
       'pasta', 'espaguetis', 'macarrones', 'carbonara', 'boloñesa',
-      'spaghetti', 'penne', 'noodles',
+      'spaghetti', 'penne',
       'pâtes',
       'nudeln'
     ]
+  },
+  {
+    id: 'noodles_asian',
+    canonicalName: 'Локшина яєчна / Wok / Noodles / Fideos asiáticos',
+    aliases: [
+      'локшин', 'локшини', 'лопш', 'вок', 'рамен', 'соба', 'удон', 'фунчоз',
+      'noodles', 'egg noodles', 'ramen', 'soba', 'udon', 'wok',
+      'fideos asiaticos', 'fideos chinos', 'tallarines', 'nouilles'
+    ]
+  },
+  {
+    id: 'teriyaki_sauce',
+    canonicalName: 'Соус Теріякі / Teriyaki',
+    aliases: ['теріякі', 'теріакі', 'teriyaki', 'salsa teriyaki']
+  },
+  {
+    id: 'soy_sauce',
+    canonicalName: 'Соєвий соус / Salsa de soja',
+    aliases: ['соєв', 'соя', 'соєвий соус', 'темний соєвий', 'soy sauce', 'salsa de soja', 'sauce soja']
+  },
+  {
+    id: 'sesame',
+    canonicalName: 'Кунжут / Сезам / Sésamo / Sesame',
+    aliases: ['кунжут', 'сезам', 'кунжутна', 'кунжутне', 'кунжутного', 'sesame', 'sesamo', 'sésamo']
+  },
+  {
+    id: 'green_peas',
+    canonicalName: 'Зелений горошок / Guisantes / Peas',
+    aliases: ['горох', 'горошок', 'гороху', 'guisantes', 'peas', 'pois']
+  },
+  {
+    id: 'garlic',
+    canonicalName: 'Часник / Ajo / Garlic',
+    aliases: ['часник', 'часнику', 'часников', 'зубчик', 'зубчики', 'ajo', 'ajos', 'garlic']
   },
   {
     id: 'burger',

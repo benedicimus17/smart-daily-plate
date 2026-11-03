@@ -768,6 +768,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
 
   // Стан для AI Парсера (Stage 6.0: Multi-Modal Whisper + OCR + Edge Gateway)
   const [parserUrl, setParserUrl] = useState('https://www.tiktok.com/@chef/video/crepes-with-meat');
+  const [videoCaptionText, setVideoCaptionText] = useState('');
   const [videoDishHint, setVideoDishHint] = useState('');
   const [videoAiTab, setVideoAiTab] = useState<'url' | 'whisper' | 'ocr'>('url');
   const [audioTranscript, setAudioTranscript] = useState('- 200г Куряче філе\n- 50г Твердий сир\n- 150г Відварений рис\n- 10г Оливкова олія');
@@ -973,12 +974,13 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   };
 
   // Робота AI Парсера (Stage 6.0: Multi-Modal Whisper + OCR + Live Metadata Gateway)
-  const handleParseVideo = async (urlToParse?: string, hint?: string) => {
+  const handleParseVideo = async (urlToParse?: string, hint?: string, caption?: string) => {
     setIsParsing(true);
     setAddedMealSlot(null);
     setParserError(null);
     const rawInput = (urlToParse !== undefined ? urlToParse : parserUrl).trim();
     let effectiveHint = (hint !== undefined ? hint : videoDishHint).trim();
+    const effectiveCaption = (caption !== undefined ? caption : videoCaptionText).trim();
 
     // Витягуємо URL з можливого тексту повідомлення (наприклад, "Tarta de queso https://vm.tiktok.com/...")
     let effectiveUrl = rawInput;
@@ -986,7 +988,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     if (urlMatch) {
       effectiveUrl = urlMatch[0];
       const surroundingText = rawInput.replace(effectiveUrl, '').trim();
-      if (surroundingText && !effectiveHint) {
+      if (surroundingText && !effectiveHint && !effectiveCaption) {
         effectiveHint = surroundingText;
       }
     }
@@ -994,7 +996,8 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
     try {
       const res = await parseVideoRecipeWithAi({
         videoUrl: effectiveUrl,
-        dishHint: effectiveHint,
+        captionText: effectiveCaption || undefined,
+        dishHint: effectiveHint || undefined,
         audioTranscript: videoAiTab === 'whisper' ? audioTranscript : undefined,
         frameOcrText: videoAiTab === 'ocr' ? frameOcrText : undefined,
         servings: parserServings
@@ -1009,12 +1012,12 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
         setParserError(null);
       } else {
         setParsedRecipe(null);
-        setParserError(res.error || 'Вкажіть назву страви (наприклад, "сирники" або "паста") у полі підказки вище.');
+        setParserError(res.error || 'Вкажіть назву страви або вставте текст опису відео з TikTok.');
       }
     } catch {
       setIsParsing(false);
       setParsedRecipe(null);
-      setParserError('Сталася помилка при аналізі відео. Будь ласка, вкажіть назву страви в полі підказки.');
+      setParserError('Сталася помилка при аналізі відео. Будь ласка, вставте опис рецепта або вкажіть назву страви.');
     }
   };
 
@@ -1841,6 +1844,20 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                     </label>
                     <div className="flex flex-wrap gap-1.5">
                       <button
+                        id="btn-example-teriyaki"
+                        type="button"
+                        onClick={() => {
+                          const sampleKeeks = `Високобілковий, низькокалорійний, ВЕЛИКИЙ смак курячої локшини Теріякі вартістю менше 350 калорій\nКалорії: 341\nЖир: 5,5 г\nБілок: 29.9г\nВуглеводи: 50.1г\n\nІнгредієнти (на 2 порції)\n- Куряча грудка кубиками\n- 150г сирої середньої яєчної локшини\n- 1 нарізана цибулина\n- Пучок подрібненої ріпчастої цибулі\n- 2 ст.л. соусу Теріякі\n- 1/4 ч.л. пластівців чилі\n- 60 мл темного соєвого соусу\n- 1 ч.л. часникових гранул\n- 1 ч.л. паприки\n- 1 ч. ложка кунжутного масла\n- 4 нарізаних кубиками зубчики часнику\n- 10 мл меду\n- 100г гороху\n- Насіння кунжуту`;
+                          setParserUrl('https://www.tiktok.com/@cookingwith.keeks/video/teriyaki-chicken-noodles');
+                          setVideoCaptionText(sampleKeeks);
+                          setVideoDishHint('куряча локшина теріякі');
+                          handleParseVideo('https://www.tiktok.com/@cookingwith.keeks/video/teriyaki-chicken-noodles', 'куряча локшина теріякі', sampleKeeks);
+                        }}
+                        className="px-2.5 py-1 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/40 text-[10.5px] font-extrabold text-amber-300 shadow-sm"
+                      >
+                        🍜 TikTok: Куряча локшина Теріякі (341 ккал)
+                      </button>
+                      <button
                         id="btn-example-crepes"
                         type="button"
                         onClick={() => {
@@ -1848,7 +1865,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                           setVideoDishHint('крепси з м’ясом');
                           handleParseVideo('https://www.tiktok.com/@chef/video/crepes-with-meat', 'крепси з м’ясом');
                         }}
-                        className="px-2.5 py-1 rounded-xl bg-amber-400/15 hover:bg-amber-400/25 border border-amber-400/30 text-[10.5px] font-bold text-amber-300"
+                        className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300 hover:text-white"
                       >
                         🥞 TikTok: Крепси з м'ясом
                       </button>
@@ -1874,17 +1891,6 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                       >
                         🥞 Reels: Панкейки
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setParserUrl('https://www.tiktok.com/@healthy/video/salmon-quinoa-bowl');
-                          setVideoDishHint('лососевий боул');
-                          handleParseVideo('https://www.tiktok.com/@healthy/video/salmon-quinoa-bowl', 'лососевий боул');
-                        }}
-                        className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10.5px] font-bold text-zinc-300 hover:text-white"
-                      >
-                        🥗 TikTok: Лососевий боул
-                      </button>
                     </div>
                   </div>
 
@@ -1899,8 +1905,45 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                         type="text"
                         value={parserUrl}
                         onChange={(e) => setParserUrl(e.target.value)}
-                        placeholder="https://www.tiktok.com/@... або вставте посилання з описом"
+                        placeholder="https://www.tiktok.com/@... або вставте посилання"
                         className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+
+                    {/* Поле для вставки опису / тексту з TikTok */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                          <span>Опис / текст рецепта з TikTok (інгредієнти, БЖУ)</span>
+                        </label>
+                        <button
+                          id="btn-paste-clipboard-caption"
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              if (navigator.clipboard && navigator.clipboard.readText) {
+                                const text = await navigator.clipboard.readText();
+                                if (text) {
+                                  setVideoCaptionText(text);
+                                  handleParseVideo(undefined, undefined, text);
+                                }
+                              }
+                            } catch {
+                              // ignore
+                            }
+                          }}
+                          className="text-[9.5px] font-bold text-amber-300 hover:text-amber-200 flex items-center gap-1 active:scale-95 transition-all"
+                        >
+                          <span>📋 Вставити з буфера</span>
+                        </button>
+                      </div>
+                      <textarea
+                        id="input-parser-video-caption"
+                        rows={3}
+                        value={videoCaptionText}
+                        onChange={(e) => setVideoCaptionText(e.target.value)}
+                        placeholder="Вставте скопійований опис з TikTok (наприклад: Куряча локшина теріякі, 341 ккал, 150г яєчної локшини...)"
+                        className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/15 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400 font-mono"
                       />
                     </div>
 
@@ -1915,17 +1958,18 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                           type="text"
                           value={videoDishHint}
                           onChange={(e) => setVideoDishHint(e.target.value)}
-                          placeholder="Наприклад: крепси з м'ясом, вівсянка, шаурма..."
+                          placeholder="Наприклад: куряча локшина теріякі, вівсянка, сирники..."
                           className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
                         />
                         {/* Швидкі чіпси вибору страви */}
                         <div className="flex items-center gap-1 flex-wrap pt-1.5">
                           <span className="text-[9.5px] text-zinc-500 font-medium">Швидко:</span>
                           {[
+                            { label: '🍜 Локшина Wok', hint: 'куряча локшина теріякі' },
                             { label: '🥞 Сирники', hint: 'сирники' },
                             { label: '🥣 Вівсянка', hint: 'вівсянка з бананом' },
                             { label: '🥗 Салат', hint: 'грецький салат' },
-                            { label: '🍝 Паста', hint: 'паста з креветками' },
+                            { label: '🍝 Паста', hint: 'паста al dente' },
                             { label: '🥩 Стейк', hint: 'стейк рибай' }
                           ].map(item => (
                             <button

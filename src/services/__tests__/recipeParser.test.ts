@@ -112,4 +112,71 @@ describe('Recipe Parser Service (1-Click TikTok / Reels / Web)', () => {
     expect(parsed.ingredients).toHaveLength(4);
     expect(parsed.totalMacros.calories).toBeGreaterThan(600);
   });
+
+  it('бездоганно розпізнає реальний TikTok-рецепт Cooking with Keeks (Куряча локшина Теріякі 341 ккал на 2 порції)', () => {
+    const keeksTikTokPost = `Високобілковий, низькокалорійний, ВЕЛИКИЙ смак курячої локшини Теріякі вартістю менше 350 калорій
+Калорії: 341
+Жир: 5,5 г
+Білок: 29.9г
+Вуглеводи: 50.1г
+
+Інгредієнти (на 2 порції)
+- Куряча грудка кубиками
+- 150г сирої середньої яєчної локшини
+- 1 нарізана цибулина
+- Пучок подрібненої ріпчастої цибулі
+- 2 ст.л. соусу Теріякі
+- 1/4 ч.л. пластівців чилі
+- 60 мл темного соєвого соусу
+- 1 ч.л. часникових гранул
+- 1 ч.л. паприки
+- 1 ч. ложка кунжутного масла
+- 4 нарізаних кубиками зубчики часнику
+- 10 мл меду
+- 100г гороху
+- Насіння кунжуту
+
+Метод:
+- Зварити горох і локшину
+- Обсмажити курку зі спеціями
+- Додати соус теріякі та з'єднати`;
+
+    const parsed = parseRecipeFromText('', keeksTikTokPost);
+
+    // Авто-визначення назви та порцій
+    expect(parsed.title).toContain('Куряча локшина Теріякі');
+    expect(parsed.servings).toBe(2);
+
+    // Точні оголошені автором макроси на 1 порцію (Золотий стандарт TikTok)
+    expect(parsed.macrosPerServing.calories).toBe(341);
+    expect(parsed.macrosPerServing.protein).toBe(29.9);
+    expect(parsed.macrosPerServing.fat).toBe(5.5);
+    expect(parsed.macrosPerServing.carbs).toBe(50.1);
+
+    // Сумарні калорії на всю страву (2 порції)
+    expect(parsed.totalMacros.calories).toBe(682); // 341 * 2
+
+    // Відсутність фейкових креветок або стейка
+    const ingredientNames = parsed.ingredients.map(i => i.name).join(' ');
+    expect(ingredientNames).not.toContain('кревет');
+    expect(ingredientNames).not.toContain('стейк');
+
+    // Наявність справжніх інгредієнтів азіатської локшини
+    expect(parsed.ingredients.some(i => i.name.includes('Куряч') || i.name.includes('філе'))).toBe(true);
+    expect(parsed.ingredients.some(i => i.name.includes('Локшина'))).toBe(true);
+    expect(parsed.ingredients.some(i => i.name.includes('Теріякі'))).toBe(true);
+    expect(parsed.ingredients.some(i => i.name.includes('соєвий'))).toBe(true);
+    expect(parsed.ingredients.some(i => i.name.includes('горох') || i.name.includes('горошок'))).toBe(true);
+  });
+
+  it('розумно парсить готову страву "куряча локшина теріякі" без завищення до 994 ккал сухої пасти', () => {
+    const wok = parseSmartDish('куряча локшина теріякі', 280);
+    expect(wok.title).toContain('Куряча локшина');
+    expect(wok.totalWeightGrams).toBe(280);
+    // 280г готової азіатської локшини з куркою має бути ~320-370 ккал, а НЕ 994 ккал!
+    expect(wok.totalMacros.calories).toBeGreaterThan(280);
+    expect(wok.totalMacros.calories).toBeLessThan(400);
+    expect(wok.totalMacros.protein).toBeGreaterThan(20);
+    expect(wok.totalMacros.carbs).toBeLessThan(60); // не 201г!
+  });
 });

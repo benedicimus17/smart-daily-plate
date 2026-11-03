@@ -253,6 +253,22 @@ const DEFAULT_RECIPES: Record<string, {
       'Нарізати тонкими слайсами та подати з авокадо.'
     ]
   },
+  'asian_noodles': {
+    photo: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
+    ingredients: [
+      { name: 'Куряче філе кубиками', grams: 120, calories: 132, protein: 27.6, fat: 1.8, carbs: 0 },
+      { name: 'Локшина яєчна відварена al dente', grams: 110, calories: 152, protein: 5.0, fat: 2.3, carbs: 27.5 },
+      { name: 'Соус Теріякі та темний соєвий', grams: 25, calories: 25, protein: 1.8, fat: 0.1, carbs: 4.5 },
+      { name: 'Зелений горошок та зелена цибуля', grams: 20, calories: 16, protein: 1.2, fat: 0.1, carbs: 2.8 },
+      { name: 'Кунжутна олія та насіння кунжуту', grams: 5, calories: 35, protein: 0.5, fat: 3.5, carbs: 0.3 }
+    ],
+    instructions: [
+      'Відварити яєчну локшину у підсоленій воді до стану al dente (3 хвилини).',
+      'Швидко обсмажити куряче філе кубиками на розпеченій пательні-вок з кунжутною олією.',
+      'Додати зелений горошок, соус теріякі та темний соєвий соус, прогріти 1 хвилину.',
+      'З\'єднати гарячу локшину з соусом і куркою, посипати підсмаженим кунжутом.'
+    ]
+  },
   'big_mac': {
     photo: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
     ingredients: [
@@ -399,9 +415,12 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
 
   // Визначаємо деталі страви за назвою
   const lowerName = entry.name.toLowerCase();
+  const hasSpecificIngredients = Boolean(entry.recipeDetails && entry.recipeDetails.trim().length > 3);
   let matchedRecipeKey: string | null = null;
 
-  if (lowerName.includes('біг мак') || lowerName.includes('бігмак') || lowerName.includes('бургер') || lowerName.includes('макдональд')) {
+  if (lowerName.includes('локшин') || lowerName.includes('wok') || lowerName.includes('теріякі') || lowerName.includes('noodle') || lowerName.includes('рамен') || lowerName.includes('удон') || lowerName.includes('соба')) {
+    matchedRecipeKey = 'asian_noodles';
+  } else if (lowerName.includes('біг мак') || lowerName.includes('бігмак') || lowerName.includes('бургер') || lowerName.includes('макдональд')) {
     matchedRecipeKey = 'big_mac';
   } else if (lowerName.includes('круас')) {
     matchedRecipeKey = 'croissant';
@@ -417,7 +436,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
     matchedRecipeKey = 'crepes_meat';
   } else if (lowerName.includes('панкейк')) {
     matchedRecipeKey = 'pancakes';
-  } else if (lowerName.includes('паста') || lowerName.includes('кревет')) {
+  } else if ((lowerName.includes('паста') || lowerName.includes('макарон')) && lowerName.includes('кревет')) {
     matchedRecipeKey = 'pasta_shrimp';
   } else if (lowerName.includes('сібас') || lowerName.includes('сибас')) {
     matchedRecipeKey = 'sea_bass';
@@ -526,28 +545,50 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
   };
 
   const dynamicCategoryPhoto =
-    mealType === 'breakfast'
+    matchedRecipeKey && DEFAULT_RECIPES[matchedRecipeKey]?.photo
+      ? DEFAULT_RECIPES[matchedRecipeKey].photo
+      : mealType === 'breakfast'
       ? 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80'
       : mealType === 'snack'
       ? 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80'
       : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
 
-  const recipeMeta = matchedRecipeKey ? DEFAULT_RECIPES[matchedRecipeKey] : {
-    photo: dynamicCategoryPhoto,
-    ingredients: parseDynamicIngredients(entry.recipeDetails, entry.weightGrams, entry.macros),
-    instructions: entry.recipeDetails
-      ? [
-          `Склад страви: ${entry.recipeDetails}`,
-          `Порція: ${entry.weightGrams}г. Енергетична цінність: ${entry.macros.calories} ккал (Б: ${entry.macros.protein}г, Ж: ${entry.macros.fat}г, В: ${entry.macros.carbs}г).`
-        ]
-      : [
-          `Страва збережена в щоденнику харчування (${entry.weightGrams}г) з розрахованим КБЖВ.`,
-          `Енергетична цінність: ${entry.macros.calories} ккал (Б: ${entry.macros.protein}г, Ж: ${entry.macros.fat}г, В: ${entry.macros.carbs}г).`
-        ],
-    cookLossNote: entry.isCookLoss && entry.rawWeightGrams && entry.cookedWeightGrams
-      ? `Уварка: ${entry.rawWeightGrams}г сирого ➔ ${entry.cookedWeightGrams}г готового (-${Math.round((1 - entry.cookedWeightGrams / entry.rawWeightGrams) * 100)}% Cook-Loss)`
-      : undefined
+  // Якщо страва має власний розписаний рецепт (інгредієнти з NLP, TikTok або ручного вводу) — використовуємо його!
+  // КАТЕГОРИЧНО забороняємо статичним шаблонам шефа перезаписувати реальні інгредієнти користувача!
+  let recipeMeta: {
+    photo: string;
+    ingredients: Array<{ name: string; grams: number; calories: number; protein: number; fat: number; carbs: number }>;
+    instructions: string[];
+    cookLossNote?: string;
   };
+
+  if (hasSpecificIngredients) {
+    recipeMeta = {
+      photo: dynamicCategoryPhoto,
+      ingredients: parseDynamicIngredients(entry.recipeDetails, entry.weightGrams, entry.macros),
+      instructions: [
+        `Інгредієнти страви: ${entry.recipeDetails}`,
+        `Порція: ${entry.weightGrams}г. Енергетична цінність: ${entry.macros.calories} ккал (Б: ${entry.macros.protein}г, Ж: ${entry.macros.fat}г, В: ${entry.macros.carbs}г).`
+      ],
+      cookLossNote: entry.isCookLoss && entry.rawWeightGrams && entry.cookedWeightGrams
+        ? `Уварка: ${entry.rawWeightGrams}г сирого ➔ ${entry.cookedWeightGrams}г готового (-${Math.round((1 - entry.cookedWeightGrams / entry.rawWeightGrams) * 100)}% Cook-Loss)`
+        : undefined
+    };
+  } else if (matchedRecipeKey) {
+    recipeMeta = DEFAULT_RECIPES[matchedRecipeKey];
+  } else {
+    recipeMeta = {
+      photo: dynamicCategoryPhoto,
+      ingredients: parseDynamicIngredients(entry.recipeDetails, entry.weightGrams, entry.macros),
+      instructions: [
+        `Страва збережена в щоденнику харчування (${entry.weightGrams}г) з розрахованим КБЖВ.`,
+        `Енергетична цінність: ${entry.macros.calories} ккал (Б: ${entry.macros.protein}г, Ж: ${entry.macros.fat}г, В: ${entry.macros.carbs}г).`
+      ],
+      cookLossNote: entry.isCookLoss && entry.rawWeightGrams && entry.cookedWeightGrams
+        ? `Уварка: ${entry.rawWeightGrams}г сирого ➔ ${entry.cookedWeightGrams}г готового (-${Math.round((1 - entry.cookedWeightGrams / entry.rawWeightGrams) * 100)}% Cook-Loss)`
+        : undefined
+    };
+  }
 
   const isEaten = entry.eaten !== false;
 
