@@ -5,10 +5,10 @@
     "project_title": "Smart Daily Plate (NUTRIQ)",
     "owner": "Founder",
     "created_at": "2026-10-19T14:05:00",
-    "last_updated": "2026-11-03T13:15:00",
+    "last_updated": "2026-11-03T14:55:00",
     "code_freeze_active": false,
     "current_sprint": "Stage 8.8: Remont Blocks A & B Complete -> Ready for Remont Block C",
-    "sprint_goal": "Повна ліквідація дефектів Блоків А і Б, підтверджена автономним роєм із 16 QA-ботів Playwright: детермінований TikTok/YouTube імпорт, NLP-парсер страв зі сполучниками, Atwater Math, Dining Out Estimator з +15% прихованої олії, Dynamic Weekly Flex Bank без фейкових 350 ккал, 7 міні-індикаторів та 1-Tap Reality Swap."
+    "sprint_goal": "Повна ліквідація дефектів Блоків А і Б: ліквідовано підстановку стейка в DishDetailModal/NextMealSpotlight, усунуто фальшиві 403 ккал у TikTok імпортері, підключено обов'язкову підказку та швидкі чіпси страв."
   },
   "architecture": {
     "framework": "React 18 + Vite 6 + TypeScript",
@@ -20,7 +20,7 @@
   "qa_verification_gate": {
     "status": "APPROVED",
     "gate_verdict": "APPROVED",
-    "verified_at": "2026-11-03T13:15:00",
+    "verified_at": "2026-11-03T14:55:00",
     "verified_by": "Specialized 16 QA Bots, 3 Auditor Subagents & CEO",
     "report_artifact": "qa_report_master_16_bots_block_a_b_audit.md",
     "tests_passed": "155/155 unit tests passed across 23 test suites",
@@ -541,6 +541,11 @@
       "timestamp": "2026-11-03T13:15:00",
       "author": "Founder, CEO & 16-Bot QA Swarm",
       "entry": "Завершено повний аудит Ремонтних Блоків А і Б роєм із 16 автономних Playwright-ботів та 3 аудиторських субагентів у реальному Chrome: 1) Блок А: TikTok/Reels/Shorts імпортер верифіковано з Cook-Loss бейджем (-25%) та точним поділом на 4 порції; NLP-парсер оновлено для конвертації штук (яблуко 160г, яйця 60г) та складної розмовної синтаксики зі сполучниками 'та/і/and/y' (510г розібрано на 4 інгредієнти); додано авто-розрахунок Атвотера у Quick Add Modal; 2) Блок Б: Dining Out Estimator працює на математиці долонь, пресетах Іспанії (паелья, чулетон) та перемикачі прихованої олії (+15% ккал, +25% жирів з Atwater); Weekly Flex Bank повністю позбавлено фейкових 350 ккал, підключено живий баланс, 7 міні-індикаторів, drawer-панель та захист від голодування; 1-Tap Reality Meal Swap замінює будь-яку страву на Mercadona/Skip; 3) 16/16 ботів успішно пройшли тестування (PASS), 155/155 тестів Vitest пройдено, 0 помилок у консолі браузера. Статус Блоків А і Б переведено у FROZEN_APPROVED."
+    },
+    {
+      "timestamp": "2026-11-03T14:55:00",
+      "author": "Founder & CEO",
+      "entry": "Інцидент та виправлення (Incident Fix: TikTok Opaque URLs & DishDetail Steak Fallback Elimination): 1) Ліквідовано підстановку DEFAULT_RECIPES['steak'] для всіх невідомих страв у DishDetailModal.tsx та NextMealSpotlight.tsx — тепер виводяться реальні збережені інгредієнти, КБЖВ та динамічні фото відповідно до типу прийому їжі; 2) Усунуто автоматичну генерацію фіктивних 403 ккал для числових TikTok URL без тексту — тепер інтерфейс вимагає назву страви та пропонує швидкі чіпси вибору в 1 тап (сирники, вівсянка, салат, паста, стейк); 3) У ChefHubModal.tsx забезпечено наскрізну передачу recipeDetails у щоденник; 4) Проведено E2E аудит у Playwright Chrome, підтверджено збереження Сирників у Сніданок без згадок стейка чи спаржі, верифіковано швидке додавання вівсянки, 0 помилок у консолі."
     }
   ]
 }

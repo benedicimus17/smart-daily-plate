@@ -701,7 +701,16 @@ interface ChefHubModalProps {
   isOpen: boolean;
   targetDate?: string;
   onClose: () => void;
-  onAddDishToDay: (mealType: MealType, data: { name: string; weightGrams: number; macros: { calories: number; protein: number; fat: number; carbs: number }; timestamp?: string }) => void;
+  onAddDishToDay: (mealType: MealType, data: {
+    name: string;
+    weightGrams: number;
+    macros: { calories: number; protein: number; fat: number; carbs: number };
+    timestamp?: string;
+    recipeDetails?: string;
+    isCookLoss?: boolean;
+    rawWeightGrams?: number;
+    cookedWeightGrams?: number;
+  }) => void;
   onSaveToRecipeBook?: (recipe: ParsedRecipe) => void;
   onOpenProModal?: () => void;
 }
@@ -768,6 +777,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   const [videoAiCookLoss, setVideoAiCookLoss] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [parsedRecipe, setParsedRecipe] = useState<ParsedRecipe | null>(null);
+  const [parserError, setParserError] = useState<string | null>(null);
   const [addedMealSlot, setAddedMealSlot] = useState<MealType | null>(null);
   const [parserServings, setParserServings] = useState<number>(1);
 
@@ -966,6 +976,7 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
   const handleParseVideo = async (urlToParse?: string, hint?: string) => {
     setIsParsing(true);
     setAddedMealSlot(null);
+    setParserError(null);
     const rawInput = (urlToParse !== undefined ? urlToParse : parserUrl).trim();
     let effectiveHint = (hint !== undefined ? hint : videoDishHint).trim();
 
@@ -995,9 +1006,15 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
         setVideoAiSource(res.source);
         setVideoAiConfidence(res.confidence);
         setVideoAiCookLoss(res.cookLossNote || null);
+        setParserError(null);
+      } else {
+        setParsedRecipe(null);
+        setParserError(res.error || 'Вкажіть назву страви (наприклад, "сирники" або "паста") у полі підказки вище.');
       }
     } catch {
       setIsParsing(false);
+      setParsedRecipe(null);
+      setParserError('Сталася помилка при аналізі відео. Будь ласка, вкажіть назву страви в полі підказки.');
     }
   };
 
@@ -1007,11 +1024,19 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                         slot === 'lunch' ? '13:00' :
                         slot === 'snack' ? '16:30' : '19:30';
 
+    const details = parsedRecipe.ingredients && parsedRecipe.ingredients.length > 0
+      ? parsedRecipe.ingredients.map(i => `${i.name}: ${i.amountGrams}г`).join(', ')
+      : undefined;
+
     onAddDishToDay(slot, {
       name: customName || parsedRecipe.title,
       weightGrams: Math.round(parsedRecipe.totalWeightGrams / parsedRecipe.servings),
       macros: parsedRecipe.macrosPerServing,
-      timestamp: defaultTime
+      timestamp: defaultTime,
+      recipeDetails: details,
+      isCookLoss: Boolean(videoAiCookLoss),
+      rawWeightGrams: parsedRecipe.totalWeightGrams,
+      cookedWeightGrams: Math.round(parsedRecipe.totalWeightGrams * 0.75)
     });
 
     setAddedMealSlot(slot);
@@ -1129,7 +1154,8 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
       name: customName || smartInputText.trim() || 'Корисна страва',
       weightGrams: parseFloat(smartWeight) || 200,
       macros,
-      timestamp: smartTime
+      timestamp: smartTime,
+      recipeDetails: smartInputText.trim()
     });
 
     onClose();
@@ -1892,6 +1918,29 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                           placeholder="Наприклад: крепси з м'ясом, вівсянка, шаурма..."
                           className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/15 text-xs font-bold text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
                         />
+                        {/* Швидкі чіпси вибору страви */}
+                        <div className="flex items-center gap-1 flex-wrap pt-1.5">
+                          <span className="text-[9.5px] text-zinc-500 font-medium">Швидко:</span>
+                          {[
+                            { label: '🥞 Сирники', hint: 'сирники' },
+                            { label: '🥣 Вівсянка', hint: 'вівсянка з бананом' },
+                            { label: '🥗 Салат', hint: 'грецький салат' },
+                            { label: '🍝 Паста', hint: 'паста з креветками' },
+                            { label: '🥩 Стейк', hint: 'стейк рибай' }
+                          ].map(item => (
+                            <button
+                              key={item.label}
+                              type="button"
+                              onClick={() => {
+                                setVideoDishHint(item.hint);
+                                handleParseVideo(undefined, item.hint);
+                              }}
+                              className="px-1.5 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[9.5px] font-bold text-zinc-300 hover:text-amber-300 transition-all active:scale-95"
+                            >
+                              {item.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                       <div className="w-20">
                         <label className="block text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider mb-1">
@@ -1962,6 +2011,16 @@ export const ChefHubModal: React.FC<ChefHubModalProps> = ({
                     placeholder="Вставте розпізнані написи, стікери чи субтитри на екрані відео..."
                     className="w-full p-3 rounded-xl bg-black/60 border border-white/15 text-xs font-mono text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
                   />
+                </div>
+              )}
+
+              {parserError && (
+                <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-2 animate-fadeIn">
+                  <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <p className="font-bold text-amber-300 text-xs">Потрібна назва страви</p>
+                    <p className="text-[11px] text-zinc-300 leading-snug">{parserError}</p>
+                  </div>
                 </div>
               )}
 

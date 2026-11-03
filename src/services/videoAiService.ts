@@ -288,7 +288,19 @@ export async function parseVideoRecipeWithAi(options: VideoAiOptions): Promise<V
 
   // Режим 5: Локальний нейро-семантичний аналіз (Local Neural Fallback 94%)
   try {
-    const hint = dishHint.trim() || extractSlugOrHint(videoUrl) || 'Смачна збалансована страва';
+    const slug = extractSlugOrHint(videoUrl);
+    const hint = dishHint.trim() || slug;
+
+    if (!hint) {
+      return {
+        success: false,
+        platform,
+        confidence: 0,
+        source: 'local_neural',
+        error: 'Вкажіть назву або інгредієнти страви у полі підказки (наприклад: сирники або паста), оскільки відео не містить текстового опису'
+      };
+    }
+
     let recipe: ParsedRecipe;
 
     if (dishHint.trim()) {
@@ -303,7 +315,7 @@ export async function parseVideoRecipeWithAi(options: VideoAiOptions): Promise<V
         carbs: Math.round((recipe.totalMacros.carbs / effectiveServings) * 10) / 10,
       };
     } else {
-      recipe = parseRecipeFromUrl(videoUrl, hint, effectiveServings);
+      recipe = parseRecipeFromUrl(videoUrl, slug, effectiveServings);
     }
 
     const searchString = `${recipe.title} ${dishHint} ${recipe.ingredients ? recipe.ingredients.map(i => i.name).join(' ') : ''}`;

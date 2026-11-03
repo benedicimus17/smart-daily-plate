@@ -399,36 +399,36 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
 
   // Визначаємо деталі страви за назвою
   const lowerName = entry.name.toLowerCase();
-  let recipeMeta = DEFAULT_RECIPES['steak'];
+  let matchedRecipeKey: string | null = null;
 
   if (lowerName.includes('біг мак') || lowerName.includes('бігмак') || lowerName.includes('бургер') || lowerName.includes('макдональд')) {
-    recipeMeta = DEFAULT_RECIPES['big_mac'];
+    matchedRecipeKey = 'big_mac';
   } else if (lowerName.includes('круас')) {
-    recipeMeta = DEFAULT_RECIPES['croissant'];
+    matchedRecipeKey = 'croissant';
   } else if (lowerName.includes('горіх') || lowerName.includes('мигдал') || lowerName.includes('фундук')) {
-    recipeMeta = DEFAULT_RECIPES['nuts'];
+    matchedRecipeKey = 'nuts';
   } else if (lowerName.includes('снек') || lowerName.includes('батончик')) {
-    recipeMeta = DEFAULT_RECIPES['snack_bar'];
+    matchedRecipeKey = 'snack_bar';
   } else if (lowerName.includes('тост') && lowerName.includes('банан')) {
-    recipeMeta = DEFAULT_RECIPES['toast_banana'];
+    matchedRecipeKey = 'toast_banana';
   } else if (lowerName.includes('тост') && (lowerName.includes('авокадо') || lowerName.includes('пашот'))) {
-    recipeMeta = DEFAULT_RECIPES['toast_avocado'];
+    matchedRecipeKey = 'toast_avocado';
   } else if (lowerName.includes('креп') || lowerName.includes('млинц') || lowerName.includes('налисник')) {
-    recipeMeta = DEFAULT_RECIPES['crepes_meat'];
+    matchedRecipeKey = 'crepes_meat';
   } else if (lowerName.includes('панкейк')) {
-    recipeMeta = DEFAULT_RECIPES['pancakes'];
+    matchedRecipeKey = 'pancakes';
   } else if (lowerName.includes('паста') || lowerName.includes('кревет')) {
-    recipeMeta = DEFAULT_RECIPES['pasta_shrimp'];
+    matchedRecipeKey = 'pasta_shrimp';
   } else if (lowerName.includes('сібас') || lowerName.includes('сибас')) {
-    recipeMeta = DEFAULT_RECIPES['sea_bass'];
+    matchedRecipeKey = 'sea_bass';
   } else if (lowerName.includes('тунц') || lowerName.includes('тунець')) {
-    recipeMeta = DEFAULT_RECIPES['tuna_steak'];
+    matchedRecipeKey = 'tuna_steak';
   } else if (lowerName.includes('салат') && (lowerName.includes('телят') || lowerName.includes('яловичин'))) {
-    recipeMeta = DEFAULT_RECIPES['beef_salad'];
+    matchedRecipeKey = 'beef_salad';
   } else if (lowerName.includes('салат')) {
-    recipeMeta = DEFAULT_RECIPES['greek_salad'];
+    matchedRecipeKey = 'greek_salad';
   } else if (lowerName.includes('чіа') || lowerName.includes('chia') || lowerName.includes('пудинг')) {
-    recipeMeta = DEFAULT_RECIPES['chia_pudding'];
+    matchedRecipeKey = 'chia_pudding';
   } else if (
     lowerName.includes('сирник') ||
     lowerName.includes('рікот') ||
@@ -436,7 +436,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
     lowerName.includes('сир кисломол') ||
     lowerName.includes('творог')
   ) {
-    recipeMeta = DEFAULT_RECIPES['syrniki'];
+    matchedRecipeKey = 'syrniki';
   } else if (
     lowerName.includes('протеїн') ||
     lowerName.includes('шейк') ||
@@ -444,18 +444,18 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
     lowerName.includes('гейнер') ||
     lowerName.includes('ізолят')
   ) {
-    recipeMeta = DEFAULT_RECIPES['protein_shake'];
+    matchedRecipeKey = 'protein_shake';
   } else if (
     lowerName.includes('омлет') ||
     lowerName.includes('яйц')
   ) {
-    recipeMeta = DEFAULT_RECIPES['omelet'];
+    matchedRecipeKey = 'omelet';
   } else if (
     lowerName.includes('лосос') ||
     lowerName.includes('сьомг') ||
     lowerName.includes('боул')
   ) {
-    recipeMeta = DEFAULT_RECIPES['salmon'];
+    matchedRecipeKey = 'salmon';
   } else if (
     lowerName.includes('кур') ||
     lowerName.includes('філе') ||
@@ -464,14 +464,90 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
     lowerName.includes('кіноа') ||
     lowerName.includes('гречк')
   ) {
-    recipeMeta = DEFAULT_RECIPES['chicken'];
+    matchedRecipeKey = 'chicken';
   } else if (
     lowerName.includes('йогурт') ||
     lowerName.includes('ягід') ||
     lowerName.includes('перекус')
   ) {
-    recipeMeta = DEFAULT_RECIPES['yogurt'];
+    matchedRecipeKey = 'yogurt';
+  } else if (
+    lowerName.includes('стейк') ||
+    lowerName.includes('яловичин') ||
+    lowerName.includes('рибай')
+  ) {
+    matchedRecipeKey = 'steak';
   }
+
+  // Динамічний розбір інгредієнтів для страв без статичного шаблону шефа
+  const parseDynamicIngredients = (details?: string, totalGrams: number = 200, totalMacros = entry.macros) => {
+    if (!details || !details.trim()) {
+      return [{
+        name: entry.name,
+        grams: totalGrams,
+        calories: totalMacros.calories,
+        protein: totalMacros.protein,
+        fat: totalMacros.fat,
+        carbs: totalMacros.carbs
+      }];
+    }
+    // Розбираємо рядки: "Куряче філе: 150г, Рис: 100г" або переноси рядків
+    const parts = details.split(/[,;\n•]+/).map(p => p.trim()).filter(p => p.length > 2);
+    if (parts.length <= 1) {
+      return [{
+        name: details.replace(/^[\s•\-]+/, '').trim() || entry.name,
+        grams: totalGrams,
+        calories: totalMacros.calories,
+        protein: totalMacros.protein,
+        fat: totalMacros.fat,
+        carbs: totalMacros.carbs
+      }];
+    }
+    const count = parts.length;
+    const estGrams = Math.max(10, Math.round(totalGrams / count));
+    const estCals = Math.round(totalMacros.calories / count);
+    const estP = Math.round((totalMacros.protein / count) * 10) / 10;
+    const estF = Math.round((totalMacros.fat / count) * 10) / 10;
+    const estC = Math.round((totalMacros.carbs / count) * 10) / 10;
+
+    return parts.map(part => {
+      const matchGrams = part.match(/(\d+)\s*(г|g|гр)/i);
+      const grams = matchGrams ? parseInt(matchGrams[1], 10) : estGrams;
+      const cleanName = part.replace(/[:\-]?\s*\d+\s*(г|g|гр|мл|ml|ст\.л|ч\.л)?/gi, '').trim();
+      return {
+        name: cleanName || part,
+        grams,
+        calories: estCals,
+        protein: estP,
+        fat: estF,
+        carbs: estC
+      };
+    });
+  };
+
+  const dynamicCategoryPhoto =
+    mealType === 'breakfast'
+      ? 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80'
+      : mealType === 'snack'
+      ? 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80'
+      : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+
+  const recipeMeta = matchedRecipeKey ? DEFAULT_RECIPES[matchedRecipeKey] : {
+    photo: dynamicCategoryPhoto,
+    ingredients: parseDynamicIngredients(entry.recipeDetails, entry.weightGrams, entry.macros),
+    instructions: entry.recipeDetails
+      ? [
+          `Склад страви: ${entry.recipeDetails}`,
+          `Порція: ${entry.weightGrams}г. Енергетична цінність: ${entry.macros.calories} ккал (Б: ${entry.macros.protein}г, Ж: ${entry.macros.fat}г, В: ${entry.macros.carbs}г).`
+        ]
+      : [
+          `Страва збережена в щоденнику харчування (${entry.weightGrams}г) з розрахованим КБЖВ.`,
+          `Енергетична цінність: ${entry.macros.calories} ккал (Б: ${entry.macros.protein}г, Ж: ${entry.macros.fat}г, В: ${entry.macros.carbs}г).`
+        ],
+    cookLossNote: entry.isCookLoss && entry.rawWeightGrams && entry.cookedWeightGrams
+      ? `Уварка: ${entry.rawWeightGrams}г сирого ➔ ${entry.cookedWeightGrams}г готового (-${Math.round((1 - entry.cookedWeightGrams / entry.rawWeightGrams) * 100)}% Cook-Loss)`
+      : undefined
+  };
 
   const isEaten = entry.eaten !== false;
 
@@ -496,6 +572,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
       >
         {/* Кнопка закриття */}
         <button
+          id="btn-close-dish-detail"
           type="button"
           onClick={onClose}
           className="absolute top-3.5 right-3.5 z-20 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center text-zinc-300 hover:text-white transition-all active:scale-95"
@@ -510,7 +587,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
             alt={entry.name}
             className="w-full h-full object-cover object-center"
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = '/dinner_steak_hd.jpg';
+              (e.currentTarget as HTMLImageElement).src = dynamicCategoryPhoto;
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#121814] via-[#121814]/40 to-transparent" />
