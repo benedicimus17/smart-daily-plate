@@ -28,6 +28,7 @@ import {
 interface LogScreenProps {
   onOpenQuickAdd?: (mealType: MealType) => void;
   onOpenProModal?: () => void;
+  onOpenAiAssistant?: () => void;
 }
 
 const formatLocalDate = (d: Date): string => {
@@ -43,7 +44,7 @@ const timeToMinutes = (t?: string): number => {
   return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
 };
 
-export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQuickAdd, onOpenProModal }) => {
+export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQuickAdd, onOpenProModal, onOpenAiAssistant }) => {
   const { t, lang } = useTranslation();
   const { user } = useUserStore();
   const {
@@ -446,13 +447,23 @@ export const LogScreen: React.FC<LogScreenProps> = ({ onOpenQuickAdd: _onOpenQui
         </div>
       )}
 
-      {/* 3. ШВИДКИЙ ІНСТРУМЕНТ: РЕСТОРАН ТА ПРИХОВАНІ ОЛІЇ */}
-      <div>
+      {/* 3. ШВИДКІ ІНСТРУМЕНТИ: ШІ-ГОЛОСОВИЙ АСИСТЕНТ ТА РЕСТОРАН */}
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          id="btn-log-open-ai-assistant"
+          type="button"
+          onClick={onOpenAiAssistant}
+          className="p-2.5 rounded-2xl bg-gradient-to-r from-emerald-500/15 to-teal-500/15 border border-emerald-500/30 hover:border-emerald-400/50 flex items-center justify-center gap-2 text-xs font-bold text-emerald-300 hover:text-white transition-all active:scale-95 shadow-sm cursor-pointer"
+        >
+          <Sparkles className="w-4 h-4 text-amber-300" />
+          <span>🎙️ ШІ-Асистент</span>
+        </button>
+
         <button
           id="btn-open-dining"
           type="button"
           onClick={() => setDiningOpen(true)}
-          className="w-full p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-emerald-400/40 flex items-center justify-center gap-2 text-xs font-bold text-zinc-200 hover:text-emerald-300 transition-all active:scale-95 shadow-sm"
+          className="p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-emerald-400/40 flex items-center justify-center gap-2 text-xs font-bold text-zinc-200 hover:text-emerald-300 transition-all active:scale-95 shadow-sm cursor-pointer"
         >
           <UtensilsCrossed className="w-4 h-4 text-emerald-400" />
           <span>{t('log_dining_button')}</span>

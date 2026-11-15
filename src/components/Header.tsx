@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, RotateCcw, Crown, Lock, Share2 } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, RotateCcw, Crown, Lock, Share2, Sparkles } from 'lucide-react';
 import { useNutritionStore } from '../store/nutritionStore';
 import { useUserStore } from '../store/userStore';
 import { useTranslation } from '../store/languageStore';
@@ -11,6 +11,7 @@ interface HeaderProps {
   onOpenProModal?: () => void;
   onResetTestUser?: () => void;
   onOpenShareModal?: () => void;
+  onOpenAiAssistant?: () => void;
 }
 
 const formatLocalDate = (d: Date): string => {
@@ -25,7 +26,8 @@ export const Header: React.FC<HeaderProps> = ({
   hideCalendarButton,
   onOpenProModal,
   onResetTestUser,
-  onOpenShareModal
+  onOpenShareModal,
+  onOpenAiAssistant
 }) => {
   const { selectedDate, setSelectedDate } = useNutritionStore();
   const { user, resetToNewGuestUser } = useUserStore();
@@ -115,6 +117,19 @@ export const Header: React.FC<HeaderProps> = ({
             title="Поділитися в Stories / соцмережах"
           >
             <Share2 className="w-3.5 h-3.5" />
+          </button>
+        )}
+
+        {onOpenAiAssistant && (
+          <button
+            id="btn-header-ai-assistant"
+            type="button"
+            onClick={onOpenAiAssistant}
+            className="absolute left-19 top-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-amber-500/15 border border-emerald-500/40 flex items-center gap-1.5 text-zinc-300 hover:text-white hover:border-emerald-400/60 transition-all active:scale-95 cursor-pointer shadow-sm group"
+            title="ШІ-Нутриціолог (Голос та розпізнавання)"
+          >
+            <Sparkles className="w-3 h-3 text-amber-300 group-hover:rotate-12 transition-transform" />
+            <span className="text-[11px] font-extrabold tracking-tight text-emerald-300 group-hover:text-emerald-200">ШІ</span>
           </button>
         )}
 

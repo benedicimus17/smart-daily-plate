@@ -21,6 +21,7 @@ import { WaterTracker } from './components/WaterTracker';
 import { LogScreen } from './components/LogScreen';
 import { ProSubscriptionModal } from './components/ProSubscriptionModal';
 import { SocialShareModal } from './components/SocialShareModal';
+import { ZenAiAssistantModal } from './components/ZenAiAssistantModal';
 import { useTranslation } from './store/languageStore';
 import { parsePwaActionFromUrl } from './services/pwaService';
 
@@ -46,6 +47,7 @@ export const App: React.FC = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [diningModalOpen, setDiningModalOpen] = useState(false);
   const [socialShareOpen, setSocialShareOpen] = useState(false);
+  const [zenAiAssistantOpen, setZenAiAssistantOpen] = useState(false);
   const [targetMealType, setTargetMealType] = useState<MealType>('lunch');
   const [trendSubTab, setTrendSubTab] = useState<'trend' | 'grocery'>('trend');
   const [inAppAlert, setInAppAlert] = useState<{ title: string; body: string } | null>(null);
@@ -147,6 +149,7 @@ export const App: React.FC = () => {
               onOpenProModal={() => setProModalOpen(true)}
               onResetTestUser={() => setPlanWizardOpen(true)}
               onOpenShareModal={() => setSocialShareOpen(true)}
+              onOpenAiAssistant={() => setZenAiAssistantOpen(true)}
             />
           )}
 
@@ -178,6 +181,7 @@ export const App: React.FC = () => {
             <LogScreen
               onOpenQuickAdd={handleOpenAdd}
               onOpenProModal={() => setProModalOpen(true)}
+              onOpenAiAssistant={() => setZenAiAssistantOpen(true)}
             />
           )}
 
@@ -310,6 +314,12 @@ export const App: React.FC = () => {
               cookLossGramsSaved: 85,
               format: 'story'
             }}
+          />
+
+          {/* Дзен ШІ-Нутриціолог: Голосове та Мультимодальне авто-логування страв (Stage 8.6) */}
+          <ZenAiAssistantModal
+            isOpen={zenAiAssistantOpen}
+            onClose={() => setZenAiAssistantOpen(false)}
           />
         </div>
       </div>
